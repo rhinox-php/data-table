@@ -1,0 +1,18 @@
+{
+    "name": "rhinox/data-table",
+    "authors": [
+        {
+            "name": "David Neilsen",
+            "email": "petah.p@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Rhino\\DataTable\\": "classes/"
+        },
+        "files": [
+            "include.php"
+        ]
+    }
+}
