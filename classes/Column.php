@@ -52,7 +52,13 @@ class Column
     {
         $formatter = $this->getFormat();
         if ($formatter) {
-            return $formatter($column, $row);
+            $result = $formatter($column, $row);
+            if (is_array($result)) {
+                $result = implode('', $result);
+            } else {
+                $result = (string) $result;
+            }
+            return $result;
         }
 
         return $column;
