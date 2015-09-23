@@ -1,0 +1,11 @@
+<?php
+namespace Rhino\DataTable;
+
+class ColumnInsert extends Column
+{
+    public function __construct($name, $format)
+    {
+        $this->name = $name;
+        $this->format = $format;
+    }
+}
