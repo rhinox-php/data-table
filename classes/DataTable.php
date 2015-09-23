@@ -3,6 +3,7 @@ namespace Rhino\DataTable;
 
 abstract class DataTable {
     use \Rhino\Core\ModuleAccess;
+    use \Rhino\Core\Renderer;
 
     protected $columns = [];
     protected $data;
@@ -15,7 +16,9 @@ abstract class DataTable {
     protected $order = [];
 
     public function render() {
+        ob_start();
         require $this->getModule()->getRoot('/views/bootstrap.php');
+        return ob_get_clean();
     }
 
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
