@@ -5,9 +5,9 @@ class MySqlColumn extends Column {
     private $query;
     private $having;
     
-    public function __construct($name) {
+    public function __construct($name, $table = null) {
         parent::__construct($name);
-        $this->setQuery($name);
+        $this->setQuery($table ? $table->getTable() . '.' . $name : $name);
         $this->setHaving($name);
     }
     
