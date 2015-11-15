@@ -13,6 +13,7 @@ abstract class DataTable {
     protected $start;
     protected $length;
     protected $search;
+    protected $inputColumns = [];
     protected $order = [];
 
     public function render() {
@@ -22,12 +23,18 @@ abstract class DataTable {
     }
 
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
-        if (!$request->isAjax()) {
+        if (!$request->isAjax() && $request->get('csv') === null) {
             return false;
         }
-        $this->setStart($request->get('start') ? : 0);
-        $this->setLength($request->get('length') ? : 10);
+        if ($request->get('csv') === null) {
+            $this->setStart($request->get('start') ? : 0);
+            $this->setLength($request->get('length') ? : 10);
+        } else {
+            $this->setStart(0);
+            $this->setLength(10000);
+        }
         $this->setSearch($request->get('search')['value']);
+        $this->setInputColumns($request->get('columns') ?: []);
         $orders = $request->get('order');
         if (is_array($orders)) {
             foreach ($orders as $order) {
@@ -36,6 +43,14 @@ abstract class DataTable {
         }
         $this->processSource();
 
+        if ($request->get('csv') === null) {
+            return $this->sendJson($request);
+        } else {
+            return $this->sendCsv();
+        }
+    }
+
+    protected function sendJson($request) {
         $data = $this->getData();
         $result = [];
         $columns = array_values($this->getColumns());
@@ -45,7 +60,7 @@ abstract class DataTable {
                 $indexedRow[$column->getName()] = $row[$c];
             }
             foreach ($columns as $c => $column) {
-                $result[$r][$c] = $column->format($row[$c], $indexedRow);
+                $result[$r][$c] = $column->format($row[$c], $indexedRow, 'html');
             }
         }
         $response->json([
@@ -54,6 +69,43 @@ abstract class DataTable {
             'recordsFiltered' => $this->getRecordsFiltered(),
             'data' => $result,
         ]);
+        return true;
+    }
+
+    protected function sendCsv() {
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=export.csv');
+        header('Pragma: no-cache');
+
+        $columns = array_values($this->getColumns());
+
+        $outstream = fopen('php://output', 'w');
+        $outputRow = [];
+        foreach ($columns as $c => $column) {
+            if ($column->isExportable()) {
+                $outputRow[$c] = $column->getLabel();
+            }
+        }
+        fputcsv($outstream, $outputRow);
+
+        $data = $this->getData();
+        $result = [];
+        foreach ($data as $r => $row) {
+            $outputRow = [];
+            $indexedRow = [];
+            foreach ($columns as $c => $column) {
+                if ($column->isExportable()) {
+                    $indexedRow[$column->getName()] = $row[$c];
+                }
+            }
+            foreach ($columns as $c => $column) {
+                if ($column->isExportable()) {
+                    $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
+                }
+            }
+            fputcsv($outstream, $outputRow);
+        }
+        fclose($outstream);
         return true;
     }
 
@@ -135,6 +187,15 @@ abstract class DataTable {
 
     public function setSearch($search) {
         $this->search = $search;
+        return $this;
+    }
+
+    public function getInputColumns() {
+        return $this->inputColumns;
+    }
+
+    public function setInputColumns($inputColumns) {
+        $this->inputColumns = $inputColumns;
         return $this;
     }
 

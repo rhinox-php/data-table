@@ -7,6 +7,8 @@ class Column
     protected $label;
     protected $format;
     protected $position;
+    protected $exportable = true;
+    protected $visible = true;
 
     public function __construct($name)
     {
@@ -48,11 +50,11 @@ class Column
         return $this;
     }
 
-    public function format($column, $row)
+    public function format($column, $row, $type)
     {
         $formatter = $this->getFormat();
         if ($formatter) {
-            $result = $formatter($column, $row);
+            $result = $formatter($column, $row, $type);
             if (is_array($result)) {
                 $result = implode('', $result);
             } else {
@@ -75,4 +77,29 @@ class Column
 
         return $this;
     }
+
+    public function isSortable() {
+        return true;
+    }
+
+    public function isExportable() {
+        return $this->exportable;
+    }
+
+    public function setExportable($exportable) {
+        $this->exportable = $exportable;
+        return $this;
+    }
+
+    public function isVisible() {
+        return $this->visible;
+    }
+
+    public function setVisible($visible) {
+        $this->visible = $visible;
+        return $this;
+    }
+
+
+
 }
