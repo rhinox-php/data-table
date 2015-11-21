@@ -5,6 +5,8 @@ abstract class DataTable {
     use \Rhino\Core\ModuleAccess;
     use \Rhino\Core\Renderer;
 
+    protected $request;
+    protected $response;
     protected $columns = [];
     protected $data;
     protected $result;
@@ -23,6 +25,8 @@ abstract class DataTable {
     }
 
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
+        $this->request = $request;
+        $this->response = $response;
         if (!$request->isAjax() && $request->get('csv') === null) {
             return false;
         }
@@ -63,7 +67,7 @@ abstract class DataTable {
                 $result[$r][$c] = $column->format($row[$c], $indexedRow, 'html');
             }
         }
-        $response->json([
+        $this->response->json([
             'draw' => (int) $request->get('draw'),
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
