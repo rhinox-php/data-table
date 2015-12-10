@@ -9,11 +9,11 @@
     <tr>
         <?php foreach ($this->getColumns() as $i => $column): ?>
             <?php if ($i === 0): ?>
-                <td class="d-col-filter d-col-filter-first">
+                <td class="rx-datatable-col-filter-first">
                     <i>Filters:</i>
                 </td>
             <?php else: ?>
-                <td class="d-col-filter">
+                <td class="rx-datatable-col-filter">
                     <input class="form-control" />
                 </td>
             <?php endif; ?>
@@ -38,9 +38,9 @@ foreach ($this->getColumns() as $i => $column) {
     (function($) {
         var table = $('#<?= $id; ?>').DataTable({
             dom:
-            "<'row'<'col-sm-6'lB><'col-sm-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                "<'row'<'col-sm-6'lB><'col-sm-6'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
             classes: {
                 sFilterInput:  "form-control",
                 sLengthSelect: "form-control",
@@ -75,7 +75,7 @@ foreach ($this->getColumns() as $i => $column) {
 
         table.columns().every(function() {
             var column = this;
-            $('#<?= $id; ?>').closest('.dataTables_scroll').find('.d-col-filter').eq(column.index()).on('keyup change', function() {
+            $('#<?= $id; ?>').closest('.dataTables_scroll').find('.rx-datatable-col-filter').eq(column.index()).on('keyup change', function() {
                 var value = $(this).find('input').val();
                 if (column.search() !== value) {
                     column.search(value);
@@ -85,3 +85,15 @@ foreach ($this->getColumns() as $i => $column) {
         });
     })(jQuery);
 </script>
+
+<style>
+    .table > thead > tr .rx-datatable-col-filter {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .table > thead > tr .rx-datatable-col-filter .form-control {
+        border: 0;
+        width: 100%;
+    }
+</style>
