@@ -8,4 +8,8 @@ class ColumnInsert extends Column
         $this->name = $name;
         $this->format = $format;
     }
+
+    public function isSortable() {
+        return false;
+    }
 }
