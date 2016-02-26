@@ -145,4 +145,13 @@ class MySqlDataTable extends DataTable
             'bindings' => $bindings,
         ];
     }
+
+    public function bind($sql, $bindings) {
+        foreach ($bindings as $key => $value) {
+            $bindKey = ':binding' . (1000 + count($this->bindings));
+            $sql = str_replace($key, $bindKey, $sql);
+            $this->bindings[$bindKey] = $value; 
+        }
+        return $sql;
+    }
 }

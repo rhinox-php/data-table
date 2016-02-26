@@ -42,11 +42,13 @@ abstract class DataTable {
         $orders = $request->get('order');
         if (is_array($orders)) {
             foreach ($orders as $order) {
-                $this->addOrder($order['column'], $order['dir']);
+                if (isset($order['column']) && isset($order['dir'])) {
+                    $this->addOrder($order['column'], $order['dir']);
+                }
             }
         }
         $this->processSource();
-
+        
         if ($request->get('csv') === null) {
             return $this->sendJson($request);
         } else {
@@ -77,39 +79,42 @@ abstract class DataTable {
     }
 
     protected function sendCsv() {
-        header('Content-Type: application/csv');
-        header('Content-Disposition: attachment; filename=export.csv');
-        header('Pragma: no-cache');
+        $this->response->callback(function() {
+            $data = $this->getData();
+            
+            header('Content-Type: application/csv');
+            header('Content-Disposition: attachment; filename=export.csv');
+            header('Pragma: no-cache');
 
-        $columns = array_values($this->getColumns());
+            $columns = array_values($this->getColumns());
 
-        $outstream = fopen('php://output', 'w');
-        $outputRow = [];
-        foreach ($columns as $c => $column) {
-            if ($column->isExportable()) {
-                $outputRow[$c] = $column->getLabel();
-            }
-        }
-        fputcsv($outstream, $outputRow);
-
-        $data = $this->getData();
-        $result = [];
-        foreach ($data as $r => $row) {
+            $outstream = fopen('php://output', 'w');
             $outputRow = [];
-            $indexedRow = [];
             foreach ($columns as $c => $column) {
                 if ($column->isExportable()) {
-                    $indexedRow[$column->getName()] = $row[$c];
-                }
-            }
-            foreach ($columns as $c => $column) {
-                if ($column->isExportable()) {
-                    $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
+                    $outputRow[$c] = $column->getLabel();
                 }
             }
             fputcsv($outstream, $outputRow);
-        }
-        fclose($outstream);
+
+            $result = [];
+            foreach ($data as $r => $row) {
+                $outputRow = [];
+                $indexedRow = [];
+                foreach ($columns as $c => $column) {
+                    if ($column->isExportable()) {
+                        $indexedRow[$column->getName()] = $row[$c];
+                    }
+                }
+                foreach ($columns as $c => $column) {
+                    if ($column->isExportable()) {
+                        $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
+                    }
+                }
+                fputcsv($outstream, $outputRow);
+            }
+            fclose($outstream);
+        });
         return true;
     }
 

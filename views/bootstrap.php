@@ -13,7 +13,7 @@
                     <i>Filters:</i>
                 </td>
             <?php else: ?>
-                <td class="rx-datatable-col-filter">
+                <td class="rx-datatable-col-filter" data-column="<?= $i; ?>">
                     <input class="form-control" />
                 </td>
             <?php endif; ?>
@@ -73,15 +73,13 @@ foreach ($this->getColumns() as $i => $column) {
             order: [[ 1, 'desc' ]],
         });
 
-        table.columns().every(function() {
-            var column = this;
-            $('#<?= $id; ?>').closest('.dataTables_wrapper').find('.rx-datatable-col-filter').eq(column.index()).on('keyup change', function() {
-                var value = $(this).find('input').val();
-                if (column.search() !== value) {
-                    column.search(value);
-                    table.draw();
-                }
-            });
+        $('#<?= $id; ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {
+            var value = $(this).find(':input').val();
+            var column = table.column($(this).data('column'));
+            if (column.search() !== value) {
+                column.search(value);
+                table.draw();
+            }
         });
     })(jQuery);
 </script>
