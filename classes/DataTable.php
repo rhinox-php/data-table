@@ -1,7 +1,7 @@
 <?php
 namespace Rhino\DataTable;
 
-abstract class DataTable {
+abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     use \Rhino\Core\ModuleAccess;
     use \Rhino\Core\Renderer;
 
@@ -22,6 +22,10 @@ abstract class DataTable {
         ob_start();
         require $this->getModule()->getRoot('/views/bootstrap.php');
         return ob_get_clean();
+    }
+    
+    public function getUnescapedOutput() {
+        return $this->render();
     }
 
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {

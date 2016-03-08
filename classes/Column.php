@@ -100,6 +100,4 @@ class Column
         return $this;
     }
 
-
-
 }
