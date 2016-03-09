@@ -1,6 +1,5 @@
-<?php $id = uniqid('table-'); ?>
 <div class="rx-datatable-wrapper">
-    <table id="<?= $id; ?>" class="table table-striped table-bordered table-hover rx-datatable">
+    <table id="<?= $this->getId(); ?>" class="table table-striped table-bordered table-hover rx-datatable">
         <thead>
         <tr>
             <?php foreach ($this->getColumns() as $column): ?>
@@ -71,6 +70,13 @@ foreach ($this->getColumns() as $i => $column) {
                     }
                 },
                 'colvis',
+                {
+                    text: '<i class="fa fa-reload"></i> Reset',
+                    action: function (e, dt, node, config) {
+                        localStorage.removeItem(<?= json_encode($this->getId()); ?>);
+                        window.location.reload();
+                    }
+                },
             ],
             language: {
                 buttons: {
@@ -83,10 +89,10 @@ foreach ($this->getColumns() as $i => $column) {
             serverSide: true,
             stateSave: true,
             stateSaveCallback: function(settings, data) {
-                localStorage.setItem('<?= $this->getId(); ?>', JSON.stringify(data));
+                localStorage.setItem(<?= json_encode($this->getId()); ?>, JSON.stringify(data));
             },
             stateLoadCallback: function(settings, data) {
-                return JSON.parse(localStorage.getItem('<?= $this->getId(); ?>'));
+                return JSON.parse(localStorage.getItem(<?= json_encode($this->getId()); ?>));
             },
             columnDefs: <?= json_encode($columnDefs); ?>,
             order: [[ 1, 'desc' ]],

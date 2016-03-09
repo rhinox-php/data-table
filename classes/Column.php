@@ -65,6 +65,8 @@ class Column
                 $result = (string) $result;
             }
             return $result;
+        } elseif ($type === 'html') {
+            return htmlspecialchars($column, ENT_QUOTES, 'UTF-8', false);
         }
 
         return $column;

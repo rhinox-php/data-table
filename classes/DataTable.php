@@ -28,6 +28,19 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     public function getUnescapedOutput() {
         return $this->render();
     }
+    
+    public function createButton(array $options) {
+        $options = new \Rhino\Core\InputData($options);
+        if ($options->bool('action')) {
+            return '
+                <form action="' . $options->string('action') . '" method="post">
+                    <button class="btn btn-xs btn-' . $options->string('style') . '">' . $options->string('text') . '</button>
+                </form>
+            ';
+        } else {
+            return '<a href="' . $options->string('href') . '" class="btn btn-xs btn-' . $options->string('style') . '">' . $options->string('text') . '</a>';
+        }
+    }
 
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
         $this->request = $request;
