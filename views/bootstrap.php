@@ -32,6 +32,7 @@ foreach ($this->getColumns() as $i => $column) {
         'targets' => $i,
         'searchable' => $i > 0,
         'orderable' => $i > 0,
+        'data' => $column->getKey(),
         'visible' => $column->isVisible(),
     ];
 }
@@ -39,8 +40,15 @@ foreach ($this->getColumns() as $i => $column) {
 <script>
     (function($) {
         $.fn.dataTableExt.sErrMode = 'throw';
+        /*
+        $.fn.dataTable.ext.errMode = function(settings, techNote, message) {
+            console.error(settings);
+            console.error(techNote);
+            console.error(message);
+        };
+        */
         
-        var table = $('#<?= $id; ?>').DataTable({
+        var table = $('#<?= $this->getId(); ?>').DataTable({
             dom:
                 "<'rx-data-table-controls'<'rx-data-table-page-size'lB><'rx-data-table-search'f>>" +
                 "<'rx-data-table-table'tr>" +
@@ -73,11 +81,18 @@ foreach ($this->getColumns() as $i => $column) {
 //            scrollX: true,
             processing: true,
             serverSide: true,
+            stateSave: true,
+            stateSaveCallback: function(settings, data) {
+                localStorage.setItem('<?= $this->getId(); ?>', JSON.stringify(data));
+            },
+            stateLoadCallback: function(settings, data) {
+                return JSON.parse(localStorage.getItem('<?= $this->getId(); ?>'));
+            },
             columnDefs: <?= json_encode($columnDefs); ?>,
             order: [[ 1, 'desc' ]],
         });
 
-        $('#<?= $id; ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {
+        $('#<?= $this->getId(); ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {
             var value = $(this).find(':input').val();
             var column = table.column($(this).data('column'));
             if (column.search() !== value) {

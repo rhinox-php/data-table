@@ -7,6 +7,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
 
     protected $request;
     protected $response;
+    protected $id;
     protected $columns = [];
     protected $data;
     protected $result;
@@ -31,7 +32,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
         $this->request = $request;
         $this->response = $response;
-        if (!$request->isAjax() && $request->get('csv') === null) {
+        if (!$request->isAjax() && $request->get('csv') === null && $request->get('json') === null) {
             return false;
         }
         if ($request->get('csv') === null) {
@@ -70,7 +71,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
                 $indexedRow[$column->getName()] = $row[$c];
             }
             foreach ($columns as $c => $column) {
-                $result[$r][$c] = $column->format($row[$c], $indexedRow, 'html');
+                $result[$r][$column->getKey()] = $column->format($row[$c], $indexedRow, 'html');
             }
         }
         $this->response->json([
@@ -120,6 +121,24 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
             fclose($outstream);
         });
         return true;
+    }
+    
+    public function getId() {
+        if (!$this->id) {
+            $hash = [
+                $this->getTable(),
+            ];
+            foreach ($this->getColumns() as $column) {
+                $hash[] = $column->getName();
+            }
+            $this->id = 'datatable-' . md5(implode(':', $hash));
+        }
+        return $this->id;
+    }
+    
+    public function setId($id) {
+        $this->id = $id;
+        return $this;
     }
 
     public function getColumns() {

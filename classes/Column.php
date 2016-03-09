@@ -26,6 +26,10 @@ class Column
 
         return $this;
     }
+    
+    public function getKey() {
+        return str_replace('_', '', lcfirst(ucwords($this->getName(), '_')));
+    }
 
     public function getLabel()
     {
