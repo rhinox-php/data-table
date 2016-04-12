@@ -18,6 +18,9 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     protected $search;
     protected $inputColumns = [];
     protected $order = [];
+    protected $defaultOrder = [
+        [1, 'desc'],
+    ];
 
     public function render() {
         ob_start();
@@ -255,6 +258,15 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
 
     public function addOrder($column, $direction) {
         $this->order[$column] = $direction;
+        return $this;
+    }
+    
+    public function getDefaultOrder() {
+        return $this->defaultOrder;
+    }
+
+    public function setDefaultOrder(array $defaultOrder) {
+        $this->defaultOrder = $defaultOrder;
         return $this;
     }
 

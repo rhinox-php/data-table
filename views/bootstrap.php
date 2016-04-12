@@ -94,8 +94,8 @@ foreach ($this->getColumns() as $i => $column) {
             stateLoadCallback: function(settings, data) {
                 return JSON.parse(localStorage.getItem(<?= json_encode($this->getId()); ?>));
             },
-            columnDefs: <?= json_encode($columnDefs); ?>,
-            order: [[ 1, 'desc' ]],
+            columnDefs: <?= json_encode($columnDefs, JSON_PRETTY_PRINT); ?>,
+            order: <?= json_encode($this->getDefaultOrder()); ?>,
         });
 
         $('#<?= $this->getId(); ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {
