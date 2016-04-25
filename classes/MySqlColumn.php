@@ -22,6 +22,10 @@ class MySqlColumn extends Column {
         return $this;
     }
     
+    public function getAs() {
+        return $this->getName();
+    }
+    
     public function getHaving() {
         return $this->having;
     }

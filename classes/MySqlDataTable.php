@@ -21,14 +21,14 @@ class MySqlDataTable extends DataTable
 
         // Prepare the select column query
         $selectColumns = implode(','.PHP_EOL, array_map(function ($column) {
-            return $column->getQuery();
+            return $column->getQuery() . ' AS ' . $column->getAs();
         }, $columns));
         
         // Prepare the having search query
         $having = '';
         if ($this->getSearch()) {
             $havingColumns = implode('OR'.PHP_EOL, array_filter(array_map(function ($column) {
-                return $column->getHaving() ? $column->getHaving().' LIKE :searchGlobal ' : null;
+                return $column->getHaving() ? $column->getAs().' LIKE :searchGlobal ' : null;
             }, $columns)));
             $having = "HAVING ($havingColumns)";
             $bindings[':searchGlobal'] = '%'.$this->getSearch().'%';
@@ -102,6 +102,7 @@ class MySqlDataTable extends DataTable
             LIMIT {$this->getLength()}
             OFFSET {$this->getStart()}
         ";
+//            dump($sql, $bindings);
 
         // Execute the query
         $statement = $this->pdo->prepare($sql);

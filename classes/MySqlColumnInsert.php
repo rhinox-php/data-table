@@ -5,11 +5,15 @@ class MySqlColumnInsert extends ColumnInsert
 {
     public function getQuery()
     {
-        return 'NULL AS '.$this->getName();
+        return 'NULL';
     }
 
     public function getHaving()
     {
         return;
+    }
+    
+    public function getAs() {
+        return $this->getName();
     }
 }
