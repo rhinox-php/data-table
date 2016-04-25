@@ -139,7 +139,7 @@ class MySqlDataTable extends DataTable
         $this->groupBys[] = $groupBy;
     }
 
-    public function addWhere($sql, $bindings) {
+    public function addWhere($sql, array $bindings = []) {
         $this->wheres[] = [
             'sql' => $sql,
             'bindings' => $bindings,
