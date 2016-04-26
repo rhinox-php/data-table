@@ -124,8 +124,14 @@ class MySqlDataTable extends DataTable
         return $this->table;
     }
 
-    public function addColumn($name) {
-        return $this->columns[] = new MySqlColumn($name, $this);
+    public function addColumn($name, $index = null) {
+        $column = new MySqlColumn($name, $this);
+        if ($index !== null) {
+            array_splice($this->columns, $index, 0, $column);
+        } else {
+            $this->columns[] = $column;
+        }
+        return $column;
     }
 
     public function insertColumn($name, $format, $position = null) {

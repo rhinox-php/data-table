@@ -14,7 +14,7 @@
                     </td>
                 <?php else: ?>
                     <td class="rx-datatable-col-filter" data-column="<?= $i; ?>">
-                        <input class="form-control" />
+                        <input class="form-control" value="<?= $column->getDefaultColumnFilter(); ?>" />
                     </td>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -34,6 +34,9 @@ foreach ($this->getColumns() as $i => $column) {
         'data' => $column->getKey(),
         'visible' => $column->isVisible(),
     ];
+    $searchCols[] = $column->getDefaultColumnFilter() ? [
+        'search' => $column->getDefaultColumnFilter(),
+    ] : null;
 }
 ?>
 <script>
@@ -92,10 +95,17 @@ foreach ($this->getColumns() as $i => $column) {
                 localStorage.setItem(<?= json_encode($this->getId()); ?>, JSON.stringify(data));
             },
             stateLoadCallback: function(settings, data) {
-                return JSON.parse(localStorage.getItem(<?= json_encode($this->getId()); ?>));
+                var data = JSON.parse(localStorage.getItem(<?= json_encode($this->getId()); ?>));
+                if (data && data.columns) {
+                    for (var i = 0; i < data.columns.length; i++) {
+                        $('#<?= $this->getId(); ?> [data-column="' + i + '"] :input').val(data.columns[i].search.search);
+                    }
+                }
+                return data;
             },
             columnDefs: <?= json_encode($columnDefs, JSON_PRETTY_PRINT); ?>,
             order: <?= json_encode($this->getDefaultOrder()); ?>,
+            searchCols: <?= json_encode($searchCols); ?>,
         });
 
         $('#<?= $this->getId(); ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {

@@ -166,6 +166,24 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         return $this;
     }
 
+    public function getColumn($name) {
+        foreach ($this->columns as $column) {
+            if ($column->getName() == $name) {
+                return $column;
+            }
+        }
+        return null;
+    }
+
+    public function getColumnIndex($name) {
+        foreach ($this->columns as $i => $column) {
+            if ($column->getName() == $name) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
     protected function spliceColumn($column, $offset = null) {
         if ($offset === null) {
             $this->columns[] = $column;
@@ -266,6 +284,14 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     }
 
     public function setDefaultOrder(array $defaultOrder) {
+        $defaultOrder = array_map(function($defaultOrder) {
+            if (is_string($defaultOrder[0])) {
+                return [
+                    $this->getColumnIndex($defaultOrder[0]),
+                    $defaultOrder[1],
+                ];
+            }
+        }, $defaultOrder);
         $this->defaultOrder = $defaultOrder;
         return $this;
     }

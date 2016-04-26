@@ -9,6 +9,7 @@ class Column
     protected $position;
     protected $exportable = true;
     protected $visible = true;
+    protected $defaultColumnFilter = null;
 
     public function __construct($name)
     {
@@ -105,5 +106,13 @@ class Column
         $this->visible = $visible;
         return $this;
     }
+    
+    public function getDefaultColumnFilter() {
+        return $this->defaultColumnFilter;
+    }
 
+    public function setDefaultColumnFilter($defaultColumnFilter) {
+        $this->defaultColumnFilter = $defaultColumnFilter;
+        return $this;
+    }
 }
