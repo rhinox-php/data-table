@@ -291,6 +291,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
                     $defaultOrder[1],
                 ];
             }
+            return $defaultOrder;
         }, $defaultOrder);
         $this->defaultOrder = $defaultOrder;
         return $this;
