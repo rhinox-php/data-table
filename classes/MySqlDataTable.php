@@ -37,8 +37,12 @@ class MySqlDataTable extends DataTable
         foreach ($this->getInputColumns() as $i => $inputColumn) {
             if (isset($inputColumn['search']['value']) && $inputColumn['search']['value']) {
                 if ($columns[$i]->getHaving()) {
-                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
-                    $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
+                    if ($inputColumn['search']['value'] === '*') {
+                        $columnHaving[] = '(' . $columns[$i]->getHaving() . ' IS NOT NULL AND ' . $columns[$i]->getHaving() . ' != "")';
+                    } else {
+                        $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
+                        $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
+                    }
                 }
             }
         }
