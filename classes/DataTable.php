@@ -21,6 +21,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     protected $defaultOrder = [
         [1, 'desc'],
     ];
+    protected $saveState = true;
 
     public function render() {
         ob_start();
@@ -294,6 +295,15 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
             return $defaultOrder;
         }, $defaultOrder);
         $this->defaultOrder = $defaultOrder;
+        return $this;
+    }
+    
+    public function getSaveState() {
+        return $this->saveState;
+    }
+
+    public function setSaveState($saveState) {
+        $this->saveState = $saveState;
         return $this;
     }
 

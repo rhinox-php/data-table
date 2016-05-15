@@ -90,7 +90,7 @@ foreach ($this->getColumns() as $i => $column) {
 //            scrollX: true,
             processing: true,
             serverSide: true,
-            stateSave: true,
+            stateSave: <?= json_encode($this->getSaveState()); ?>,
             stateSaveCallback: function(settings, data) {
                 localStorage.setItem(<?= json_encode($this->getId()); ?>, JSON.stringify(data));
             },
