@@ -22,6 +22,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         [1, 'desc'],
     ];
     protected $saveState = true;
+    protected $tableButtons = [];
 
     public function render() {
         ob_start();
@@ -305,6 +306,19 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     public function setSaveState($saveState) {
         $this->saveState = $saveState;
         return $this;
+    }
+    
+    public function getTableButtons() {
+        return $this->tableButtons;
+    }
+
+    public function setTableButtons($tableButtons) {
+        $this->tableButtons = $tableButtons;
+        return $this;
+    }
+    
+    public function addTableButton(array $options) {
+        $this->tableButtons[] = $options;
     }
 
 }

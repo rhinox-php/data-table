@@ -80,6 +80,15 @@ foreach ($this->getColumns() as $i => $column) {
                         window.location.reload();
                     }
                 },
+                <?php foreach ($this->getTableButtons() as $button): ?>
+                {
+                    text: <?= json_encode($button['text']); ?>,
+                    action: function (e, dt, node, config) {
+                        $.redirect(<?= json_encode($button['href']); ?>, {}, 'get');
+                    },
+                    className: <?= json_encode($button['class']); ?>,
+                },
+                <?php endforeach; ?>
             ],
             language: {
                 buttons: {
@@ -143,12 +152,12 @@ foreach ($this->getColumns() as $i => $column) {
     }
     
     .rx-datatable-wrapper .rx-data-table-page-size {
-        width: 50%;
+        width: 70%;
         float: left;
     }
     
     .rx-datatable-wrapper .rx-data-table-search {
-        width: 50%;
+        width: 30%;
         float: right;
     }
     
