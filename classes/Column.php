@@ -63,6 +63,12 @@ class Column
             if (is_array($result)) {
                 $result = implode('', $result);
             } else {
+                if ($result instanceof \Generator || $result instanceof \Iterator) {
+                    $result = iterator_to_array($result);
+                }
+                if (is_array($result)) {
+                    $result = implode(' ', $result);
+                }
                 $result = (string) $result;
             }
             return $result;
