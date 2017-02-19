@@ -145,6 +145,9 @@ foreach ($this->getColumns() as $i => $column) {
         });
 
         var lastChecked = false;
+        $('#<?= $this->getId(); ?>').on('click', ':checkbox', function(e) {
+            e.preventDefault();
+        });
         $('#<?= $this->getId(); ?>').on('mousedown', 'td', function(e) {
             var checkbox = $(this).find(':checkbox');
             if (checkbox.length) {
@@ -165,6 +168,9 @@ foreach ($this->getColumns() as $i => $column) {
                 }
                 checkbox.prop('checked', checked);
                 lastChecked = rowIndex;
+                if (RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder) {
+                    RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder(RhinoDataTables['<?= $this->getId(); ?>'].getSelected());
+                }
             }
         });
 
@@ -178,6 +184,10 @@ foreach ($this->getColumns() as $i => $column) {
             table: table,
             selectAll: selectAll,
             buttons: {},
+            selectHanlder: null,
+            select: function(callback) {
+                RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder = callback;
+            },
             getSelected: function() {
                 var result = [];
                 $('#<?= $this->getId(); ?> :checked').each(function() {
