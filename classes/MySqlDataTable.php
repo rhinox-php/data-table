@@ -21,7 +21,7 @@ class MySqlDataTable extends DataTable
 
         // Prepare the select column query
         $selectColumns = implode(','.PHP_EOL, array_map(function ($column) {
-            $as = preg_replace('/[^a-z0-0_]/i', '', $column->getAs());
+            $as = preg_replace('/[^a-z0-9_]/i', '', $column->getAs());
             return $column->getQuery() . ' AS `' . $as . '`';
         }, $columns));
 
