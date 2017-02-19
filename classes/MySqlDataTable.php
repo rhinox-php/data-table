@@ -9,7 +9,7 @@ class MySqlDataTable extends DataTable
     private $groupBys = [];
     private $bindings = [];
     private $wheres = [];
-    
+
     public function __construct($pdo, $table) {
         $this->pdo = $pdo;
         $this->table = $table;
@@ -21,9 +21,10 @@ class MySqlDataTable extends DataTable
 
         // Prepare the select column query
         $selectColumns = implode(','.PHP_EOL, array_map(function ($column) {
-            return $column->getQuery() . ' AS ' . $column->getAs();
+            $as = preg_replace('/[^a-z0-0_]/i', '', $column->getAs());
+            return $column->getQuery() . ' AS `' . $as . '`';
         }, $columns));
-        
+
         // Prepare the having search query
         $having = '';
         if ($this->getSearch()) {
@@ -71,14 +72,14 @@ class MySqlDataTable extends DataTable
         } else {
             $wheres = '';
         }
-        
+
         // Joins
         $joins = [];
         foreach ($this->joins as $join) {
             $joins[] = $join;
         }
         $joins = implode(PHP_EOL, $joins);
-        
+
         // Group by
         $groupBys = [];
         foreach ($this->groupBys as $groupBy) {
@@ -126,7 +127,7 @@ class MySqlDataTable extends DataTable
         $this->setRecordsTotal($total);
         $this->setRecordsFiltered($total);
     }
-    
+
     public function getTable() {
         return $this->table;
     }
@@ -144,7 +145,7 @@ class MySqlDataTable extends DataTable
     public function insertColumn($name, $format, $position = null) {
         return $this->spliceColumn(new MySqlColumnInsert($name, $format), $position);
     }
-    
+
     public function addJoin($join) {
         $this->joins[] = $join;
     }
@@ -164,7 +165,7 @@ class MySqlDataTable extends DataTable
         foreach ($bindings as $key => $value) {
             $bindKey = ':binding' . (1000 + count($this->bindings));
             $sql = str_replace($key, $bindKey, $sql);
-            $this->bindings[$bindKey] = $value; 
+            $this->bindings[$bindKey] = $value;
         }
         return $sql;
     }

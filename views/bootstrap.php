@@ -41,6 +41,10 @@ foreach ($this->getColumns() as $i => $column) {
 ?>
 <script>
     (function($) {
+        if (typeof RhinoDataTables === 'undefined') {
+            RhinoDataTables = {};
+        }
+
         $.fn.dataTableExt.sErrMode = 'throw';
         /*
         $.fn.dataTable.ext.errMode = function(settings, techNote, message) {
@@ -49,7 +53,7 @@ foreach ($this->getColumns() as $i => $column) {
             console.error(message);
         };
         */
-        
+
         var table = $('#<?= $this->getId(); ?>').DataTable({
             dom:
                 "<'rx-data-table-controls'<'rx-data-table-page-size'lB><'rx-data-table-search'f>>" +
@@ -81,12 +85,26 @@ foreach ($this->getColumns() as $i => $column) {
                     }
                 },
                 <?php foreach ($this->getTableButtons() as $button): ?>
+                <?php
+                    $className = $button['class'] ?: '';
+                    if ($button['name']) {
+                        $className = ' rx-button-' . $button['name'];
+                    }
+                ?>
                 {
                     text: <?= json_encode($button['text']); ?>,
                     action: function (e, dt, node, config) {
-                        $.redirect(<?= json_encode($button['href']); ?>, {}, 'get');
+                        <?php if ($button['type'] === 'selectAll'): ?>
+                            selectAll();
+                        <?php elseif ($button['href']): ?>
+                            $.redirect(<?= json_encode($button['href']); ?>, {}, 'get');
+                        <?php else: ?>
+                            if (RhinoDataTables['<?= $this->getId(); ?>'].buttons[<?= json_encode($button['name']); ?>]) {
+                                RhinoDataTables['<?= $this->getId(); ?>'].buttons[<?= json_encode($button['name']); ?>].click();
+                            }
+                        <?php endif; ?>
                     },
-                    className: <?= json_encode($button['class']); ?>,
+                    className: <?= json_encode($className); ?>,
                 },
                 <?php endforeach; ?>
             ],
@@ -125,6 +143,59 @@ foreach ($this->getColumns() as $i => $column) {
                 table.draw();
             }
         });
+
+        var lastChecked = false;
+        $('#<?= $this->getId(); ?>').on('mousedown', 'td', function(e) {
+            var checkbox = $(this).find(':checkbox');
+            if (checkbox.length) {
+                var rowIndex = $(this).closest('tr').index();
+                var checked = !checkbox.is(':checked');
+                if(e.shiftKey) {
+                    e.preventDefault();
+                    var index = $(this).index();
+                    var tableBody = $(this).closest('tbody');
+                    var minChecked = Math.min(rowIndex, lastChecked);
+                    var maxChecked = Math.max(rowIndex, lastChecked);
+                    tableBody.find('tr').each(function(i) {
+                        if (i >= minChecked && i <= maxChecked) {
+                            var cell = $(this).find('td').eq(index);
+                            cell.find(':checkbox').prop('checked', checked);
+                        }
+                    });
+                }
+                checkbox.prop('checked', checked);
+                lastChecked = rowIndex;
+            }
+        });
+
+        var selectAllState = true;
+        var selectAll = function() {
+            $('#<?= $this->getId(); ?> :checkbox').prop('checked', selectAllState);
+            selectAllState = !selectAllState;
+        };
+
+        RhinoDataTables['<?= $this->getId(); ?>'] = {
+            table: table,
+            selectAll: selectAll,
+            buttons: {},
+            getSelected: function() {
+                var result = [];
+                $('#<?= $this->getId(); ?> :checked').each(function() {
+                    result.push(table.row($(this).closest('tr')).data());
+                });
+                return result;
+            },
+            getButton: function(name) {
+                return {
+                    click: function(callback) {
+                        if (!RhinoDataTables['<?= $this->getId(); ?>'].buttons[name]) {
+                            RhinoDataTables['<?= $this->getId(); ?>'].buttons[name] = {};
+                        }
+                        RhinoDataTables['<?= $this->getId(); ?>'].buttons[name].click = callback;
+                    },
+                };
+            },
+        };
     })(jQuery);
 </script>
 
@@ -133,44 +204,44 @@ foreach ($this->getColumns() as $i => $column) {
         padding: 0;
         margin: 0;
     }
-    
+
     .rx-datatable-wrapper .table > thead > tr .rx-datatable-col-filter .form-control {
         border: 0;
         width: 100%;
     }
-    
+
     .rx-datatable-wrapper .table > thead > tr .rx-datatable-col-filter-first {
         padding: 8px;
     }
-    
+
     .rx-datatable-wrapper .rx-datatable {
         width: 100% !important;
     }
-    
+
     .rx-datatable-wrapper .dataTables_wrapper {
         overflow: auto;
     }
-    
+
     .rx-datatable-wrapper .rx-data-table-page-size {
         width: 70%;
         float: left;
     }
-    
+
     .rx-datatable-wrapper .rx-data-table-search {
         width: 30%;
         float: right;
     }
-    
+
     .rx-datatable-wrapper .rx-data-table-count {
         width: 50%;
         float: left;
     }
-    
+
     .rx-datatable-wrapper .rx-data-table-pagination {
         width: 50%;
         float: right;
     }
-    
+
     .rx-datatable-wrapper .dataTables_length {
         float: left;
         margin-right: 10px;

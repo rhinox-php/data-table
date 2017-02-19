@@ -4,7 +4,7 @@ namespace Rhino\DataTable;
 class Column
 {
     protected $name;
-    protected $label;
+    protected $label = null;
     protected $format;
     protected $position;
     protected $exportable = true;
@@ -27,14 +27,14 @@ class Column
 
         return $this;
     }
-    
+
     public function getKey() {
         return str_replace('_', '', lcfirst(ucwords($this->getName(), '_')));
     }
 
     public function getLabel()
     {
-        return $this->label ?: $this->name;
+        return $this->label !== null ? $this->label : $this->name;
     }
 
     public function setLabel($label)
@@ -112,7 +112,7 @@ class Column
         $this->visible = $visible;
         return $this;
     }
-    
+
     public function getDefaultColumnFilter() {
         return $this->defaultColumnFilter;
     }

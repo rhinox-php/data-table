@@ -29,11 +29,11 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         require $this->getModule()->getRoot('/views/bootstrap.php');
         return ob_get_clean();
     }
-    
+
     public function getUnescapedOutput() {
         return $this->render();
     }
-    
+
     public function createButton(array $options) {
         $options = new \Rhino\Core\InputData($options);
         if ($options->bool('action')) {
@@ -71,7 +71,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
             }
         }
         $this->processSource();
-        
+
         if ($request->get('csv') === null) {
             return $this->sendJson($request);
         } else {
@@ -104,7 +104,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
     protected function sendCsv() {
         $this->response->callback(function() {
             $data = $this->getData();
-            
+
             header('Content-Type: application/csv');
             header('Content-Disposition: attachment; filename=export.csv');
             header('Pragma: no-cache');
@@ -140,7 +140,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         });
         return true;
     }
-    
+
     public function getId() {
         if (!$this->id) {
             $hash = [
@@ -153,7 +153,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         }
         return $this->id;
     }
-    
+
     public function setId($id) {
         $this->id = $id;
         return $this;
@@ -280,7 +280,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         $this->order[$column] = $direction;
         return $this;
     }
-    
+
     public function getDefaultOrder() {
         return $this->defaultOrder;
     }
@@ -298,7 +298,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         $this->defaultOrder = $defaultOrder;
         return $this;
     }
-    
+
     public function getSaveState() {
         return $this->saveState;
     }
@@ -307,7 +307,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         $this->saveState = $saveState;
         return $this;
     }
-    
+
     public function getTableButtons() {
         return $this->tableButtons;
     }
@@ -316,9 +316,18 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         $this->tableButtons = $tableButtons;
         return $this;
     }
-    
+
     public function addTableButton(array $options) {
-        $this->tableButtons[] = $options;
+        $this->tableButtons[] = array_merge([
+            'name' => null,
+            'type' => null,
+            'text' => null,
+            'href' => null,
+            'class' => null,
+        ], $options);
     }
 
+    public function getJsInstance() {
+        return "RhinoDataTables['{$this->getId()}']";
+    }
 }
