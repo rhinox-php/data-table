@@ -89,9 +89,8 @@ foreach ($this->getColumns() as $i => $column) {
                             return mixed;
                         };
                         var params = arrayToObject(dt.ajax.params());
-                        $.redirect(location.href, $.extend(, {
-                            csv: true,
-                        }), 'post');
+                        params.csv = true;
+                        $.redirect(location.href, params, 'post');
                     }
                 },
                 'colvis',
