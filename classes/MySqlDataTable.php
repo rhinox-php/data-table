@@ -36,17 +36,15 @@ class MySqlDataTable extends DataTable
         }
         $columnHaving = [];
         foreach ($this->getInputColumns() as $i => $inputColumn) {
-            if (isset($inputColumn['search']['value']) && $inputColumn['search']['value']) {
-                if ($columns[$i]->getHaving()) {
-                    if ($inputColumn['search']['value'] === '*') {
-                        $columnHaving[] = '(' . $columns[$i]->getHaving() . ' IS NOT NULL AND ' . $columns[$i]->getHaving() . ' != "")';
-                    } elseif (strpos($inputColumn['search']['value'], '*') !== false) {
-                        $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
-                        $bindings[':search' . ($i + 100)] = str_replace('*', '%', $inputColumn['search']['value']);
-                    } else {
-                        $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
-                        $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
-                    }
+            if (isset($inputColumn['search']['value']) && $inputColumn['search']['value'] && isset($columns[$i]) && $columns[$i]->getHaving()) {
+                if ($inputColumn['search']['value'] === '*') {
+                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' IS NOT NULL AND ' . $columns[$i]->getHaving() . ' != "")';
+                } elseif (strpos($inputColumn['search']['value'], '*') !== false) {
+                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
+                    $bindings[':search' . ($i + 100)] = str_replace('*', '%', $inputColumn['search']['value']);
+                } else {
+                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
+                    $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
                 }
             }
         }
