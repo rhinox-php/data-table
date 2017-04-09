@@ -71,7 +71,7 @@ foreach ($this->getColumns() as $i => $column) {
                 {
                     text: '<i class="fa fa-download"></i> Download CSV',
                     action: function (e, dt, node, config) {
-                        $.redirect(window.location.pathname, $.extend(dt.ajax.params(), {
+                        $.redirect(location.href, $.extend(dt.ajax.params(), {
                             csv: true,
                         }), 'post');
                     }
