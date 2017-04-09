@@ -71,7 +71,25 @@ foreach ($this->getColumns() as $i => $column) {
                 {
                     text: '<i class="fa fa-download"></i> Download CSV',
                     action: function (e, dt, node, config) {
-                        $.redirect(location.href, $.extend(dt.ajax.params(), {
+                        var arrayToObject = function(mixed) {
+                            if (Array.isArray(mixed)) {
+                                var object = {};
+                                for (var i = 0; i < mixed.length; i++) {
+                                    object[i] = arrayToObject(mixed[i]);
+                                }
+                                return object;
+                            }
+                            if (typeof mixed === 'object') {
+                                var object = {};
+                                for (var key in mixed) {
+                                    object[key] = arrayToObject(mixed[key]);
+                                }
+                                return object;
+                            }
+                            return mixed;
+                        };
+                        var params = arrayToObject(dt.ajax.params());
+                        $.redirect(location.href, $.extend(, {
                             csv: true,
                         }), 'post');
                     }
