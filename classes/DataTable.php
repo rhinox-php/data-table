@@ -36,14 +36,18 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
 
     public function createButton(array $options) {
         $options = new \Rhino\Core\InputData($options);
+        $confirmation = '';
+        if ($options->string('confirm')) {
+            $confirmation = ' onclick="if (!confirm(\''. htmlspecialchars($options->string('confirm'), ENT_QUOTES).'\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
+        }
         if ($options->bool('action')) {
             return '
                 <form action="' . $options->string('action') . '" method="post">
-                    <button class="btn btn-xs btn-' . $options->string('style') . '">' . $options->string('text') . '</button>
+                    <button class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</button>
                 </form>
             ';
         } else {
-            return '<a href="' . $options->string('href') . '" class="btn btn-xs btn-' . $options->string('style') . '">' . $options->string('text') . '</a>';
+            return '<a href="' . $options->string('href') . '" class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</a>';
         }
     }
 

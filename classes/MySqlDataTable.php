@@ -90,7 +90,7 @@ class MySqlDataTable extends DataTable
         foreach ($this->order as $columnIndex => $direction) {
             $direction = $direction == 'desc' ? 'DESC' : 'ASC';
             if ($columns[$columnIndex]->isSortable()) {
-                $orderBy[] = $columns[$columnIndex]->getQuery() . ' ' . $direction;
+                $orderBy[] = $columns[$columnIndex]->getOrderQuery() . ' ' . $direction;
             }
         }
         $orderBy = empty($orderBy) ? '' : ('ORDER BY ' . implode(', ', $orderBy));
