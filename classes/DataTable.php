@@ -58,13 +58,14 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
             return false;
         }
         if ($request->get('csv') === null) {
-            $this->setStart($request->get('start') ? : 0);
-            $this->setLength($request->get('length') ? : 10);
+            $this->setStart($request->get('start') ?: 0);
+            $this->setLength($request->get('length') ?: 10);
         } else {
             $this->setStart(0);
             $this->setLength(10000);
         }
-        $this->setSearch($request->get('search')['value']);
+        $search = $request->get('search');
+        $this->setSearch(isset($search['value']) ? $search['value'] : null);
         $this->setInputColumns($request->get('columns') ?: []);
         $orders = $request->get('order');
         if (is_array($orders)) {
