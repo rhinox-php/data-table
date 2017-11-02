@@ -26,7 +26,7 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
 
     public function render() {
         ob_start();
-        require $this->getModule()->getRoot('/views/bootstrap.php');
+        require \Rhino\DataTable\ROOT . '/views/bootstrap.php';
         return ob_get_clean();
     }
 
@@ -51,10 +51,10 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         }
     }
 
-    public function process(\Rhino\Core\Http\Request $request, \Rhino\Core\Http\Response $response) {
+    public function process($request, $response) {
         $this->request = $request;
         $this->response = $response;
-        if (!$request->isAjax() && $request->get('csv') === null && $request->get('json') === null) {
+        if (!$request->isXmlHttpRequest() && $request->get('csv') === null && $request->get('json') === null) {
             return false;
         }
         if ($request->get('csv') === null) {
