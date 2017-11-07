@@ -2,7 +2,6 @@
 namespace Rhino\DataTable;
 
 class Autocomplete {
-    use \Rhino\Core\ModuleAccess;
     use \Rhino\Core\Renderer;
 
     protected $url;
@@ -15,7 +14,7 @@ class Autocomplete {
         require $this->getModule()->getRoot('/views/autocomplete.php');
         return ob_get_clean();
     }
-    
+
     public function getUrl() {
         return $this->url;
     }

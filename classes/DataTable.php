@@ -2,7 +2,6 @@
 namespace Rhino\DataTable;
 
 abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
-    use \Rhino\Core\ModuleAccess;
     use \Rhino\Core\Renderer;
 
     protected $request;
