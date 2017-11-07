@@ -2,8 +2,6 @@
 namespace Rhino\DataTable;
 
 class Autocomplete {
-    use \Rhino\Core\Renderer;
-
     protected $url;
     protected $inputName;
     protected $keys;
@@ -11,7 +9,7 @@ class Autocomplete {
     public function render() {
         $autocomplete = new \Rhino\Core\Escaper\Wrapped($this);
         ob_start();
-        require $this->getModule()->getRoot('/views/autocomplete.php');
+        require \Rhino\DataTable\ROOT . '/views/autocomplete.php';
         return ob_get_clean();
     }
 

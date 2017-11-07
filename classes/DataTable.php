@@ -2,8 +2,6 @@
 namespace Rhino\DataTable;
 
 abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
-    use \Rhino\Core\Renderer;
-
     protected $request;
     protected $response;
     protected $id;
@@ -27,10 +25,6 @@ abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
         ob_start();
         require \Rhino\DataTable\ROOT . '/views/bootstrap.php';
         return ob_get_clean();
-    }
-
-    public function getUnescapedOutput() {
-        return $this->render();
     }
 
     public function createButton(array $options) {
