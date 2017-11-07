@@ -1,7 +1,7 @@
 <?php
 namespace Rhino\DataTable;
 
-abstract class DataTable implements \Rhino\Core\Escaper\UnescapedOutput {
+abstract class DataTable {
     protected $request;
     protected $response;
     protected $id;
