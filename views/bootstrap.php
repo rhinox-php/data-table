@@ -239,6 +239,7 @@ foreach ($this->getColumns() as $i => $column) {
 
     .rx-datatable-wrapper .table > thead > tr .rx-datatable-col-filter-first {
         padding: 8px;
+        white-space: nowrap;
     }
 
     .rx-datatable-wrapper .rx-datatable {
