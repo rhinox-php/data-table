@@ -105,12 +105,17 @@ foreach ($this->getColumns() as $i => $column) {
                 <?php
                     $className = $button['class'] ?: '';
                     if ($button['name']) {
-                        $className = ' rx-button-' . $button['name'];
+                        $className .= ' rx-button-' . $button['name'];
                     }
                 ?>
                 {
                     text: <?= json_encode($button['text']); ?>,
                     action: function (e, dt, node, config) {
+                        <?php if ($button['confirm']): ?>
+                            if (!confirm(<?= json_encode($button['confirm']); ?>)) {
+                                return;
+                            }
+                        <?php endif; ?>
                         <?php if ($button['type'] === 'selectAll'): ?>
                             selectAll();
                         <?php elseif ($button['href']): ?>

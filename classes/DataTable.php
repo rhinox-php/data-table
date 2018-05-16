@@ -322,6 +322,7 @@ abstract class DataTable {
             'text' => null,
             'href' => null,
             'class' => null,
+            'confirm' => null,
         ], $options);
     }
 
