@@ -194,11 +194,15 @@ foreach ($this->getColumns() as $i => $column) {
                     RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder(RhinoDataTables['<?= $this->getId(); ?>'].getSelected());
                 }
             }
+            checkbox.trigger('change');
         });
 
         var selectAllState = true;
         var selectAll = function() {
             $('#<?= $this->getId(); ?> :checkbox').prop('checked', selectAllState);
+            if (RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder) {
+                RhinoDataTables['<?= $this->getId(); ?>'].selectHanlder(RhinoDataTables['<?= $this->getId(); ?>'].getSelected());
+            }
             selectAllState = !selectAllState;
         };
 
