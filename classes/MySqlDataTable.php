@@ -9,6 +9,7 @@ class MySqlDataTable extends DataTable
     private $groupBys = [];
     private $bindings = [];
     private $wheres = [];
+    private $havings = [];
 
     public function __construct($pdo, $table) {
         $this->pdo = $pdo;
@@ -46,6 +47,12 @@ class MySqlDataTable extends DataTable
                     $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
                     $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
                 }
+            }
+        }
+        foreach ($this->havings as $customHaving) {
+            $columnHaving[] = '(' . $customHaving['sql'] . ')';
+            foreach ($customHaving['bindings'] as $key => $value) {
+                $bindings[$key] = $value;
             }
         }
         if (!empty($columnHaving)) {
@@ -108,7 +115,7 @@ class MySqlDataTable extends DataTable
             LIMIT {$this->getLength()}
             OFFSET {$this->getStart()}
         ";
-//            dump($sql, $bindings);
+        // dump($sql, $bindings);
 
         // Execute the query
         $statement = $this->pdo->prepare($sql);
@@ -154,6 +161,13 @@ class MySqlDataTable extends DataTable
 
     public function addWhere($sql, array $bindings = []) {
         $this->wheres[] = [
+            'sql' => $sql,
+            'bindings' => $bindings,
+        ];
+    }
+
+    public function addHaving($sql, array $bindings = []) {
+        $this->havings[] = [
             'sql' => $sql,
             'bindings' => $bindings,
         ];
