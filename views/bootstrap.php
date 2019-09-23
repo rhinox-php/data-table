@@ -67,6 +67,7 @@ foreach ($this->getColumns() as $i => $column) {
                 url: '',
                 type: 'post',
             },
+            lengthMenu: [[10, 25, 50, 100, 200, 500], [10, 25, 50, 100, 200, 500]],
             buttons: [
                 {
                     text: '<i class="fa fa-download"></i> Download CSV',
