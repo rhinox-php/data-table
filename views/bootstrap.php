@@ -10,7 +10,6 @@
             <?php foreach ($this->getColumns() as $i => $column): ?>
                 <?php if ($i === 0): ?>
                     <td class="rx-datatable-col-filter rx-datatable-col-filter-first">
-                        <i>Filters:</i>
                     </td>
                 <?php else: ?>
                     <td class="rx-datatable-col-filter" data-column="<?= $i; ?>">
