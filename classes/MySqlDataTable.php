@@ -37,14 +37,14 @@ class MySqlDataTable extends DataTable
         }
         $columnHaving = [];
         foreach ($this->getInputColumns() as $i => $inputColumn) {
-            if (isset($inputColumn['search']['value']) && $inputColumn['search']['value'] && isset($columns[$i]) && $columns[$i]->getHaving()) {
+            if (isset($inputColumn['search']['value']) && $inputColumn['search']['value'] && isset($columns[$i]) && $columns[$i]->getQuery()) {
                 if ($inputColumn['search']['value'] === '*') {
-                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' IS NOT NULL AND ' . $columns[$i]->getHaving() . ' != "")';
+                    $columnHaving[] = '(' . $columns[$i]->getQuery() . ' IS NOT NULL AND ' . $columns[$i]->getQuery() . ' != "")';
                 } elseif (strpos($inputColumn['search']['value'], '*') !== false) {
-                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
+                    $columnHaving[] = '(' . $columns[$i]->getQuery() . ' LIKE :search' . ($i + 100) . ')';
                     $bindings[':search' . ($i + 100)] = str_replace('*', '%', $inputColumn['search']['value']);
                 } else {
-                    $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
+                    $columnHaving[] = '(' . $columns[$i]->getQuery() . ' LIKE :search' . ($i + 100) . ')';
                     $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
                 }
             }
@@ -55,14 +55,14 @@ class MySqlDataTable extends DataTable
                 $bindings[$key] = $value;
             }
         }
-        if (!empty($columnHaving)) {
-            $columnHaving = implode(' AND ', $columnHaving);
-            if ($having) {
-                $having .= ' AND ' . $columnHaving;
-            } else {
-                $having = "HAVING ($columnHaving)";
-            }
-        }
+        // if (!empty($columnHaving)) {
+        //     $columnHaving = implode(' AND ', $columnHaving);
+        //     if ($having) {
+        //         $having .= ' AND ' . $columnHaving;
+        //     } else {
+        //         $having = "HAVING ($columnHaving)";
+        //     }
+        // }
 
         // Where
         $wheres = [];
@@ -73,9 +73,23 @@ class MySqlDataTable extends DataTable
             }
         }
         if (!empty($wheres)) {
-            $wheres = 'WHERE ' . implode(' AND ' . PHP_EOL, $wheres);
+            $wheres = implode(' AND ' . PHP_EOL, $wheres);
+        //     $wheres = 'WHERE ' . implode(' AND ' . PHP_EOL, $wheres);
         } else {
             $wheres = '';
+        }
+
+        if (!empty($columnHaving)) {
+            $columnHaving = implode(' AND ', $columnHaving);
+            if ($wheres) {
+                $wheres = "($wheres) AND ($columnHaving)";
+            } else {
+                $wheres = "($columnHaving)";
+            }
+        }
+
+        if ($wheres) {
+            $wheres = "WHERE $wheres";
         }
 
         // Joins
@@ -115,7 +129,8 @@ class MySqlDataTable extends DataTable
             LIMIT {$this->getLength()}
             OFFSET {$this->getStart()}
         ";
-        // dump($sql, $bindings);
+
+        // $this->debug($sql, array_merge($this->bindings, $bindings));
 
         // Execute the query
         $statement = $this->pdo->prepare($sql);
@@ -180,5 +195,15 @@ class MySqlDataTable extends DataTable
             $this->bindings[$bindKey] = $value;
         }
         return $sql;
+    }
+
+    private function debug($sql, $bindings) {
+        $sql = preg_replace_callback('/:[a-z0-9]+/', function($matches) use($bindings) {
+            if (isset($bindings[$matches[0]])) {
+                return "'" . addslashes($bindings[$matches[0]]) . "'";
+            }
+            return $matches[0];
+        }, $sql);
+        dump($sql, $bindings);
     }
 }
