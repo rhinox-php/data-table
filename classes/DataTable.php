@@ -20,6 +20,7 @@ abstract class DataTable {
     ];
     protected $saveState = true;
     protected $tableButtons = [];
+    protected $rowFormatters = [];
 
     public function render() {
         ob_start();
@@ -85,6 +86,12 @@ abstract class DataTable {
             $indexedRow = [];
             foreach ($columns as $c => $column) {
                 $indexedRow[$column->getName()] = $row[$c];
+            }
+            foreach ($this->getRowFormatters() as $rowFormmater) {
+                $format = $rowFormmater($indexedRow, 'html');
+                if ($format['class']) {
+                    $result[$r]['DT_RowClass'] = $format['class'];
+                }
             }
             foreach ($columns as $c => $column) {
                 $result[$r][$column->getKey()] = $column->format($row[$c], $indexedRow, 'html');
@@ -328,5 +335,22 @@ abstract class DataTable {
 
     public function getJsInstance() {
         return "RhinoDataTables['{$this->getId()}']";
+    }
+
+    public function getRowFormatters()
+    {
+        return $this->rowFormatters;
+    }
+
+    public function setRowFormatters(array $rowFormatters)
+    {
+        $this->rowFormatters = $rowFormatters;
+        return $this;
+    }
+
+    public function addRowFormatter(callable $rowFormatter)
+    {
+        $this->rowFormatters[] = $rowFormatter;
+        return $this;
     }
 }
