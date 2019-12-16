@@ -5,6 +5,7 @@ class MySqlColumn extends Column {
     private $table;
     private $query;
     private $having;
+    private $searchWhere;
     private $orderQuery;
 
     public function __construct($name, $table = null) {
@@ -42,6 +43,15 @@ class MySqlColumn extends Column {
 
     public function setHaving($having) {
         $this->having = $having;
+        return $this;
+    }
+
+    public function getSearchWhere() {
+        return $this->searchWhere;
+    }
+
+    public function setSearchWhere($searchWhere) {
+        $this->searchWhere = $searchWhere;
         return $this;
     }
 

@@ -10,7 +10,6 @@
             <?php foreach ($this->getColumns() as $i => $column): ?>
                 <?php if ($i === 0): ?>
                     <td class="rx-datatable-col-filter rx-datatable-col-filter-first">
-                        <i>Filters:</i>
                     </td>
                 <?php else: ?>
                     <td class="rx-datatable-col-filter" data-column="<?= $i; ?>">
@@ -158,13 +157,21 @@ foreach ($this->getColumns() as $i => $column) {
             searchCols: <?= json_encode($searchCols); ?>,
         });
 
+        var searchDebounce = null;
+
         $('#<?= $this->getId(); ?>').closest('.dataTables_wrapper').on('keyup change', '.rx-datatable-col-filter', function() {
-            var value = $(this).find(':input').val();
-            var column = table.column($(this).data('column'));
-            if (column.search() !== value) {
-                column.search(value);
-                table.draw();
+            if (searchDebounce) {
+                clearTimeout(searchDebounce);
             }
+            searchDebounce = setTimeout(function() {
+                searchDebounce = null;
+                var value = $(this).find(':input').val();
+                var column = table.column($(this).data('column'));
+                if (column.search() !== value) {
+                    column.search(value);
+                    table.draw();
+                }
+            }.bind(this), 500);
         });
 
         var lastChecked = false;
