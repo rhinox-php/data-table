@@ -55,14 +55,14 @@ class MySqlDataTable extends DataTable
                 $bindings[$key] = $value;
             }
         }
-        // if (!empty($columnHaving)) {
-        //     $columnHaving = implode(' AND ', $columnHaving);
-        //     if ($having) {
-        //         $having .= ' AND ' . $columnHaving;
-        //     } else {
-        //         $having = "HAVING ($columnHaving)";
-        //     }
-        // }
+        if (!empty($columnHaving)) {
+            $columnHaving = implode(' AND ', $columnHaving);
+            if ($having) {
+                $having .= ' AND ' . $columnHaving;
+            } else {
+                $having = "HAVING ($columnHaving)";
+            }
+        }
 
         // Where
         $wheres = [];
@@ -74,19 +74,18 @@ class MySqlDataTable extends DataTable
         }
         if (!empty($wheres)) {
             $wheres = implode(' AND ' . PHP_EOL, $wheres);
-        //     $wheres = 'WHERE ' . implode(' AND ' . PHP_EOL, $wheres);
         } else {
             $wheres = '';
         }
 
-        if (!empty($columnHaving)) {
-            $columnHaving = implode(' AND ', $columnHaving);
-            if ($wheres) {
-                $wheres = "($wheres) AND ($columnHaving)";
-            } else {
-                $wheres = "($columnHaving)";
-            }
-        }
+        // if (!empty($columnHaving)) {
+        //     $columnHaving = implode(' AND ', $columnHaving);
+        //     if ($wheres) {
+        //         $wheres = "($wheres) AND ($columnHaving)";
+        //     } else {
+        //         $wheres = "($columnHaving)";
+        //     }
+        // }
 
         if ($wheres) {
             $wheres = "WHERE $wheres";
@@ -133,8 +132,12 @@ class MySqlDataTable extends DataTable
         // $this->debug($sql, array_merge($this->bindings, $bindings));
 
         // Execute the query
+        $time = microtime(true);
         $statement = $this->pdo->prepare($sql);
         $statement->execute(array_merge($this->bindings, $bindings));
+        $this->setMetaValue('queryTime', microtime(true) - $time);
+        $this->setMetaValue('sql', $sql);
+        $this->setMetaValue('bindings', array_merge($this->bindings, $bindings));
 
         // Fetch the results
         $data = $statement->fetchAll(\PDO::FETCH_NUM);

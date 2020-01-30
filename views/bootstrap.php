@@ -56,6 +56,7 @@ foreach ($this->getColumns() as $i => $column) {
         var table = $('#<?= $this->getId(); ?>').DataTable({
             dom:
                 "<'rx-data-table-controls'<'rx-data-table-page-size'lB><'rx-data-table-search'f>>" +
+                "<'rx-datatable-error'>" +
                 "<'rx-data-table-table'tr>" +
                 "<'rx-data-table-nav'<'rx-data-table-count'i><'rx-data-table-pagination'p>>",
             classes: {
@@ -65,6 +66,15 @@ foreach ($this->getColumns() as $i => $column) {
             ajax: {
                 url: '',
                 type: 'post',
+                error: (xhr, error, thrown) => {
+                    $('#<?= $this->getId(); ?>')
+                        .closest('.rx-datatable-wrapper')
+                        .find('.rx-datatable-error')
+                        .html('')
+                        .append('<div class="alert alert-danger">Error processing table <a href="#" onclick="$(\'.rx-datatable-error-details\').show()">(show)</div></div>')
+                        .append('<div style="display: none" class="rx-datatable-error-details">' + xhr.responseText + '</div>');
+                    $('.dataTables_processing').hide();
+                },
             },
             lengthMenu: [[10, 25, 50, 100, 200, 500], [10, 25, 50, 100, 200, 500]],
             buttons: [

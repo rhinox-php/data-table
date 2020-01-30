@@ -1,7 +1,8 @@
 <?php
 namespace Rhino\DataTable;
 
-abstract class DataTable {
+abstract class DataTable
+{
     protected $request;
     protected $response;
     protected $id;
@@ -21,18 +22,21 @@ abstract class DataTable {
     protected $saveState = true;
     protected $tableButtons = [];
     protected $rowFormatters = [];
+    protected $meta = [];
 
-    public function render() {
+    public function render()
+    {
         ob_start();
         require \Rhino\DataTable\ROOT . '/views/bootstrap.php';
         return ob_get_clean();
     }
 
-    public function createButton(array $options) {
+    public function createButton(array $options)
+    {
         $options = new \Rhino\Core\InputData($options);
         $confirmation = '';
         if ($options->string('confirm')) {
-            $confirmation = ' onclick="if (!confirm(\''. htmlspecialchars($options->string('confirm'), ENT_QUOTES).'\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
+            $confirmation = ' onclick="if (!confirm(\'' . htmlspecialchars($options->string('confirm'), ENT_QUOTES) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
         }
         if ($options->bool('action')) {
             return '
@@ -45,7 +49,8 @@ abstract class DataTable {
         }
     }
 
-    public function process($request, $response) {
+    public function process($request, $response)
+    {
         $this->request = $request;
         $this->response = $response;
         if (!$request->isXmlHttpRequest() && $request->get('csv') === null && $request->get('json') === null) {
@@ -78,7 +83,8 @@ abstract class DataTable {
         }
     }
 
-    protected function sendJson($request) {
+    protected function sendJson($request)
+    {
         $data = $this->getData();
         $result = [];
         $columns = array_values($this->getColumns());
@@ -102,12 +108,14 @@ abstract class DataTable {
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
             'data' => $result,
+            'meta' => $this->getMeta(),
         ]);
         return true;
     }
 
-    protected function sendCsv() {
-        $this->response->callback(function() {
+    protected function sendCsv()
+    {
+        $this->response->callback(function () {
             $data = $this->getData();
 
             header('Content-Type: application/csv');
@@ -146,7 +154,8 @@ abstract class DataTable {
         return true;
     }
 
-    public function getId() {
+    public function getId()
+    {
         if (!$this->id) {
             $hash = [
                 $this->getTable(),
@@ -159,21 +168,25 @@ abstract class DataTable {
         return $this->id;
     }
 
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->id = $id;
         return $this;
     }
 
-    public function getColumns() {
+    public function getColumns()
+    {
         return $this->columns;
     }
 
-    public function setColumns(array $columns) {
+    public function setColumns(array $columns)
+    {
         $this->columns = $columns;
         return $this;
     }
 
-    public function getColumn($name) {
+    public function getColumn($name)
+    {
         foreach ($this->columns as $column) {
             if ($column->getName() == $name) {
                 return $column;
@@ -182,7 +195,8 @@ abstract class DataTable {
         return null;
     }
 
-    public function getColumnIndex($name) {
+    public function getColumnIndex($name)
+    {
         foreach ($this->columns as $i => $column) {
             if ($column->getName() == $name) {
                 return $i;
@@ -191,7 +205,8 @@ abstract class DataTable {
         return null;
     }
 
-    protected function spliceColumn($column, $offset = null) {
+    protected function spliceColumn($column, $offset = null)
+    {
         if ($offset === null) {
             $this->columns[] = $column;
         } else {
@@ -200,98 +215,119 @@ abstract class DataTable {
         return $column;
     }
 
-    public function getData() {
+    public function getData()
+    {
         return $this->data;
     }
 
-    public function setData($data) {
+    public function setData($data)
+    {
         $this->data = $data;
         return $this;
     }
 
-    public function getResult() {
+    public function getResult()
+    {
         return $this->result;
     }
 
-    public function setResult($result) {
+    public function setResult($result)
+    {
         $this->result = $result;
         return $this;
     }
 
-    public function getRecordsTotal() {
+    public function getRecordsTotal()
+    {
         return $this->recordsTotal;
     }
 
-    public function setRecordsTotal($recordsTotal) {
+    public function setRecordsTotal($recordsTotal)
+    {
         $this->recordsTotal = $recordsTotal;
         return $this;
     }
 
-    public function getRecordsFiltered() {
+    public function getRecordsFiltered()
+    {
         return $this->recordsFiltered;
     }
 
-    public function setRecordsFiltered($recordsFiltered) {
+    public function setRecordsFiltered($recordsFiltered)
+    {
         $this->recordsFiltered = $recordsFiltered;
         return $this;
     }
 
-    public function getStart() {
+    public function getStart()
+    {
         return $this->start;
     }
 
-    public function setStart($start) {
+    public function setStart($start)
+    {
         $this->start = $start;
         return $this;
     }
 
-    public function setLength($length) {
+    public function setLength($length)
+    {
         $this->length = $length;
         return $this;
     }
 
-    public function getLength() {
+    public function getLength()
+    {
         return $this->length;
     }
 
-    public function getSearch() {
+    public function getSearch()
+    {
         return $this->search;
     }
 
-    public function setSearch($search) {
+    public function setSearch($search)
+    {
         $this->search = $search;
         return $this;
     }
 
-    public function getInputColumns() {
+    public function getInputColumns()
+    {
         return $this->inputColumns;
     }
 
-    public function setInputColumns($inputColumns) {
+    public function setInputColumns($inputColumns)
+    {
         $this->inputColumns = $inputColumns;
         return $this;
     }
 
-    public function getOrder() {
+    public function getOrder()
+    {
         return $this->order;
     }
 
-    public function setOrder($order) {
+    public function setOrder($order)
+    {
         $this->order = $order;
         return $this;
     }
 
-    public function addOrder($column, $direction) {
+    public function addOrder($column, $direction)
+    {
         $this->order[$column] = $direction;
         return $this;
     }
 
-    public function getDefaultOrder() {
+    public function getDefaultOrder()
+    {
         return $this->defaultOrder;
     }
 
-    public function setDefaultOrder(array $defaultOrder) {
-        $defaultOrder = array_map(function($defaultOrder) {
+    public function setDefaultOrder(array $defaultOrder)
+    {
+        $defaultOrder = array_map(function ($defaultOrder) {
             if (is_string($defaultOrder[0])) {
                 return [
                     $this->getColumnIndex($defaultOrder[0]),
@@ -304,25 +340,30 @@ abstract class DataTable {
         return $this;
     }
 
-    public function getSaveState() {
+    public function getSaveState()
+    {
         return $this->saveState;
     }
 
-    public function setSaveState($saveState) {
+    public function setSaveState($saveState)
+    {
         $this->saveState = $saveState;
         return $this;
     }
 
-    public function getTableButtons() {
+    public function getTableButtons()
+    {
         return $this->tableButtons;
     }
 
-    public function setTableButtons($tableButtons) {
+    public function setTableButtons($tableButtons)
+    {
         $this->tableButtons = $tableButtons;
         return $this;
     }
 
-    public function addTableButton(array $options) {
+    public function addTableButton(array $options)
+    {
         $this->tableButtons[] = array_merge([
             'name' => null,
             'type' => null,
@@ -333,7 +374,8 @@ abstract class DataTable {
         ], $options);
     }
 
-    public function getJsInstance() {
+    public function getJsInstance()
+    {
         return "RhinoDataTables['{$this->getId()}']";
     }
 
@@ -351,6 +393,23 @@ abstract class DataTable {
     public function addRowFormatter(callable $rowFormatter)
     {
         $this->rowFormatters[] = $rowFormatter;
+        return $this;
+    }
+
+    public function getMeta()
+    {
+        return $this->meta;
+    }
+
+    public function setMeta(array $meta)
+    {
+        $this->meta = $meta;
+        return $this;
+    }
+
+    public function setMetaValue(string $key, $value)
+    {
+        $this->meta[$key] = $value;
         return $this;
     }
 }
