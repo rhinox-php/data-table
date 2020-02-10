@@ -26,7 +26,36 @@ class SolrDataTable extends DataTable
         $fields = implode(',', $fields);
         $query->setFields($fields);
 
-        $orderBy = [];
+        if ($this->getSearch()) {
+            $query->setQuery($this->getSearch());
+        }
+
+        // @todo pagination
+        // @todo filtered totals?
+        // @todo default copy field
+        // @todo bool drop downs
+
+        foreach ($this->getInputColumns() as $i => $inputColumn) {
+            if (isset($inputColumn['search']['value']) && $inputColumn['search']['value'] && isset($columns[$i])) {
+                $searchValue = $inputColumn['search']['value'];
+                if (strpos($searchValue, '~') !== false) {
+                    // Fuzzy search
+                } elseif (preg_match('/^[0-9.]+$/', $searchValue)) {
+                    // Exact number search
+                } elseif (preg_match('/^[0-9*.]+\s*TO\s*[0-9*.]+$/i', $searchValue)) {
+                    // Range search
+                    $searchValue = '[' . strtoupper($searchValue) . ']';
+                } else {
+                    // Wildcard search
+                    $searchValue = preg_replace('/[^a-z0-9]+/i', '*', $searchValue);
+                    $searchValue = '*' . $searchValue . '*';
+                }
+                $query->createFilterQuery($columns[$i]->getName())->setQuery($columns[$i]->getName() . ':%L1%', [
+                    $searchValue,
+                ]);
+            }
+        }
+
         foreach ($this->order as $columnIndex => $direction) {
             if ($columns[$columnIndex]->isSortable()) {
                 $query->addSort($columns[$columnIndex]->getName(), $direction);
@@ -34,6 +63,7 @@ class SolrDataTable extends DataTable
         }
 
         /** @var \Solarium\QueryType\Select\Result\Document[] */
+        // d($query->getDebug());
         $results = $this->solarium->execute($query);
 
         $total = $results->getNumFound();
