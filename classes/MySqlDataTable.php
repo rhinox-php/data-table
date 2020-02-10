@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\DataTable;
 
 class MySqlDataTable extends DataTable
@@ -11,17 +12,19 @@ class MySqlDataTable extends DataTable
     private $wheres = [];
     private $havings = [];
 
-    public function __construct($pdo, $table) {
+    public function __construct($pdo, $table)
+    {
         $this->pdo = $pdo;
         $this->table = $table;
     }
 
-    public function processSource() {
+    public function processSource()
+    {
         $bindings = [];
         $columns = $this->getColumns();
 
         // Prepare the select column query
-        $selectColumns = implode(','.PHP_EOL, array_map(function ($column) {
+        $selectColumns = implode(',' . PHP_EOL, array_map(function ($column) {
             $as = preg_replace('/[^a-z0-9_]/i', '', $column->getAs());
             return $column->getQuery() . ' AS `' . $as . '`';
         }, $columns));
@@ -29,11 +32,11 @@ class MySqlDataTable extends DataTable
         // Prepare the having search query
         $having = '';
         if ($this->getSearch()) {
-            $havingColumns = implode('OR'.PHP_EOL, array_filter(array_map(function ($column) {
-                return $column->getHaving() ? $column->getAs().' LIKE :searchGlobal ' : null;
+            $havingColumns = implode('OR' . PHP_EOL, array_filter(array_map(function ($column) {
+                return $column->getHaving() ? $column->getAs() . ' LIKE :searchGlobal ' : null;
             }, $columns)));
             $having = "HAVING ($havingColumns)";
-            $bindings[':searchGlobal'] = '%'.$this->getSearch().'%';
+            $bindings[':searchGlobal'] = '%' . $this->getSearch() . '%';
         }
         $columnHaving = [];
         foreach ($this->getInputColumns() as $i => $inputColumn) {
@@ -45,7 +48,7 @@ class MySqlDataTable extends DataTable
                     $bindings[':search' . ($i + 100)] = str_replace('*', '%', $inputColumn['search']['value']);
                 } else {
                     $columnHaving[] = '(' . $columns[$i]->getHaving() . ' LIKE :search' . ($i + 100) . ')';
-                    $bindings[':search' . ($i + 100)] = '%'.$inputColumn['search']['value'].'%';
+                    $bindings[':search' . ($i + 100)] = '%' . $inputColumn['search']['value'] . '%';
                 }
             }
         }
@@ -141,6 +144,7 @@ class MySqlDataTable extends DataTable
 
         // Fetch the results
         $data = $statement->fetchAll(\PDO::FETCH_NUM);
+        d($data);
         $this->setData($data);
 
         // Get the total results
@@ -151,11 +155,13 @@ class MySqlDataTable extends DataTable
         $this->setRecordsFiltered($total);
     }
 
-    public function getTable() {
+    public function getTable()
+    {
         return $this->table;
     }
 
-    public function addColumn($name, $index = null) {
+    public function addColumn($name, $index = null)
+    {
         $column = new MySqlColumn($name, $this);
         if ($index !== null) {
             array_splice($this->columns, $index, 0, $column);
@@ -165,33 +171,39 @@ class MySqlDataTable extends DataTable
         return $column;
     }
 
-    public function insertColumn($name, $format, $position = null) {
+    public function insertColumn($name, $format, $position = null)
+    {
         return $this->spliceColumn(new MySqlColumnInsert($name, $format), $position);
     }
 
-    public function addJoin($join) {
+    public function addJoin($join)
+    {
         $this->joins[] = $join;
     }
 
-    public function addGroupBy($groupBy) {
+    public function addGroupBy($groupBy)
+    {
         $this->groupBys[] = $groupBy;
     }
 
-    public function addWhere($sql, array $bindings = []) {
+    public function addWhere($sql, array $bindings = [])
+    {
         $this->wheres[] = [
             'sql' => $sql,
             'bindings' => $bindings,
         ];
     }
 
-    public function addHaving($sql, array $bindings = []) {
+    public function addHaving($sql, array $bindings = [])
+    {
         $this->havings[] = [
             'sql' => $sql,
             'bindings' => $bindings,
         ];
     }
 
-    public function bind($sql, $bindings) {
+    public function bind($sql, $bindings)
+    {
         foreach ($bindings as $key => $value) {
             $bindKey = ':binding' . (1000 + count($this->bindings));
             $sql = str_replace($key, $bindKey, $sql);
@@ -200,13 +212,19 @@ class MySqlDataTable extends DataTable
         return $sql;
     }
 
-    private function debug($sql, $bindings) {
-        $sql = preg_replace_callback('/:[a-z0-9]+/', function($matches) use($bindings) {
+    private function debug($sql, $bindings)
+    {
+        $sql = preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
             if (isset($bindings[$matches[0]])) {
                 return "'" . addslashes($bindings[$matches[0]]) . "'";
             }
             return $matches[0];
         }, $sql);
         dump($sql, $bindings);
+    }
+
+    public function getIdHash(): array
+    {
+        return [$this->getTable()];
     }
 }

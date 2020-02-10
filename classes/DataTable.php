@@ -1,4 +1,5 @@
 <?php
+
 namespace Rhino\DataTable;
 
 abstract class DataTable
@@ -157,15 +158,18 @@ abstract class DataTable
     public function getId()
     {
         if (!$this->id) {
-            $hash = [
-                $this->getTable(),
-            ];
+            $hash = $this->getIdHash();
             foreach ($this->getColumns() as $column) {
                 $hash[] = $column->getName();
             }
             $this->id = 'datatable-' . md5(implode(':', $hash));
         }
         return $this->id;
+    }
+
+    public function getIdHash(): array
+    {
+        return [];
     }
 
     public function setId($id)
