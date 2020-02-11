@@ -64,28 +64,171 @@ class Column
         return $this;
     }
 
-    public function format($column, $row, $type)
+    public function format($value, $row, $type)
     {
+        $preset = $this->getPreset();
+        switch ($preset['preset']) {
+            case 'human':
+                $data = explode(',', $value);
+                array_walk($data, function (&$value) {
+                    $value = $this->humanise($value);
+                });
+                $data = array_filter($data);
+                $value = htmlspecialchars(implode(', ', $data));
+                break;
+
+            case 'group':
+                $data = explode(',', $value);
+                $data = array_filter($data);
+                $sliced = false;
+                if ($preset['options']) {
+                    if (count($data) > $preset['options']) {
+                        $data = array_slice($data, 0, $preset['options']);
+                        $sliced = true;
+                    }
+                }
+                $value = htmlspecialchars(implode(', ', $data));
+                if ($sliced) {
+                    $value .= '...';
+                }
+                break;
+
+            case 'link':
+                if ($type == 'html' && $value) {
+                    $url = preg_replace_callback('/{(.*?)}/', function ($matches) use ($row) {
+                        if (isset($row[$matches[1]])) {
+                            return $row[$matches[1]];
+                        }
+                        return $matches[1];
+                    }, $preset['options']);
+                    $value = '<a href="' . $url . '">' . htmlspecialchars($value) . '</a>';
+                }
+                break;
+
+            case 'groupLink':
+                $data = explode(',', $value);
+                if ($type == 'html' && $value) {
+                    array_walk($data, function (&$value) use ($preset) {
+                        $url = str_replace('{value}', $value, $preset['options']);
+                        $value = '<a href="' . $url . '">' . htmlspecialchars($value) . '</a>';
+                    });
+                }
+                $data = array_filter($data);
+                $value = implode(', ', $data);
+                break;
+
+            case 'prefix':
+                if ($value !== null && $preset['options']['prefix'] !== null) {
+                    $value = $preset['options']['prefix'] . $value;
+                }
+                break;
+
+            case 'suffix':
+                if ($value !== null && $preset['options']['suffix'] !== null) {
+                    $value = $value . $preset['options']['suffix'];
+                }
+                break;
+
+            case 'length':
+                if ($value !== null && $preset['options']['unit'] !== null) {
+                    $unit = new \PhpUnitsOfMeasure\PhysicalQuantity\Length($value, 'mm');
+                    $value = $unit->toUnit($preset['options']['unit']);
+                    if ($preset['options']['round'] !== null) {
+                        $value = number_format($value, 1);
+                    }
+                    if ($preset['options']['suffix'] !== null) {
+                        $value .= $preset['options']['suffix'];
+                    }
+                }
+                break;
+
+            case 'money':
+                if ($value !== null) {
+                    $value = '$ ' . number_format($value ?: 0, 2);
+                }
+                break;
+
+            case 'percent':
+                if ($value !== null) {
+                    $value = round($value) . ' %';
+                }
+                break;
+
+            case 'trim':
+            case 'trimHtml':
+                // @todo show more link
+                if (strlen($value) > 100) {
+                    $value = htmlspecialchars(substr($value, 0, 100)) . '...';
+                } else {
+                    $value = htmlspecialchars($value);
+                }
+                break;
+
+            case 'bytes':
+                if ($value !== null) {
+                    // @todo fix column filtering
+                    $precision = 2;
+                    $units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+                    $pow = floor(($value ? log($value) : 0) / log(1024));
+                    $pow = min($pow, count($units) - 1);
+                    $value /= pow(1024, $pow);
+                    $value = round($value, $precision) . ' ' . $units[$pow];
+                }
+                break;
+
+            case 'enum':
+                if ($value !== null) {
+                    // @todo fix column filtering
+                    $value = $preset['options'][$value] ?? $value;
+                }
+                break;
+
+            case 'date':
+                if ($value) {
+                    try {
+                        $date = new \DateTimeImmutable($value, new \DateTimeZone('UTC'));
+                        $value = $date->format($preset['options']['format'] ?? 'Y-m-d');
+                    } catch (\Exception $exception) {
+                    }
+                }
+                break;
+
+            case 'dateTime':
+                if ($value) {
+                    try {
+                        $date = new \DateTimeImmutable($value, new \DateTimeZone('UTC'));
+                        if (isset($preset['options']['timeZone'])) {
+                            $date->setTimezone($preset['options']['timeZone']);
+                        }
+                        $value = $date->format($preset['options']['format'] ?? 'Y-m-d H:i:s');
+                    } catch (\Exception $exception) {
+                    }
+                }
+                break;
+
+            case 'html':
+                break;
+
+            default:
+                $preset = null;
+                break;
+        }
         $formatter = $this->getFormat();
         if ($formatter) {
-            $result = $formatter($column, $row, $type);
-            if (is_array($result)) {
-                $result = implode('', $result);
-            } else {
-                if ($result instanceof \Generator || $result instanceof \Iterator) {
-                    $result = iterator_to_array($result);
-                }
-                if (is_array($result)) {
-                    $result = implode(' ', $result);
-                }
-                $result = (string) $result;
+            $result = $formatter($value, $row, $type);
+            if ($result instanceof \Generator || $result instanceof \Iterator) {
+                $result = iterator_to_array($result);
             }
+            if (is_array($result)) {
+                $result = implode(' ', $result);
+            }
+            $result = (string) $result;
             return $result;
-        } elseif ($type === 'html') {
-            return htmlspecialchars($column, ENT_QUOTES, 'UTF-8', false);
+        } elseif ($type === 'html' && !$preset) {
+            return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false);
         }
 
-        return $column;
+        return $value;
     }
 
     public function getPreset()
@@ -130,10 +273,6 @@ class Column
                 $this->setFilterDateRange([
                     'timeZone' => $options,
                 ]);
-                break;
-
-            case 'asset':
-                $this->setSearchable(false);
                 break;
 
             case 'jsonArray':

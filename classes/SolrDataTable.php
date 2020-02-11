@@ -39,6 +39,8 @@ class SolrDataTable extends DataTable
                     switch ($preset) {
                         case 'none':
                         case 'array':
+                        case 'trim':
+                        case 'trimHtml':
                             $filters[] = $column->getName() . ':' . $searchValue;
                             break;
 

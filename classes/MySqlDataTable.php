@@ -144,7 +144,6 @@ class MySqlDataTable extends DataTable
 
         // Fetch the results
         $data = $statement->fetchAll(\PDO::FETCH_NUM);
-        d($data);
         $this->setData($data);
 
         // Get the total results
