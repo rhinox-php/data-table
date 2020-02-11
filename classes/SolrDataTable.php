@@ -29,7 +29,40 @@ class SolrDataTable extends DataTable
         $query->setFields($fields);
 
         if ($this->getSearch()) {
-            $query->setQuery($this->getSearch());
+            // @todo escape input
+            $searchValue = $this->formatSearchValue($this->getSearch());
+            $filters = [];
+            foreach ($columns as $column) {
+                if ($column->isSearchable()) {
+                    $preset = $column->getPreset();
+                    $preset = $preset['preset'] ?? 'none';
+                    switch ($preset) {
+                        case 'none':
+                        case 'array':
+                            $filters[] = $column->getName() . ':' . $searchValue;
+                            break;
+
+                        case 'id':
+                        case 'number':
+                        case 'percent':
+                        case 'money':
+                            if (is_numeric($this->getSearch())) {
+                                $filters[] = $column->getName() . ':' . $searchValue;
+                            }
+                            break;
+
+                        case 'bool':
+                            break;
+
+                        case 'date':
+                        case 'dateTime':
+                            break;
+                    }
+                }
+            }
+            $filters = implode(' || ' . PHP_EOL, $filters);
+            // d($filters);
+            $query->setQuery($filters);
         }
 
         // @todo filtered totals?
@@ -114,7 +147,14 @@ class SolrDataTable extends DataTable
 
     private function filterText(SolrColumn $column, string $searchValue, \Solarium\QueryType\Select\Query\Query $query)
     {
-        // Text input filters
+        $searchValue = $this->formatSearchValue($searchValue);
+        $query->createFilterQuery($column->getName())->setQuery($column->getName() . ':%L1%', [
+            $searchValue,
+        ]);
+    }
+
+    private function formatSearchValue(string $searchValue)
+    {
         if (strpos($searchValue, '~') !== false) {
             // Fuzzy search
         } elseif (preg_match('/^[0-9.]+$/', $searchValue)) {
@@ -127,9 +167,7 @@ class SolrDataTable extends DataTable
             $searchValue = preg_replace('/[^a-z0-9]+/i', '*', $searchValue);
             $searchValue = '*' . $searchValue . '*';
         }
-        $query->createFilterQuery($column->getName())->setQuery($column->getName() . ':%L1%', [
-            $searchValue,
-        ]);
+        return $searchValue;
     }
 
     public function addColumn($name, $index = null)

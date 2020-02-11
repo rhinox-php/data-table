@@ -61,13 +61,15 @@
 </div>
 <?php
 $columnDefs = [];
-foreach ($this->getColumns() as $i => $column) {
+$i = 0;
+foreach ($this->getColumns() as $column) {
     $columnDefs[] = [
-        'targets' => $i,
-        'searchable' => $i > 0,
-        'orderable' => $i > 0,
+        'targets' => $i++,
         'data' => $column->getKey(),
+        'searchable' => $column->isSearchable(),
+        'orderable' => $column->isSortable(),
         'visible' => $column->isVisible(),
+        'className' => $column->getClassName(),
     ];
     $searchCols[] = $column->getDefaultColumnFilter() ? [
         'search' => $column->getDefaultColumnFilter(),

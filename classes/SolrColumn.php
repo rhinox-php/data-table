@@ -22,6 +22,10 @@ class SolrColumn extends Column
                     ],
                 ]);
                 break;
+
+            case 'array':
+                $this->setSortable(false);
+                break;
         }
         return parent::setPreset($preset, $options);
     }

@@ -7,6 +7,7 @@ class Column
     protected $name;
     protected $label = null;
     protected $className = '';
+    protected $preset;
     protected $format;
     protected $position;
     protected $exportable = true;
@@ -85,6 +86,11 @@ class Column
         }
 
         return $column;
+    }
+
+    public function getPreset()
+    {
+        return $this->preset;
     }
 
     public function setPreset($preset, $options = null): Column
@@ -181,6 +187,20 @@ class Column
             case 'jsonString':
                 $this->setFormat(function ($value, $row, $type) {
                     return json_decode($value);
+                });
+                break;
+
+            case 'array':
+                $this->setFormat(function ($value, $row, $type) {
+                    if ($value && is_array($value)) {
+                        $result = [];
+                        foreach ($value as $item) {
+                            $result[] = '<li>' . $item . '</li>';
+                        }
+                        natcasesort($result);
+                        return '<ul class="rx-datatable-json-array">' . implode('', $result) . '</ul>';
+                    }
+                    return $value;
                 });
                 break;
         }
