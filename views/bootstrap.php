@@ -211,10 +211,17 @@ foreach ($this->getColumns() as $i => $column) {
             }
             searchDebounce = setTimeout(function() {
                 searchDebounce = null;
-                var value = $(this).find(':input').val();
-                var column = table.column($(this).data('column'));
-                if (column.search() !== value) {
-                    column.search(value);
+                var draw = false;
+                $('#<?= $this->getId(); ?>').closest('.dataTables_wrapper').find('.rx-datatable-col-filter').each(function() {
+                    var value = $(this).find(':input').val();
+                    var column = table.column($(this).data('column'));
+                    if (column.search() !== value) {
+                        column.search(value);
+                        draw = true;
+
+                    }
+                });
+                if (draw) {
                     table.draw();
                 }
             }.bind(this), 500);

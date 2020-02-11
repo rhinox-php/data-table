@@ -6,6 +6,7 @@ class Column
 {
     protected $name;
     protected $label = null;
+    protected $className = '';
     protected $format;
     protected $position;
     protected $exportable = true;
@@ -111,8 +112,18 @@ class Column
                 $this->addClass('rx-datatable-number');
                 break;
 
+            case 'date':
+                $this->addClass('rx-datatable-number');
+                $this->setFilterDateRange([
+                    'timeZone' => $options,
+                ]);
+                break;
+
             case 'dateTime':
                 $this->addClass('rx-datatable-number');
+                $this->setFilterDateRange([
+                    'timeZone' => $options,
+                ]);
                 break;
 
             case 'asset':
@@ -266,6 +277,11 @@ class Column
         return $this;
     }
 
+    public function getFilterDateRange()
+    {
+        return $this->filterDateRange;
+    }
+
     public function hasFilterDateRange()
     {
         return !empty($this->filterDateRange);
@@ -275,5 +291,27 @@ class Column
     {
         $this->filterDateRange = $filterDateRange;
         return $this;
+    }
+
+    public function getClassName()
+    {
+        return $this->className;
+    }
+
+    public function addClass($class)
+    {
+        $this->className .= ' ' . $class;
+        return $this;
+    }
+
+    public function humanise($value)
+    {
+        if ($value == 'id') {
+            return 'ID';
+        }
+        $value = preg_replace('/[^a-z0-9]+/i', ' ', $value);
+        $value = preg_replace('/\bid\b/i', 'ID', $value);
+        $value = ucwords($value);
+        return $value;
     }
 }
