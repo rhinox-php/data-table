@@ -12,4 +12,8 @@ class ColumnInsert extends Column
     public function isSortable() {
         return false;
     }
+
+    public function isSearchable() {
+        return false;
+    }
 }

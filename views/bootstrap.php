@@ -7,16 +7,52 @@
             <?php endforeach; ?>
         </tr>
         <tr>
-            <?php foreach ($this->getColumns() as $i => $column): ?>
-                <?php if ($i === 0): ?>
-                    <td class="rx-datatable-col-filter rx-datatable-col-filter-first">
-                    </td>
-                <?php else: ?>
-                    <td class="rx-datatable-col-filter" data-column="<?= $i; ?>">
-                        <input class="form-control" value="<?= $column->getDefaultColumnFilter(); ?>" />
-                    </td>
-                <?php endif; ?>
-            <?php endforeach; ?>
+            <?php foreach ($this->getColumns() as $columnId => $column): ?>
+                <td class="rx-datatable-col-filter rx-datatable-search-<?= $column->getKey(); ?> <?= $columnId == 0 ? 'rx-datatable-col-filter-first' : ''; ?>" data-column="<?=$columnId;?>">
+                    <?php if ($column->isSearchable()): ?>
+                        <?php if ($column->hasFilterSelect()): ?>
+                            <select class="form-control selectpicker" id="rx-datatable-filter-<?=strtr($column->getName(), '_', '-');?>">
+                                <option value="">Any</option>
+                                <?php foreach ($column->getFilterSelect() as $label => $query): ?>
+                                    <option value="<?=$label;?>"><?=$label;?></option>
+                                <?php endforeach;?>
+                            </select>
+                        <?php elseif ($column->hasFilterDateRange()): ?>
+                            <input class="form-control" type="text" placeholder="Filter <?= $column->getLabel(); ?>" id="rx-datatable-date-range-<?= $columnId ?>" name="rx-datatable-date-range-<?= $columnId ?>" />
+                            <script>
+                                $('input[name="rx-datatable-date-range-<?= $columnId ?>"]').daterangepicker({
+                                    autoUpdateInput: false,
+                                    timePicker: true,
+                                    locale: {
+                                        cancelLabel: 'Clear',
+                                        format: 'YYYY-MM-DD HH:mm',
+                                    },
+                                    ranges: {
+                                        'Today': [moment().startOf('day'), moment().endOf('day')],
+                                        'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                                        'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment().endOf('day')],
+                                        'Last 30 Days': [moment().subtract(29, 'days').startOf('day'), moment().endOf('day')],
+                                        'This Month': [moment().startOf('month').startOf('day'), moment().endOf('month').endOf('day')],
+                                        'Last Month': [moment().subtract(1, 'month').startOf('month').startOf('day'), moment().subtract(1, 'month').endOf('month').endOf('day')],
+                                    },
+                                });
+
+                                $('input[name="rx-datatable-date-range-<?= $columnId ?>"]').on('apply.daterangepicker', function(ev, picker) {
+                                    $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm') + ' to ' + picker.endDate.format('YYYY-MM-DD HH:mm')).trigger('change');
+                                });
+
+                                $('input[name="rx-datatable-date-range-<?= $columnId ?>"]').on('cancel.daterangepicker', function(ev, picker) {
+                                    $(this).val('').trigger('change');
+                                });
+                            </script>
+                        <?php else: ?>
+                            <input class="form-control" placeholder="Filter <?= $column->getLabel(); ?>" />
+                        <?php endif;?>
+                    <?php else: ?>
+                        <input class="form-control" type="hidden" />
+                    <?php endif;?>
+                </td>
+            <?php endforeach;?>
         </tr>
         </thead>
         <tbody>

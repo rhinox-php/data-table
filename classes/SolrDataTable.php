@@ -38,21 +38,30 @@ class SolrDataTable extends DataTable
         foreach ($this->getInputColumns() as $i => $inputColumn) {
             if (isset($inputColumn['search']['value']) && $inputColumn['search']['value'] && isset($columns[$i])) {
                 $searchValue = $inputColumn['search']['value'];
-                if (strpos($searchValue, '~') !== false) {
-                    // Fuzzy search
-                } elseif (preg_match('/^[0-9.]+$/', $searchValue)) {
-                    // Exact number search
-                } elseif (preg_match('/^[0-9*.]+\s*TO\s*[0-9*.]+$/i', $searchValue)) {
-                    // Range search
-                    $searchValue = '[' . strtoupper($searchValue) . ']';
+                if ($columns[$i]->hasFilterSelect()) {
+                    // Select menu filters
+                    $filterSelect = $columns[$i]->getFilterSelect($searchValue);
+                    if ($filterSelect) {
+                        $query->createFilterQuery($columns[$i]->getName())->setQuery($filterSelect['query']);
+                    }
                 } else {
-                    // Wildcard search
-                    $searchValue = preg_replace('/[^a-z0-9]+/i', '*', $searchValue);
-                    $searchValue = '*' . $searchValue . '*';
+                    // Text input filters
+                    if (strpos($searchValue, '~') !== false) {
+                        // Fuzzy search
+                    } elseif (preg_match('/^[0-9.]+$/', $searchValue)) {
+                        // Exact number search
+                    } elseif (preg_match('/^[0-9*.]+\s*TO\s*[0-9*.]+$/i', $searchValue)) {
+                        // Range search
+                        $searchValue = '[' . strtoupper($searchValue) . ']';
+                    } else {
+                        // Wildcard search
+                        $searchValue = preg_replace('/[^a-z0-9]+/i', '*', $searchValue);
+                        $searchValue = '*' . $searchValue . '*';
+                    }
+                    $query->createFilterQuery($columns[$i]->getName())->setQuery($columns[$i]->getName() . ':%L1%', [
+                        $searchValue,
+                    ]);
                 }
-                $query->createFilterQuery($columns[$i]->getName())->setQuery($columns[$i]->getName() . ':%L1%', [
-                    $searchValue,
-                ]);
             }
         }
 

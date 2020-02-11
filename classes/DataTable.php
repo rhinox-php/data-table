@@ -52,6 +52,7 @@ abstract class DataTable
 
     public function process($request, $response)
     {
+        // @todo input data as input
         $this->request = $request;
         $this->response = $response;
         if (!$request->isXmlHttpRequest() && $request->get('csv') === null && $request->get('json') === null) {
@@ -178,6 +179,9 @@ abstract class DataTable
         return $this;
     }
 
+    /**
+     * @return Column[]
+     */
     public function getColumns()
     {
         return $this->columns;
