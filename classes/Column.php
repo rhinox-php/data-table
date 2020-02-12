@@ -270,9 +270,7 @@ class Column
 
             case 'dateTime':
                 $this->addClass('rx-datatable-number');
-                $this->setFilterDateRange([
-                    'timeZone' => $options,
-                ]);
+                $this->setFilterDateRange($options);
                 break;
 
             case 'jsonArray':

@@ -7,7 +7,7 @@ class SolrDataTable extends DataTable
     const SOLR_DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     private $solarium;
-    private $bindings = [];
+    private $filterQueries = [];
 
     public function __construct(\Solarium\Client $solarium)
     {
@@ -89,6 +89,7 @@ class SolrDataTable extends DataTable
                     $timeZone = $filterDateRange['timeZone'];
 
                     if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $searchValue, $matches)) {
+                        // d($matches);
                         $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from'], $timeZone);
                         $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to'], $timeZone);
                     } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2})/', $searchValue, $matches)) {
@@ -116,6 +117,10 @@ class SolrDataTable extends DataTable
                     $this->filterText($column, $searchValue, $query);
                 }
             }
+        }
+
+        foreach ($this->filterQueries as $i => $filterQuery) {
+            $query->createFilterQuery('filter_query_' . $i)->setQuery($filterQuery['filterQuery'], $filterQuery['bindings']);
         }
 
         foreach ($this->order as $columnIndex => $direction) {
@@ -188,50 +193,11 @@ class SolrDataTable extends DataTable
         return $this->spliceColumn(new SolrColumnInsert($name, $format), $position);
     }
 
-    public function addJoin($join)
+    public function addFilterQuery(string $filterQuery, array $bindings = [])
     {
-        $this->joins[] = $join;
-    }
-
-    public function addGroupBy($groupBy)
-    {
-        $this->groupBys[] = $groupBy;
-    }
-
-    public function addWhere($sql, array $bindings = [])
-    {
-        $this->wheres[] = [
-            'sql' => $sql,
+        $this->filterQueries[] = [
+            'filterQuery' => $filterQuery,
             'bindings' => $bindings,
         ];
-    }
-
-    public function addHaving($sql, array $bindings = [])
-    {
-        $this->havings[] = [
-            'sql' => $sql,
-            'bindings' => $bindings,
-        ];
-    }
-
-    public function bind($sql, $bindings)
-    {
-        foreach ($bindings as $key => $value) {
-            $bindKey = ':binding' . (1000 + count($this->bindings));
-            $sql = str_replace($key, $bindKey, $sql);
-            $this->bindings[$bindKey] = $value;
-        }
-        return $sql;
-    }
-
-    private function debug($sql, $bindings)
-    {
-        $sql = preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
-            if (isset($bindings[$matches[0]])) {
-                return "'" . addslashes($bindings[$matches[0]]) . "'";
-            }
-            return $matches[0];
-        }, $sql);
-        dump($sql, $bindings);
     }
 }
