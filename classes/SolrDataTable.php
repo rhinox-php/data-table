@@ -2,6 +2,8 @@
 
 namespace Rhino\DataTable;
 
+use Solarium\Core\Query\Helper;
+
 class SolrDataTable extends DataTable
 {
     const SOLR_DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
@@ -16,11 +18,11 @@ class SolrDataTable extends DataTable
 
     public function processSource()
     {
-        $bindings = [];
         $columns = $this->getColumns();
 
         /** @var \Solarium\QueryType\Select\Query\Query */
         $query = $this->solarium->createQuery($this->solarium::QUERY_SELECT);
+
         $fields = [];
         foreach ($columns as $column) {
             $fields[] = $column->getName();
@@ -29,11 +31,14 @@ class SolrDataTable extends DataTable
         $query->setFields($fields);
 
         if ($this->getSearch()) {
-            // @todo escape input
-            $searchValue = $this->formatSearchValue($this->getSearch());
+            $complex = false;
             $filters = [];
             foreach ($columns as $column) {
                 if ($column->isSearchable()) {
+                    [$searchValue, $columnComplex] = $this->formatSearchValue($column, $this->getSearch(), $query->getHelper());
+                    if ($columnComplex) {
+                        $complex = true;
+                    }
                     $preset = $column->getPreset();
                     $preset = $preset['preset'] ?? 'none';
                     switch ($preset) {
@@ -41,7 +46,7 @@ class SolrDataTable extends DataTable
                         case 'array':
                         case 'trim':
                         case 'trimHtml':
-                            $filters[] = $column->getName() . ':' . $searchValue;
+                            $filters[] = $searchValue;
                             break;
 
                         case 'id':
@@ -49,7 +54,7 @@ class SolrDataTable extends DataTable
                         case 'percent':
                         case 'money':
                             if (is_numeric($this->getSearch())) {
-                                $filters[] = $column->getName() . ':' . $searchValue;
+                                $filters[] = $searchValue;
                             }
                             break;
 
@@ -62,8 +67,10 @@ class SolrDataTable extends DataTable
                     }
                 }
             }
-            $filters = implode(' || ' . PHP_EOL, $filters);
-            // d($filters);
+            $filters = implode(' || ', $filters);
+            if ($complex) {
+                $filters = '{!complexphrase inOrder=false}' . $filters;
+            }
             $query->setQuery($filters);
         }
 
@@ -154,27 +161,44 @@ class SolrDataTable extends DataTable
 
     private function filterText(SolrColumn $column, string $searchValue, \Solarium\QueryType\Select\Query\Query $query)
     {
-        $searchValue = $this->formatSearchValue($searchValue);
-        $query->createFilterQuery($column->getName())->setQuery($column->getName() . ':%L1%', [
-            $searchValue,
-        ]);
+        [$searchValue, $complex] = $this->formatSearchValue($column, $searchValue, $query->getHelper());
+        if ($complex) {
+            $searchValue = '{!complexphrase inOrder=false}' . $searchValue;
+        }
+        // d($searchValue);
+        $query->createFilterQuery($column->getName())->setQuery($searchValue);
     }
 
-    private function formatSearchValue(string $searchValue)
+    private function formatSearchValue(SolrColumn $column, string $searchValue, Helper $helper)
     {
-        if (strpos($searchValue, '~') !== false) {
+        $searchValue = trim($searchValue);
+        if (preg_match('/^[a-z0-9]+~[0-9]*$/i', $searchValue)) {
             // Fuzzy search
+            $searchValue = $column->getName() . ':' . $searchValue;
+            return [$searchValue, false];
         } elseif (preg_match('/^[0-9.]+$/', $searchValue)) {
             // Exact number search
+            $searchValue = $column->getName() . ':' . $searchValue;
+            return [$searchValue, false];
         } elseif (preg_match('/^[0-9*.]+\s*TO\s*[0-9*.]+$/i', $searchValue)) {
             // Range search
             $searchValue = '[' . strtoupper($searchValue) . ']';
-        } else {
-            // Wildcard search
-            $searchValue = preg_replace('/[^a-z0-9]+/i', '*', $searchValue);
-            $searchValue = '*' . $searchValue . '*';
+            $searchValue = $column->getName() . ':' . $searchValue;
+            return [$searchValue, false];
         }
-        return $searchValue;
+
+        $searchValues = [];
+
+        // Term
+        $searchValues[] = $column->getName() . ':' . '*' . $helper->escapeTerm($searchValue) . '*';
+
+        // Phrase
+        $searchValues[] = $column->getName() . ':' . preg_replace('/\s+\*+\s+/', ' ', $helper->escapePhrase($searchValue));
+        $searchValues[] = $column->getName() . ':' . preg_replace('/\s+\*+\s+/', ' ', $helper->escapePhrase('*' . $searchValue . '*'));
+
+        $searchValue = implode(' || ', $searchValues);
+// d($searchValue);
+        return [$searchValue, true];
     }
 
     public function addColumn($name, $index = null)
