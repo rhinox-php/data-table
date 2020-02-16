@@ -104,12 +104,20 @@ foreach ($this->getColumns() as $column) {
             ajax: {
                 url: '',
                 type: 'post',
+                complete: (response) => {
+                    if (response.status == 200) {
+                        $('#<?= $this->getId(); ?>')
+                            .closest('.rx-datatable-wrapper')
+                            .find('.rx-datatable-error')
+                            .html('');
+                    }
+                },
                 error: (xhr, error, thrown) => {
                     $('#<?= $this->getId(); ?>')
                         .closest('.rx-datatable-wrapper')
                         .find('.rx-datatable-error')
                         .html('')
-                        .append('<div class="alert alert-danger">Error processing table <a href="#" onclick="$(\'.rx-datatable-error-details\').show()">(show)</div></div>')
+                        .append('<div class="alert alert-danger">Error processing table <a href="#" onclick="$(\'.rx-datatable-error-details\').toggle()">(show)</div></div>')
                         .append('<div style="display: none" class="rx-datatable-error-details">' + xhr.responseText + '</div>');
                     $('.dataTables_processing').hide();
                 },
