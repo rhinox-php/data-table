@@ -8,8 +8,8 @@ class MySqlColumn extends Column {
     private $searchWhere;
     private $orderQuery;
 
-    public function __construct($name, $table = null) {
-        parent::__construct($name);
+    public function __construct(DataTable $dataTable, $name, $table = null) {
+        parent::__construct($dataTable, $name);
         $this->table = $table;
         $this->setQuery($table ? $table->getTable() . '.' . $name : $name);
         $this->setHaving($name);

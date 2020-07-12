@@ -6,7 +6,9 @@
             "email": "petah.p@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+        "symfony/http-foundation": "^5.1"
+    },
     "autoload": {
         "psr-4": {
             "Rhino\\DataTable\\": "classes/"
@@ -14,5 +16,8 @@
         "files": [
             "include.php"
         ]
+    },
+    "require-dev": {
+        "phan/phan": "^3.0"
     }
 }

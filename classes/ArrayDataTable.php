@@ -5,7 +5,7 @@ class ArrayDataTable extends DataTable
 {
     protected $array = [];
 
-    public function processSource()
+    public function processSource(InputData $input)
     {
         $data = $this->getArray();
         $this->setRecordsTotal(count($data));

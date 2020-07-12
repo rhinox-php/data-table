@@ -4,9 +4,10 @@ namespace Rhino\DataTable;
 
 class Column
 {
-    protected $name;
-    protected $label = null;
-    protected $className = '';
+    protected DataTable $dataTable;
+    protected string $name;
+    protected $header = null;
+    protected string $className = '';
     protected $preset;
     protected $format;
     protected $position;
@@ -19,8 +20,9 @@ class Column
     protected $filterSelect = [];
     protected $filterDateRange = [];
 
-    public function __construct($name)
+    public function __construct(DataTable $dataTable, $name)
     {
+        $this->dataTable = $dataTable;
         $this->name = $name;
     }
 
@@ -41,14 +43,14 @@ class Column
         return str_replace('_', '', lcfirst(ucwords($this->getName(), '_')));
     }
 
-    public function getLabel()
+    public function getHeader()
     {
-        return $this->label !== null ? $this->label : $this->humanise($this->getName());
+        return $this->header !== null ? $this->header : $this->humanise($this->getName());
     }
 
-    public function setLabel($label)
+    public function setHeader($header)
     {
-        $this->label = $label;
+        $this->header = $header;
         return $this;
     }
 
@@ -67,7 +69,7 @@ class Column
     public function format($value, $row, $type)
     {
         $preset = $this->getPreset();
-        switch ($preset['preset']) {
+        switch ($preset['preset'] ?? null) {
             case 'human':
                 $data = explode(',', $value);
                 array_walk($data, function (&$value) {
@@ -252,12 +254,12 @@ class Column
                 break;
 
             case 'created':
-                $this->setLabel('Created');
+                $this->setHeader('Created');
                 $this->addClass('rx-datatable-number');
                 break;
 
             case 'updated':
-                $this->setLabel('Updated');
+                $this->setHeader('Updated');
                 $this->addClass('rx-datatable-number');
                 break;
 
@@ -358,11 +360,6 @@ class Column
         $this->position = $position;
 
         return $this;
-    }
-
-    public function isExportable()
-    {
-        return $this->exportable;
     }
 
     public function setExportable($exportable)
@@ -470,5 +467,21 @@ class Column
         $value = preg_replace('/\bid\b/i', 'ID', $value);
         $value = ucwords($value);
         return $value;
+    }
+
+    public function isExportable()
+    {
+        return true;
+    }
+
+    public function getFooter()
+    {
+        return $this->footer;
+    }
+
+    public function setFooter($footerType, $footerOptions = [])
+    {
+        $this->footer = [$footerType, $footerOptions];
+        return $this;
     }
 }

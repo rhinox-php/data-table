@@ -16,7 +16,7 @@ class SolrDataTable extends DataTable
         $this->solarium = $solarium;
     }
 
-    public function processSource()
+    public function processSource(InputData $input)
     {
         $columns = $this->getColumns();
 

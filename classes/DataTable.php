@@ -2,10 +2,15 @@
 
 namespace Rhino\DataTable;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 abstract class DataTable
 {
-    protected $request;
-    protected $response;
+    protected Request $request;
+    protected Response $response;
     protected $id;
     protected $columns = [];
     protected $data;
@@ -18,65 +23,89 @@ abstract class DataTable
     protected $inputColumns = [];
     protected $order = [];
     protected $defaultOrder = [
-        [1, 'desc'],
+        // [1, 'desc'],
     ];
-    protected $saveState = true;
     protected $tableButtons = [];
     protected $rowFormatters = [];
     protected $meta = [];
+    protected string $url = '';
+    protected $saveState = true;
+    protected $rememberSettingsEnabled = true;
+    protected $exportFileName = 'export';
+    protected $hasAction = false;
+    protected $hasSelect = false;
+
+    public function sendResponse()
+    {
+        $response = $this->getResponse();
+        $response->send();
+        // if ($response instanceof \Closure) {
+        //     $response();
+        //     return;
+        // }
+        // echo json_encode($response);
+    }
 
     public function render()
     {
         ob_start();
+        $dataTable = $this;
         require \Rhino\DataTable\ROOT . '/views/bootstrap.php';
         return ob_get_clean();
     }
 
-    public function createButton(array $options)
+    // public function createButton(array $options)
+    // {
+    //     $options = new \Rhino\Core\InputData($options);
+    //     $confirmation = '';
+    //     if ($options->string('confirm')) {
+    //         $confirmation = ' onclick="if (!confirm(\'' . htmlspecialchars($options->string('confirm'), ENT_QUOTES) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
+    //     }
+    //     if ($options->bool('action')) {
+    //         return '
+    //             <form action="' . $options->string('action') . '" method="post">
+    //                 <button class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</button>
+    //             </form>
+    //         ';
+    //     } else {
+    //         return '<a href="' . $options->string('href') . '" class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</a>';
+    //     }
+    // }
+
+    public static function createButton()
     {
-        $options = new \Rhino\Core\InputData($options);
-        $confirmation = '';
-        if ($options->string('confirm')) {
-            $confirmation = ' onclick="if (!confirm(\'' . htmlspecialchars($options->string('confirm'), ENT_QUOTES) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
-        }
-        if ($options->bool('action')) {
-            return '
-                <form action="' . $options->string('action') . '" method="post">
-                    <button class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</button>
-                </form>
-            ';
-        } else {
-            return '<a href="' . $options->string('href') . '" class="btn btn-xs btn-' . $options->string('style') . '"' . $confirmation . '>' . $options->string('text') . '</a>';
-        }
+        return new Button();
     }
 
-    public function process($request, $response)
+    public static function createDropdown(array $buttons)
+    {
+        return new Dropdown($buttons);
+    }
+
+    public function process($request)
     {
         // @todo input data as input
+        $input = new InputData(array_merge($request->query->all(), $request->request->all()));
         $this->request = $request;
-        $this->response = $response;
-        if (!$request->isXmlHttpRequest() && $request->get('csv') === null && $request->get('json') === null) {
+        if (!$request->isXmlHttpRequest() && !$input->bool('csv') && !$input->bool('json')) {
             return false;
         }
         if ($request->get('csv') === null) {
-            $this->setStart($request->get('start') ?: 0);
-            $this->setLength($request->get('length') ?: 10);
+            $this->setStart($input->int('start') ?: 0);
+            $this->setLength($input->int('length') ?: 10);
         } else {
             $this->setStart(0);
+            // @todo allow setting custom default limit
             $this->setLength(10000);
         }
-        $search = $request->get('search');
-        $this->setSearch(isset($search['value']) ? $search['value'] : null);
-        $this->setInputColumns($request->get('columns') ?: []);
-        $orders = $request->get('order');
-        if (is_array($orders)) {
-            foreach ($orders as $order) {
-                if (isset($order['column']) && isset($order['dir'])) {
-                    $this->addOrder($order['column'], $order['dir']);
-                }
+        $this->setSearch($input->string('search.value', null));
+        $this->setInputColumns($input->arr('columns'));
+        foreach ($input->arr('order') as $order) {
+            if ($order->string('column') !== '' && $order->string('dir')) {
+                $this->addOrder($order->string('column'), $order->string('dir'));
             }
         }
-        $this->processSource();
+        $this->processSource($input);
 
         if ($request->get('csv') === null) {
             return $this->sendJson($request);
@@ -85,7 +114,7 @@ abstract class DataTable
         }
     }
 
-    protected function sendJson($request)
+    protected function sendJson(Request $request)
     {
         $data = $this->getData();
         $result = [];
@@ -105,7 +134,7 @@ abstract class DataTable
                 $result[$r][$column->getKey()] = $column->format($row[$c], $indexedRow, 'html');
             }
         }
-        $this->response->json([
+        $this->response = new JsonResponse([
             'draw' => (int) $request->get('draw'),
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
@@ -115,14 +144,22 @@ abstract class DataTable
         return true;
     }
 
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
     protected function sendCsv()
     {
-        $this->response->callback(function () {
+        $this->response = new StreamedResponse(null, 200, [
+            'Content-Type' => 'application/csv',
+            'Content-Disposition' => 'attachment; filename=' . $this->getExportFileName() . '.csv',
+        ]);
+        $this->response->setCache([
+            'no_cache' => true,
+        ]);
+        $this->response->setCallback(function () {
             $data = $this->getData();
-
-            header('Content-Type: application/csv');
-            header('Content-Disposition: attachment; filename=export.csv');
-            header('Pragma: no-cache');
 
             $columns = array_values($this->getColumns());
 
@@ -130,13 +167,12 @@ abstract class DataTable
             $outputRow = [];
             foreach ($columns as $c => $column) {
                 if ($column->isExportable()) {
-                    $outputRow[$c] = $column->getLabel();
+                    $outputRow[$c] = $column->getHeader();
                 }
             }
             fputcsv($outstream, $outputRow);
 
-            $result = [];
-            foreach ($data as $r => $row) {
+            foreach ($data as $row) {
                 $outputRow = [];
                 $indexedRow = [];
                 foreach ($columns as $c => $column) {
@@ -333,8 +369,21 @@ abstract class DataTable
         return $this->defaultOrder;
     }
 
-    public function setDefaultOrder(array $defaultOrder)
+    public function setDefaultOrder(string $column, string $direction)
     {
+        if ($direction !== 'asc' && $direction !== 'desc') {
+            throw new Exception\ConfigException('Invalid default order direction, must be "asc" or "desc", got: ' . $direction);
+        }
+        $this->defaultOrder = [[
+            $this->getColumnIndex($column),
+            $direction,
+        ]];
+        return $this;
+    }
+
+    public function setDefaultOrderMulti(array $defaultOrder)
+    {
+        // @todo implement me
         $defaultOrder = array_map(function ($defaultOrder) {
             if (is_string($defaultOrder[0])) {
                 return [
@@ -419,5 +468,43 @@ abstract class DataTable
     {
         $this->meta[$key] = $value;
         return $this;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(string $url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+    public function getExportFileName(): string
+    {
+        return $this->exportFileName;
+    }
+
+    public function setExportFileName(string $exportFileName)
+    {
+        $this->exportFileName = $exportFileName;
+        return $this;
+    }
+
+    public function addSelect(string $checkboxName = 'row')
+    {
+        return $this->columns[] = new Select($this, 'select' . count($this->columns), $checkboxName);
+    }
+
+    public function addAction($callback): Action
+    {
+        $action = new Action($this, $callback, 'action' . count($this->columns));
+        if (!$this->hasAction) {
+            $this->hasAction = true;
+        }
+        $action->setHeader('');
+        $action->addClass('j-data-table-nowrap');
+        return $this->columns[] = $action;
     }
 }

@@ -1,0 +1,1 @@
+Doesn't work with emulate prepares enabled as if there is an error in the SQL statement it is not reported. An empty result set is returned.
