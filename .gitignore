@@ -1,3 +1,4 @@
 vendor
 .phan
 .vscode
+.test-output
