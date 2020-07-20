@@ -2,16 +2,14 @@
 namespace Rhino\DataTable;
 
 class MySqlColumn extends Column {
-    private $table;
     private $query;
     private $having;
     private $searchWhere;
     private $orderQuery;
 
-    public function __construct(DataTable $dataTable, $name, $table = null) {
+    public function __construct(MySqlDataTable $dataTable, string $name) {
         parent::__construct($dataTable, $name);
-        $this->table = $table;
-        $this->setQuery($table ? $table->getTable() . '.' . $name : $name);
+        $this->setQuery($dataTable ? $dataTable->getTable() . '.' . $name : $name);
         $this->setHaving($name);
     }
 
@@ -19,8 +17,8 @@ class MySqlColumn extends Column {
         return $this->query;
     }
 
-    public function setQuery($query, array $bindings = []) {
-        $this->query = $this->table->bind($query, $bindings);
+    public function setQuery(string $query, array $bindings = []): self {
+        $this->query = $this->dataTable->bind($query, $bindings);
         return $this;
     }
 

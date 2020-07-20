@@ -117,15 +117,8 @@ class ArrayDataTable extends DataTable
         return $this;
     }
 
-    // @todo can we move this to the base class?
     public function addColumn(string $name, int $index = null): ArrayColumn
     {
-        $column = new ArrayColumn($this, $name);
-        if ($index !== null) {
-            array_splice($this->columns, $index, 1, [$column]);
-        } else {
-            $this->columns[] = $column;
-        }
-        return $column;
+        return $this->spliceColumn(new ArrayColumn($this, $name), $index);
     }
 }

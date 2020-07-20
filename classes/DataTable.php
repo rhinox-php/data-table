@@ -267,12 +267,12 @@ abstract class DataTable
         return null;
     }
 
-    protected function spliceColumn($column, $offset = null)
+    protected function spliceColumn($column, ?int $index = null)
     {
-        if ($offset === null) {
+        if ($index === null) {
             $this->columns[] = $column;
         } else {
-            array_splice($this->columns, $offset, 0, [$column]);
+            array_splice($this->columns, $index, 0, [$column]);
         }
         return $column;
     }

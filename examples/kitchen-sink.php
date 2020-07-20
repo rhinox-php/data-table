@@ -35,6 +35,9 @@ $dataTable->addAction(function ($row) use ($dataTable) {
 
 $dataTable->addColumn('id');
 $dataTable->addColumn('name');
+$dataTable->insertColumn('random', function() {
+    return rand(0, 100);
+});
 $dataTable->addColumn('product_code');
 $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity)')->setHeader('Country Name');
 $dataTable->addColumn('created_at')->setFilterDateRange(true);

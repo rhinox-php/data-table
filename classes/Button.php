@@ -64,6 +64,7 @@ class Button
             foreach ($this->getData() as $key => $value) {
                 $inputs[] = '<input type="hidden" name="' . $key . '" value="' . $value . '" />';
             }
+            // @todo move csrf token to laravel specific data table
             return '
                 <form action="' . $this->getUrl() . '" method="post" ' . $target . ' class="j-data-table-button-form">
                     <input type="hidden" name="_token" value="' . $this->csrfToken . '" />

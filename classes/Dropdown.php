@@ -17,14 +17,14 @@ class Dropdown
             $buttons .= $button->addClass('dropdown-item')->render();
         }
         $id = uniqid('uid-');
-        $result = "
-            <div class='dropdown'>
-                <button class='btn btn-primary btn-sm j-btn-data-table dropdown-toggle' type='button' id='$id' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>
-                <div class='dropdown-menu' aria-labelledby='$id'>
+        $result = <<<HTML
+            <div class="dropdown">
+                <button class="btn btn-primary btn-sm j-btn-data-table dropdown-toggle" type="button" id="$id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                <div class="dropdown-menu" aria-labelledby="$id">
                     $buttons
                 </div>
             </div>
-        ";
+        HTML;
         return $result;
     }
 
