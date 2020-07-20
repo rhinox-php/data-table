@@ -228,6 +228,7 @@ class MySqlDataTable extends DataTable
         return $this->table;
     }
 
+    // @todo can we move this to the base class?
     public function addColumn($name, $index = null)
     {
         $column = new MySqlColumn($this, $name, $this);

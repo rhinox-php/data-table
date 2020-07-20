@@ -35,6 +35,13 @@ abstract class DataTable
     protected $hasAction = false;
     protected $hasSelect = false;
 
+    /**
+     * Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables (Ajax requests are asynchronous and thus can return out of sequence). This is used as part of the draw return parameter.
+     *
+     * @see https://datatables.net/manual/server-side
+     */
+    private ?int $drawCounter = null;
+
     public function sendResponse()
     {
         $response = $this->getResponse();
@@ -86,6 +93,7 @@ abstract class DataTable
     {
         // @todo input data as input
         $input = new InputData(array_merge($request->query->all(), $request->request->all()));
+        $this->setDrawCounter($input->int('draw'));
         $this->request = $request;
         if (!$request->isXmlHttpRequest() && !$input->bool('csv') && !$input->bool('json')) {
             return false;
@@ -108,40 +116,50 @@ abstract class DataTable
         $this->processSource($input);
 
         if ($request->get('csv') === null) {
-            return $this->sendJson($request);
+            return $this->sendJson();
         } else {
             return $this->sendCsv();
         }
     }
 
-    protected function sendJson(Request $request)
+    protected function sendJson(): bool
+    {
+        $this->response = new JsonResponse($this->getJsonResponseData());
+        return true;
+    }
+
+    public function getJsonResponseData(): array
     {
         $data = $this->getData();
         $result = [];
         $columns = array_values($this->getColumns());
         foreach ($data as $r => $row) {
+            // Get row data indexed by column name
             $indexedRow = [];
             foreach ($columns as $c => $column) {
                 $indexedRow[$column->getName()] = $row[$c];
             }
-            foreach ($this->getRowFormatters() as $rowFormmater) {
-                $format = $rowFormmater($indexedRow, 'html');
+
+            // Run row formatters
+            foreach ($this->getRowFormatters() as $rowFormatter) {
+                $format = $rowFormatter($indexedRow, 'html');
                 if ($format['class']) {
                     $result[$r]['DT_RowClass'] = $format['class'];
                 }
             }
+
+            // Run column formatters
             foreach ($columns as $c => $column) {
                 $result[$r][$column->getKey()] = $column->format($row[$c], $indexedRow, 'html');
             }
         }
-        $this->response = new JsonResponse([
-            'draw' => (int) $request->get('draw'),
+        return [
+            'draw' => $this->getDrawCounter(),
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
             'data' => $result,
             'meta' => $this->getMeta(),
-        ]);
-        return true;
+        ];
     }
 
     public function getResponse()
@@ -506,5 +524,16 @@ abstract class DataTable
         $action->setHeader('');
         $action->addClass('j-data-table-nowrap');
         return $this->columns[] = $action;
+    }
+
+    public function getDrawCounter(): int
+    {
+        return $this->drawCounter;
+    }
+
+    public function setDrawCounter(int $drawCounter)
+    {
+        $this->drawCounter = $drawCounter;
+        return $this;
     }
 }
