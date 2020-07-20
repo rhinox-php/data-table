@@ -229,11 +229,11 @@ class MySqlDataTable extends DataTable
     }
 
     // @todo can we move this to the base class?
-    public function addColumn($name, $index = null)
+    public function addColumn(string $name, int $index = null): MySqlColumn
     {
-        $column = new MySqlColumn($this, $name, $this);
+        $column = new MySqlColumn($this, $name);
         if ($index !== null) {
-            array_splice($this->columns, $index, 0, $column);
+            array_splice($this->columns, $index, 1, [$column]);
         } else {
             $this->columns[] = $column;
         }

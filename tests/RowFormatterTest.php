@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RowFormatterTest extends \PHPUnit\Framework\TestCase
 {
-    public function testConstructor(): void
+    public function testRowFormatter(): void
     {
         $data = [
             [1, 'red'],
