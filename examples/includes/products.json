@@ -1,0 +1,242 @@
+[
+    {
+        "name": "MacBook Pro (13-inch, Early 2011)",
+        "code": "mbp_13_early_11",
+        "description": "2.3 GHz Dual-Core Intel Core i5, 320 GB hard disk, 4 GB of RAM",
+        "unit_price": "1199",
+        "category": "laptop",
+        "created_at": "February 2011"
+    },
+    {
+        "name": "MacBook Pro (13-inch, Late 2011)",
+        "code": "mbp_13_late_11",
+        "description": "2.4 GHz Dual-Core Intel Core i5, 500 GB hard disk, 4 GB of RAM",
+        "unit_price": "1199",
+        "category": "laptop",
+        "created_at": "October 2011"
+    },
+    {
+        "name": "MacBook Pro (13-inch, Mid 2009)",
+        "code": "mbp_13_mid_09",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "June 2009"
+    },
+    {
+        "name": "MacBook Pro (13-inch, Mid 2010)",
+        "code": "mbp_13_mid_10",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "April 2010"
+    },
+    {
+        "name": "MacBook Pro (13-inch, Mid 2012)",
+        "code": "mbp_13_mid_12",
+        "description": "2.5 GHz Dual-Core Intel Core i5, 500 GB hard disk, 4 GB of RAM",
+        "unit_price": "1199",
+        "category": "laptop",
+        "created_at": "June 2012"
+    },
+    {
+        "name": "MacBook Pro (Retina, 13-inch, Early 2013)",
+        "code": "mbp_13_retina_early_13",
+        "description": "2.5 GHz Dual-Core Intel Core i5, 128 GB flash storage",
+        "unit_price": "1499",
+        "category": "laptop",
+        "created_at": "February 2013"
+    },
+    {
+        "name": "MacBook Pro (Retina, 13-inch, Early 2015)",
+        "code": "mbp_13_retina_early_15",
+        "description": "2.7 GHz Dual-Core Intel Core i5, 128 GB flash storage",
+        "unit_price": "1299",
+        "category": "laptop",
+        "created_at": "March 2015"
+    },
+    {
+        "name": "MacBook Pro (Retina, 13-inch, Late 2012)",
+        "code": "mbp_13_retina_late_12",
+        "description": "128 GB flash storage",
+        "unit_price": "1699",
+        "category": "laptop",
+        "created_at": "October 2012"
+    },
+    {
+        "name": "MacBook Pro (Retina, 13-inch, Late 2013)",
+        "code": "mbp_13_retina_late_13",
+        "description": "2.4 GHz Dual-Core Intel Core i5, 4 GB of RAM, 128 GB flash storage",
+        "unit_price": "1299",
+        "category": "laptop",
+        "created_at": "October 2013"
+    },
+    {
+        "name": "MacBook Pro (Retina, 13-inch, Mid 2014)",
+        "code": "mbp_13_retina_mid_14",
+        "description": "2.6 GHz Dual-Core Intel Core i5, 128 GB flash storage",
+        "unit_price": "1299",
+        "category": "laptop",
+        "created_at": "July 2014"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Early 2011)",
+        "code": "mbp_15_early_11",
+        "description": "2.0 GHz quad-core Intel Core i7, 500 GB hard disk, 4 GB of RAM, AMD Radeon HD 6490M with 256MB of VRAM",
+        "unit_price": "1799",
+        "category": "laptop",
+        "created_at": "February 2011"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Late 2011)",
+        "code": "mbp_15_late_11",
+        "description": "2.2 GHz quad-core Intel Core i7, 500 GB hard disk, 4 GB of RAM, AMD Radeon HD 6750M with 512 MB of VRAM",
+        "unit_price": "1799",
+        "category": "laptop",
+        "created_at": "October 2011"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Mid 2009)",
+        "code": "mbp_15_mid_09",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "June 2009"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Mid 2010)",
+        "code": "mbp_15_mid_10",
+        "description": "2.4 GHz Core i5\/4 GB RAM\/320 GB HD",
+        "unit_price": "1799",
+        "category": "laptop",
+        "created_at": "April 2010"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Mid 2012)",
+        "code": "mbp_15_mid_12",
+        "description": "2.3 GHz quad-core Intel Core i7, 500 GB hard disk, 4 GB of RAM, 512 MB of VRAM",
+        "unit_price": "1799",
+        "category": "laptop",
+        "created_at": "June 2012"
+    },
+    {
+        "name": "MacBook Pro (Retina, 15-inch, Early 2013)",
+        "code": "mbp_15_retina_early_13",
+        "description": "2.4 GHz Quad-Core Intel Core i7, 8 GB of RAM, 256 GB flash storage",
+        "unit_price": "2199",
+        "category": "laptop",
+        "created_at": "February 2013"
+    },
+    {
+        "name": "MacBook Pro (Retina, 15-inch, Late 2013)",
+        "code": "mbp_15_retina_late_13",
+        "description": "2.0 GHz Quad-Core Intel Core i7, 8 GB of RAM, 256 GB flash storage, integrated GPU",
+        "unit_price": "1999",
+        "category": "laptop",
+        "created_at": "October 2013"
+    },
+    {
+        "name": "MacBook Pro (Retina, 15-inch, Mid 2014)",
+        "code": "mbp_15_retina_mid_14",
+        "description": "2.2 GHz Quad-Core Intel Core i7, 16 GB of RAM, 256 GB flash storage, integrated GPU",
+        "unit_price": "1999",
+        "category": "laptop",
+        "created_at": "July 2014"
+    },
+    {
+        "name": "MacBook Pro (Retina, 15-inch, Mid 2015)",
+        "code": "mbp_15_retina_mid_15",
+        "description": "2.2 GHz Quad-Core Intel Core i7, 16 GB of RAM, 256 GB flash storage, integrated GPU",
+        "unit_price": "1999",
+        "category": "laptop",
+        "created_at": "May 2015"
+    },
+    {
+        "name": "MacBook Pro (17-inch)",
+        "code": "mbp_17",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "April 2006"
+    },
+    {
+        "name": "MacBook Pro (17-inch, Early 2009)",
+        "code": "mbp_17_early_09",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "January 2009"
+    },
+    {
+        "name": "MacBook Pro (17-inch, Early 2011)",
+        "code": "mbp_17_early_11",
+        "description": "2.2 GHz quad-core Intel Core i7, 750 GB hard disk, 4 GB of RAM, AMD Radeon HD 6750M with 1GB of VRAM",
+        "unit_price": "2499",
+        "category": "laptop",
+        "created_at": "February 2011"
+    },
+    {
+        "name": "MacBook Pro (17-inch, Late 2011)",
+        "code": "mbp_17_late_11",
+        "description": "2.4 GHz quad-core Intel Core i7, 750 GB hard disk, 4 GB of RAM, AMD Radeon HD 6770M with 1GB of VRAM",
+        "unit_price": "2499",
+        "category": "laptop",
+        "created_at": "October 2011"
+    },
+    {
+        "name": "MacBook Pro (17-inch, Mid 2009)",
+        "code": "mbp_17_mid_09",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "June 2009"
+    },
+    {
+        "name": "MacBook Pro (17-inch, Mid 2010)",
+        "code": "mbp_17_mid_10",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "April 2010"
+    },
+    {
+        "name": "MacBook Pro (Early 2008)",
+        "code": "mbp_early_08",
+        "description": "15.4\"\/2.4 GHz\/3 MB L2\/2 GB RAM\/200 GB HD\/256 MB VRAM",
+        "unit_price": "1999",
+        "category": "laptop",
+        "created_at": "February 2008"
+    },
+    {
+        "name": "MacBook Pro (Late 2006)",
+        "code": "mbp_late_06",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "October 2006"
+    },
+    {
+        "name": "MacBook Pro (15-inch, Late 2008)",
+        "code": "mbp_late_08",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "October 2008"
+    },
+    {
+        "name": "MacBook Pro (Mid 2007)",
+        "code": "mbp_mid_07",
+        "description": "",
+        "unit_price": null,
+        "category": "laptop",
+        "created_at": "June 2007"
+    },
+    {
+        "name": "MacBook Pro (Retina, 15-inch, Mid 2012)",
+        "code": "mbp_retina",
+        "description": "2.3 GHz quad-core Intel Core i7, 256 GB SSD",
+        "unit_price": "2199",
+        "category": "laptop",
+        "created_at": "June 2012"
+    }
+]

@@ -4,6 +4,15 @@ require_once __DIR__ . '/autoload.php';
 /** @var PDO */
 $pdo = require_once __DIR__ . '/pdo.php';
 
+$categories = [
+    'laptop',
+    'desktop',
+    'tablet',
+    'phone',
+];
+
+$productData = json_decode(file_get_contents(__DIR__ . '/products.json'), true);
+
 $faker = Faker\Factory::create();
 $faker->seed(719889473);
 
@@ -19,6 +28,7 @@ $statement = $pdo->prepare(<<<SQL
         code,
         name,
         description,
+        category,
         unit_price,
         created_at,
         updated_at,
@@ -27,6 +37,7 @@ $statement = $pdo->prepare(<<<SQL
         :code,
         :name,
         :description,
+        :category,
         :unit_price,
         :created_at,
         NULL,
@@ -34,16 +45,21 @@ $statement = $pdo->prepare(<<<SQL
     );
 SQL);
 $products = [];
-for ($p = 0; $p < $productCount; $p++) {
-    $product = [
-        'code' => $faker->ean13,
-        'name' => ucfirst($faker->word),
-        'description' => implode(PHP_EOL . PHP_EOL, $faker->paragraphs(2)),
-        'unit_price' => $faker->randomFloat(2, 1, 100),
-        'created_at' => $faker->dateTimeBetween('-5 years', 'now')->format('Y-m-d H:i:s'),
-    ];
-    $statement->execute($product);
-    $products[$pdo->lastInsertId()] = $product;
+foreach ($productData as $p) {
+    if (!$p['unit_price']) {
+        continue;
+    }
+    $p['created_at'] = (new \DateTime($p['created_at']))->format('Y-m-d H:i:s');
+    // $product = [
+    //     'code' => $faker->ean13,
+    //     'name' => ucfirst($faker->word),
+    //     'description' => implode(PHP_EOL . PHP_EOL, $faker->paragraphs(2)),
+    //     'category' => $faker->randomElement($categories),
+    //     'unit_price' => $faker->randomFloat(2, 1, 100),
+    //     'created_at' => $faker->dateTimeBetween('-5 years', 'now')->format('Y-m-d H:i:s'),
+    // ];
+    $statement->execute($p);
+    $products[$pdo->lastInsertId()] = $p;
 }
 
 $orderStatement = $pdo->prepare(<<<SQL

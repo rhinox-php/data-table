@@ -484,4 +484,9 @@ class Column
         $this->footer = [$footerType, $footerOptions];
         return $this;
     }
+
+    public function getDataTable(): DataTable
+    {
+        return $this->dataTable;
+    }
 }

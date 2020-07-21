@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit backupGlobals="false"
          backupStaticAttributes="false"
-         bootstrap="vendor/autoload.php"
+         bootstrap="phpunit-bootstrap.php"
          colors="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
@@ -22,4 +22,9 @@
             <directory suffix=".php">./classes</directory>
         </whitelist>
     </filter>
+    <php>
+        <ini name="xdebug.var_display_max_depth" value="10"/>
+        <ini name="xdebug.var_display_max_children" value="256"/>
+        <ini name="xdebug.var_display_max_data" value="10000"/>
+    </php>
 </phpunit>

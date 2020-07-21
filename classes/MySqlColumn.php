@@ -1,56 +1,72 @@
 <?php
+
 namespace Rhino\DataTable;
 
-class MySqlColumn extends Column {
-    private $query;
-    private $having;
-    private $searchWhere;
-    private $orderQuery;
+class MySqlColumn extends Column
+{
+    protected $query;
+    protected $having;
+    protected $searchWhere;
+    protected $orderQuery;
 
-    public function __construct(MySqlDataTable $dataTable, string $name) {
+    public function __construct(MySqlDataTable $dataTable, string $name)
+    {
         parent::__construct($dataTable, $name);
         $this->setQuery($dataTable ? $dataTable->getTable() . '.' . $name : $name);
         $this->setHaving($name);
     }
 
-    public function getQuery() {
+    public function getQuery()
+    {
         return $this->query;
     }
 
-    public function setQuery(string $query, array $bindings = []): self {
-        $this->query = $this->dataTable->bind($query, $bindings);
+    public function setQuery(string $query, array $bindings = []): self
+    {
+        $this->query = $this->getDataTable()->bind($query, $bindings);
         return $this;
     }
 
-    public function getOrderQuery() {
+    public function getOrderQuery()
+    {
         return $this->orderQuery ?: $this->getQuery();
     }
 
-    public function setOrderQuery($orderQuery) {
+    public function setOrderQuery($orderQuery): self
+    {
         $this->orderQuery = $orderQuery;
         return $this;
     }
 
-    public function getAs() {
+    public function getAs()
+    {
         return $this->getName();
     }
 
-    public function getHaving() {
+    public function getHaving()
+    {
         return $this->having;
     }
 
-    public function setHaving($having) {
+    public function setHaving($having): self
+    {
         $this->having = $having;
         return $this;
     }
 
-    public function getSearchWhere() {
+    public function getSearchWhere()
+    {
         return $this->searchWhere;
     }
 
-    public function setSearchWhere($searchWhere) {
+    public function setSearchWhere($searchWhere): self
+    {
         $this->searchWhere = $searchWhere;
         return $this;
     }
 
+    public function getDataTable(): MySqlDataTable
+    {
+        return $this->dataTable;
+    }
 }

@@ -64,6 +64,7 @@ CREATE TABLE `products` (
   `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `unit_price` decimal(7,2) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime DEFAULT NULL,

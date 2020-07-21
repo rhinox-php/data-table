@@ -66,6 +66,9 @@ class MySqlDataTable extends DataTable
                         if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
                             $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from']);
                             $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to']);
+                        } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
+                            $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['from']);
+                            $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['to']);
                         } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2})/', $dateRange, $matches)) {
                             $from = \DateTimeImmutable::createFromFormat('Y-m-d', $matches['from']);
                             $from = $from->setTime(0, 0, 0);
@@ -269,6 +272,7 @@ class MySqlDataTable extends DataTable
 
     public function bind($sql, $bindings)
     {
+        // @todo check if this can be combined with replaceBindings
         foreach ($bindings as $key => $value) {
             $bindKey = ':binding' . (1000 + count($this->bindings));
             $sql = str_replace($key, $bindKey, $sql);
@@ -277,16 +281,16 @@ class MySqlDataTable extends DataTable
         return $sql;
     }
 
-    private function debug($sql, $bindings)
-    {
-        $sql = preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
-            if (isset($bindings[$matches[0]])) {
-                return "'" . addslashes($bindings[$matches[0]]) . "'";
-            }
-            return $matches[0];
-        }, $sql);
-        dump($sql, $bindings);
-    }
+    // private function debug($sql, $bindings)
+    // {
+    //     $sql = preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
+    //         if (isset($bindings[$matches[0]])) {
+    //             return "'" . addslashes($bindings[$matches[0]]) . "'";
+    //         }
+    //         return $matches[0];
+    //     }, $sql);
+    //     dump($sql, $bindings);
+    // }
 
     public function getIdHash(): array
     {

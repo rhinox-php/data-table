@@ -46,6 +46,33 @@ $dataTable->addAction(function ($row) use ($dataTable) {
 $dataTable->addColumn('id')->setPreset('id')->setVisible(false);
 $dataTable->addColumn('name');
 $dataTable->addColumn('code');
+$dataTable->addColumn('category')->setFilterSelect([
+    'laptop' => [
+        'category = :category',
+        [
+            ':category' => 'laptop',
+        ],
+    ],
+    'desktop' => [
+        'category = :category',
+        [
+            ':category' => 'desktop',
+        ],
+    ],
+    'tablet' => [
+        'category = :category',
+        [
+            ':category' => 'tablet',
+        ],
+    ],
+    'phone' => [
+        'category = :category',
+        [
+            ':category' => 'phone',
+        ],
+    ],
+]);
+$dataTable->addColumn('unit_price');
 $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset('number');
 // @todo money format should not break line between $ sign
 $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset('money');
@@ -53,7 +80,7 @@ $dataTable->insertColumn('random', function() {
     return rand(0, 100);
 });
 // @todo fix the date range UI
-$dataTable->addColumn('created_at')->setFilterDateRange(true);
+$dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterDateRange(true);
 // @todo date time preset as well as explicit date range filter
 
 $dataTable->setDefaultOrder('name', 'asc');
