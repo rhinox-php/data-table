@@ -10,10 +10,20 @@ $pdo = require_once __DIR__ . '/includes/pdo.php';
 
 $dataTable = new MySqlDataTable($pdo, 'products');
 $dataTable->addJoin('LEFT JOIN line_items ON line_items.product_id = products.id');
-$dataTable->addWhere('products.created_at > :date', [
-    ':date' => (new \DateTime('-2 years'))->format('Y-m-d H:i:s'),
-]);
+// @todo where
+// $dataTable->addWhere('products.created_at > :date', [
+//     ':date' => (new \DateTime('-2 years'))->format('Y-m-d H:i:s'),
+// ]);
 $dataTable->addGroupBy('products.id');
+
+// @todo advanced button
+// @todo right align columns
+// @todo different icon sets
+// @todo drop down button shouldn't break to new line
+// @todo select row header should be blank by default
+// @todo varying row formatter color
+// @todo download excel
+// @todo csv/excel column formatters
 
 $dataTable->addSelect();
 $dataTable->addAction(function ($row) use ($dataTable) {
@@ -33,21 +43,25 @@ $dataTable->addAction(function ($row) use ($dataTable) {
     ];
 });
 
-$dataTable->addColumn('id');
+$dataTable->addColumn('id')->setPreset('id')->setVisible(false);
 $dataTable->addColumn('name');
+$dataTable->addColumn('code');
+$dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset('number');
+// @todo money format should not break line between $ sign
+$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset('money');
 $dataTable->insertColumn('random', function() {
     return rand(0, 100);
 });
-$dataTable->addColumn('product_code');
-$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity)')->setHeader('Country Name');
+// @todo fix the date range UI
 $dataTable->addColumn('created_at')->setFilterDateRange(true);
+// @todo date time preset as well as explicit date range filter
 
 $dataTable->setDefaultOrder('name', 'asc');
 $dataTable->setExportFileName('products-' . date('Y-m-d-His'));
 
 $dataTable->addRowFormatter(function ($row) {
     return [
-        'class' => 'text-danger',
+        'class' => $row['random'] < 30 ? 'text-danger' : null,
     ];
 });
 

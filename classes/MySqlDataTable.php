@@ -207,6 +207,9 @@ class MySqlDataTable extends DataTable
             throw new Exception\QueryException('Error preparing SQL query', $this->pdo->errorInfo(), $sql);
         }
         $statement->execute(array_merge($this->bindings, $bindings));
+
+        // @todo disable debug meta data by default
+        // @todo test debug meta data, enabled and disabled
         $this->setMetaValue('queryTime', microtime(true) - $time);
         $this->setMetaValue('sql', $sql);
         $this->setMetaValue('bindings', array_merge($this->bindings, $bindings));

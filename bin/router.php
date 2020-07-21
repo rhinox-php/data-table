@@ -12,11 +12,18 @@ if (is_dir(__DIR__ . '/../' . $url)) {
         header('Location: ' . rtrim($url, '/') . '/');
         return;
     }
+    $files = [];
     foreach (new DirectoryIterator(__DIR__ . '/../' . $url) as $fileInfo) {
         if ($fileInfo->getFilename() === '.') {
             continue;
         }
-        echo '<a href="./' . htmlspecialchars($fileInfo->getFilename(), ENT_QUOTES) . '">' . $fileInfo->getFilename() . '</a><br />' . PHP_EOL;
+        $files[] = $fileInfo->getFilename();
+    }
+    usort($files, function ($a, $b) {
+        return strnatcasecmp($a, $b);
+    });
+    foreach ($files as $fileInfo) {
+        echo '<a href="./' . htmlspecialchars($fileInfo, ENT_QUOTES) . '">' . $fileInfo . '</a><br />' . PHP_EOL;
     }
     return;
 }

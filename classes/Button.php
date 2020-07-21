@@ -66,10 +66,10 @@ class Button
             }
             // @todo move csrf token to laravel specific data table
             return '
-                <form action="' . $this->getUrl() . '" method="post" ' . $target . ' class="j-data-table-button-form">
+                <form action="' . $this->getUrl() . '" method="post" ' . $target . ' class="rhinox-data-table-button-form">
                     <input type="hidden" name="_token" value="' . $this->csrfToken . '" />
                     ' . implode(PHP_EOL, $inputs) . '
-                    <button class="btn btn-' . $color . ' ' . $classes . ' j-data-table-button"' . $confirmation . ' ' . $attributes . '>' . $icon . $this->getText() . '</button>
+                    <button class="btn btn-' . $color . ' ' . $classes . ' rhinox-data-table-button"' . $confirmation . ' ' . $attributes . '>' . $icon . $this->getText() . '</button>
                 </form>
             ';
         }

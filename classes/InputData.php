@@ -422,4 +422,32 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     {
         return $this->getData();
     }
+
+    public static function jsonDecode(string $jsonString, bool $assoc = true): self
+    {
+        $json = json_decode($jsonString, $assoc);
+        $error = json_last_error();
+        if ($error) {
+            $errorMessage = 'Unknown error';
+            switch ($error) {
+                case JSON_ERROR_DEPTH:
+                    $errorMessage = 'Maximum stack depth exceeded';
+                    break;
+                case JSON_ERROR_STATE_MISMATCH:
+                    $errorMessage = 'Underflow or the modes mismatch';
+                    break;
+                case JSON_ERROR_CTRL_CHAR:
+                    $errorMessage = 'Unexpected control character found';
+                    break;
+                case JSON_ERROR_SYNTAX:
+                    $errorMessage = 'Syntax error, malformed JSON';
+                    break;
+                case JSON_ERROR_UTF8:
+                    $errorMessage = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+                    break;
+            }
+            throw new \Exception('Error decoding JSON #' . $error . ' ' . $errorMessage);
+        }
+        return new static($json);
+    }
 }

@@ -11,10 +11,10 @@ class Column
     protected $preset;
     protected $format;
     protected $position;
-    protected $exportable = true;
-    protected $visible = true;
-    protected $searchable = true;
-    protected $sortable = true;
+    protected bool $exportable = true;
+    protected bool $visible = true;
+    protected bool $searchable = true;
+    protected bool $sortable = true;
     protected $defaultColumnFilter = null;
     protected $filterEnabled = true;
     protected $filterSelect = [];

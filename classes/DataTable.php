@@ -131,33 +131,34 @@ abstract class DataTable
     public function getJsonResponseData(): array
     {
         $data = $this->getData();
-        $result = [];
         $columns = array_values($this->getColumns());
-        foreach ($data as $r => $row) {
-            // Get row data indexed by column name
+        foreach ($data as $rowIndex => $row) {
+            // Get row data indexed by column key
             $indexedRow = [];
-            foreach ($columns as $c => $column) {
-                $indexedRow[$column->getName()] = $row[$c];
+            foreach ($columns as $columnIndex => $column) {
+                $indexedRow[$column->getKey()] = $row[$columnIndex];
+            }
+
+            // Run column formatters
+            foreach ($columns as $columnIndex => $column) {
+                $indexedRow[$column->getKey()] = $column->format($indexedRow[$column->getKey()], $indexedRow, 'html');
             }
 
             // Run row formatters
             foreach ($this->getRowFormatters() as $rowFormatter) {
                 $format = $rowFormatter($indexedRow, 'html');
                 if ($format['class']) {
-                    $result[$r]['DT_RowClass'] = $format['class'];
+                    $indexedRow['DT_RowClass'] = $format['class'];
                 }
             }
-
-            // Run column formatters
-            foreach ($columns as $c => $column) {
-                $result[$r][$column->getKey()] = $column->format($row[$c], $indexedRow, 'html');
-            }
+            $data[$rowIndex] = $indexedRow;
         }
+
         return [
             'draw' => $this->getDrawCounter(),
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
-            'data' => $result,
+            'data' => $data,
             'meta' => $this->getMeta(),
         ];
     }
@@ -522,7 +523,7 @@ abstract class DataTable
             $this->hasAction = true;
         }
         $action->setHeader('');
-        $action->addClass('j-data-table-nowrap');
+        $action->addClass('rhinox-data-table-nowrap');
         return $this->columns[] = $action;
     }
 

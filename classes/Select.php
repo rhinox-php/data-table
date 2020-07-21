@@ -5,8 +5,8 @@ namespace Rhino\DataTable;
 class Select extends Column
 {
     protected $label = '';
-    protected $searchable = false;
-    protected $orderable = false;
+    protected bool $searchable = false;
+    protected bool $sortable = false;
     protected $checkboxName;
 
     public function __construct(DataTable $dataTable, $name,  $checkboxName)

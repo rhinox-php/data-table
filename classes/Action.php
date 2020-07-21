@@ -6,8 +6,8 @@ class Action extends Column
 {
     protected $callback;
     protected $header = '';
-    protected $searchable = false;
-    protected $orderable = false;
+    protected bool $searchable = false;
+    protected bool $sortable = false;
 
     public function __construct(DataTable $dataTable, $callback, $name = 'action')
     {
@@ -50,7 +50,7 @@ class Action extends Column
 
     public function getClassName()
     {
-        return parent::getClassName() . ' j-data-table-action';
+        return parent::getClassName() . ' rhinox-data-table-action';
     }
 
     public function isExportable()
