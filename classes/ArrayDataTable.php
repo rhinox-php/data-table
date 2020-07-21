@@ -14,20 +14,20 @@ class ArrayDataTable extends DataTable
     public function processSource(InputData $input)
     {
         $data = $this->getArray();
+
+        foreach ($data as $rowIndex => $row) {
+            $processedRow = [];
+            foreach ($this->getColumns() as $column) {
+                $processedRow[] = $column->processSource($row);
+            }
+            $data[$rowIndex] = $processedRow;
+        }
+
         $this->setRecordsTotal(count($data));
 
         $data = $this->filterData($data);
         $data = $this->sortData($data);
         $data = $this->spliceData($data);
-
-        // $result = [];
-        // foreach ($data as $row) {
-        //     $resultRow = [];
-        //     foreach ($this->getColumns() as $column) {
-        //         $resultRow[] = $column->processSource($row);
-        //     }
-        //     $result[] = $resultRow;
-        // }
 
         $this->setData($data);
     }

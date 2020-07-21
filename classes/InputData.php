@@ -410,7 +410,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
 
     public function offsetUnset($offset)
     {
-        return isset($this->$offset);
+        $this->unset($offset);
     }
 
     public function count()

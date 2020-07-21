@@ -4,50 +4,38 @@ namespace Rhino\DataTable;
 
 class Button
 {
-    protected $url;
-    protected $text = '';
-    protected $color;
-    protected $classes = [];
-    protected $attributes = [];
-    protected $confirmation;
-    protected $data = [];
-    protected $icon;
-    protected $target;
-    protected $csrfToken;
-    protected $visible = true;
+    protected ?string $url = null;
+    protected ?string $text = null;
+    protected array $classes = [];
+    protected array $attributes = [];
+    protected ?string $confirmation = null;
+    protected array $data = [];
+    protected ?string $icon = null;
+    protected ?string $target = null;
+    protected ?string $csrfToken = null;
+    protected bool $visible = true;
 
-    public function render()
+    public function render(): ?string
     {
         if (!$this->getVisible()) {
-            return;
+            return null;
         }
         $confirmation = '';
         if ($this->getConfirmation()) {
             $confirmation = ' onclick="if (!confirm(\'' . $this->escapeHtml($this->getConfirmation()) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
         }
         switch ($this->getIcon()) {
-            case 'edit': {
-                    $icon = '<i class="glyphicon glyphicon-pencil"></i>';
-                    break;
-                }
-            case 'link': {
-                    $icon = '<i class="glyphicon glyphicon-link"></i>';
-                    break;
-                }
-            default: {
-                    $icon = '';
-                    break;
-                }
-        }
-        switch ($this->getColor()) {
-            case 'red': {
-                    $color = 'red';
-                    break;
-                }
-            default: {
-                    $color = 'blue';
-                    break;
-                }
+            case 'edit':
+                $icon = '<i class="glyphicon glyphicon-pencil"></i>';
+                break;
+
+            case 'link':
+                $icon = '<i class="glyphicon glyphicon-link"></i>';
+                break;
+
+            default:
+                $icon = '';
+                break;
         }
         $classes = implode(' ', $this->getClasses());
         $attributes = [];
@@ -67,9 +55,9 @@ class Button
             // @todo move csrf token to laravel specific data table
             return '
                 <form action="' . $this->getUrl() . '" method="post" ' . $target . ' class="rhinox-data-table-button-form">
-                    <input type="hidden" name="_token" value="' . $this->csrfToken . '" />
+                    <input type="hidden" name="_token" value="' . $this->getCsrfToken() . '" />
                     ' . implode(PHP_EOL, $inputs) . '
-                    <button class="btn btn-' . $color . ' ' . $classes . ' rhinox-data-table-button"' . $confirmation . ' ' . $attributes . '>' . $icon . $this->getText() . '</button>
+                    <button class="btn ' . $classes . ' rhinox-data-table-button"' . $confirmation . ' ' . $attributes . '>' . $icon . $this->getText() . '</button>
                 </form>
             ';
         }
@@ -81,136 +69,123 @@ class Button
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', $doubleEncode);
     }
 
-    public function getUrl()
+    public function getUrl(): ?string
     {
         return $this->url;
     }
 
-    public function getText()
+    public function getText(): ?string
     {
         return $this->text;
     }
 
-    public function getColor()
-    {
-        return $this->color;
-    }
-
-    public function getConfirmation()
+    public function getConfirmation(): ?string
     {
         return $this->confirmation;
     }
 
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
-    public function getIcon()
+    public function getIcon(): ?string
     {
         return $this->icon;
     }
 
-    public function setUrl($url)
+    public function setUrl($url): self
     {
         $this->url = $url;
         return $this;
     }
 
-    public function setText($text)
+    public function setText($text): self
     {
         $this->text = $text;
         return $this;
     }
 
-    public function setColor($color)
-    {
-        $this->color = $color;
-        return $this;
-    }
-
-    public function setConfirmation($confirmation)
+    public function setConfirmation($confirmation): self
     {
         $this->confirmation = $confirmation;
         return $this;
     }
 
-    public function setData($data)
+    public function setData($data): self
     {
         $this->data = $data;
         return $this;
     }
 
-    public function setIcon($icon)
+    public function setIcon($icon): self
     {
         $this->icon = $icon;
         return $this;
     }
 
-    public function setClasses($classes)
+    public function setClasses($classes): self
     {
         $this->classes = $classes;
         return $this;
     }
 
-    public function getClasses()
+    public function getClasses(): array
     {
         return $this->classes;
     }
 
-    public function addClass($class)
+    public function addClass($class): self
     {
         $this->classes[] = $class;
-
         return $this;
     }
 
-    public function setAttributes($attributes)
+    public function setAttributes($attributes): self
     {
         $this->attributes = $attributes;
         return $this;
     }
 
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
 
-    public function addAttribute($name, $value)
+    public function addAttribute($name, $value): self
     {
         $this->attributes[$name] = $value;
-
         return $this;
     }
 
-    public function getTarget()
+    public function getTarget(): ?string
     {
         return $this->target;
     }
 
-    public function setTarget($target)
+    public function setTarget($target): self
     {
         $this->target = $target;
         return $this;
     }
 
-    public function getCsrfToken()
+    public function getCsrfToken(): ?string
     {
         return $this->csrfToken;
     }
 
-    public function setCsrfToken($csrfToken)
+    public function setCsrfToken($csrfToken): self
     {
         $this->csrfToken = $csrfToken;
         return $this;
     }
 
-    public function getVisible()
+    public function getVisible(): bool
     {
         return $this->visible;
     }
 
-    public function setVisible(bool $visible)
+    public function setVisible(bool $visible): self
     {
         $this->visible = $visible;
         return $this;

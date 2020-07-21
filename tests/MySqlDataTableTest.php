@@ -327,8 +327,14 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                         ->setUrl('/button/' . $row['id'])
                         ->setText('Button'),
                     $dataTable->createButton()
-                        ->setUrl('/button/' . $row['id'])
-                        ->setText('Button'),
+                        ->setUrl('/button/delete')
+                        ->setData([
+                            'id' => $row['id'],
+                        ])
+                        ->setConfirmation('Are you sure you want to delete this?')
+                        ->setTarget('_blank')
+                        ->setClasses(['btn', 'btn-danger', 'btn-sm'])
+                        ->setText('Delete'),
                 ]),
             ];
         });
