@@ -368,7 +368,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->insertColumn('random', function () {
             return rand(0, 100);
         });
-        $dataTable->addColumn('created_at')->setFilterDateRange(true);
+        $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterDateRange(true);
 
         $dataTable->setDefaultOrder('name', 'asc');
         $dataTable->setExportFileName('products-' . date('Y-m-d-His'));

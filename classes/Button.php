@@ -23,28 +23,28 @@ class Button
         }
         $confirmation = '';
         if ($this->getConfirmation()) {
-            $confirmation = ' onclick="if (!confirm(\'' . e($this->getConfirmation()) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
+            $confirmation = ' onclick="if (!confirm(\'' . $this->escapeHtml($this->getConfirmation()) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
         }
         switch ($this->getIcon()) {
-            case 'edit':{
+            case 'edit': {
                     $icon = '<i class="glyphicon glyphicon-pencil"></i>';
                     break;
                 }
-            case 'link':{
+            case 'link': {
                     $icon = '<i class="glyphicon glyphicon-link"></i>';
                     break;
                 }
-            default:{
+            default: {
                     $icon = '';
                     break;
                 }
         }
         switch ($this->getColor()) {
-            case 'red':{
+            case 'red': {
                     $color = 'red';
                     break;
                 }
-            default:{
+            default: {
                     $color = 'blue';
                     break;
                 }
@@ -52,7 +52,7 @@ class Button
         $classes = implode(' ', $this->getClasses());
         $attributes = [];
         foreach ($this->getAttributes() as $name => $value) {
-            $attributes[] = $name . '="' . e($value) . '"';
+            $attributes[] = $name . '="' . $this->escapeHtml($value) . '"';
         }
         $attributes = implode(' ', $attributes);
         $target = '';
@@ -74,6 +74,11 @@ class Button
             ';
         }
         return '<a href="' . $this->getUrl() . '" ' . $confirmation . ' class="' . $classes . '" ' . $attributes . ' ' . $target . '>' . $icon . $this->getText() . '</a>';
+    }
+
+    protected function escapeHtml(string $value, bool $doubleEncode = true): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', $doubleEncode);
     }
 
     public function getUrl()

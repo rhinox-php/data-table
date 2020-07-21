@@ -66,6 +66,8 @@ class MySqlDataTable extends DataTable
                         if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
                             $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from']);
                             $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to']);
+                            $from = $from->setTime($from->format('H'), $from->format('i'), 0);
+                            $to = $to->setTime($to->format('H'), $to->format('i'), 59);
                         } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
                             $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['from']);
                             $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['to']);
@@ -81,8 +83,6 @@ class MySqlDataTable extends DataTable
                                 $to = $from;
                                 $from = $temp;
                             }
-                            $from = $from->setTime($from->format('H'), $from->format('i'), 0);
-                            $to = $to->setTime($to->format('H'), $to->format('i'), 59);
                             $betweenQuery = '(DATE(' . $columns[$i->int()]->getAs() . ') BETWEEN :from AND :to)';
                             list($betweenQuery, $betweenBindings) = $this->replaceBindings($betweenQuery, [
                                 ':from' => $from->format('Y-m-d H:i:s'),

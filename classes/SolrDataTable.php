@@ -214,7 +214,7 @@ class SolrDataTable extends DataTable
 
     public function insertColumn($name, $format, $position = null)
     {
-        return $this->spliceColumn(new SolrColumnInsert($name, $format), $position);
+        return $this->spliceColumn(new SolrColumnInsert($this, $name, $format), $position);
     }
 
     public function addFilterQuery(string $filterQuery, array $bindings = [])

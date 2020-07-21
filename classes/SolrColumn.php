@@ -4,11 +4,6 @@ namespace Rhino\DataTable;
 
 class SolrColumn extends Column
 {
-    public function __construct($name)
-    {
-        parent::__construct($name);
-    }
-
     public function setPreset($preset, $options = null): Column
     {
         switch ($preset) {

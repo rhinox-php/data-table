@@ -7,7 +7,9 @@
         }
     ],
     "require": {
-        "symfony/http-foundation": "^5.1"
+        "symfony/http-foundation": "^5.1",
+        "solarium/solarium": "^6.0",
+        "php-units-of-measure/php-units-of-measure": "^2.1"
     },
     "autoload": {
         "psr-4": {
