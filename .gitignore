@@ -2,3 +2,6 @@ vendor
 .phan
 .vscode
 .test-output
+node_modules
+public
+dist

@@ -1,0 +1,61 @@
+.rhinox-data-table-wrapper .table>thead>tr .rhinox-data-table-col-filter {
+    padding: 0;
+    margin: 0;
+}
+
+.rhinox-data-table-wrapper .table>thead>tr .rhinox-data-table-col-filter .form-control {
+    border: 0;
+    width: 100%;
+}
+
+.rhinox-data-table-wrapper .table>thead>tr .rhinox-data-table-col-filter-first {
+    padding: 8px;
+    white-space: nowrap;
+}
+
+.rhinox-data-table-wrapper .rhinox-data-table {
+    width: 100% !important;
+}
+
+.rhinox-data-table-wrapper .dataTables_wrapper {
+    overflow: auto;
+}
+
+.rhinox-data-table-wrapper .rhinox-data-table-page-size {
+    width: 70%;
+    float: left;
+}
+
+.rhinox-data-table-wrapper .rhinox-data-table-search {
+    width: 30%;
+    float: right;
+}
+
+.rhinox-data-table-wrapper .rhinox-data-table-count {
+    width: 50%;
+    float: left;
+}
+
+.rhinox-data-table-wrapper .rhinox-data-table-pagination {
+    width: 50%;
+    float: right;
+}
+
+.rhinox-data-table-wrapper .dataTables_length {
+    float: left;
+    margin-right: 10px;
+}
+
+.rhinox-data-table-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum"on;
+    white-space: nowrap;
+}
+
+.rhinox-data-table-nowrap {
+    white-space: nowrap;
+}
+
+.rhinox-data-table-nowrap>* {
+    display: inline-block;
+}

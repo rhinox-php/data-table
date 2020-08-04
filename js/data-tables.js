@@ -136,14 +136,14 @@ const initDataTable = (dataTableConfig) => {
                 },
                 'colvis',
                 {
-                    text: '<i class="fa fa-reload"></i> Reset',
+                    text: '<i class="fa fa-reload"></i> Reset Settings',
                     action: function (e, dt, node, config) {
                         localStorage.removeItem(dataTableConfig.id);
                         window.location.reload();
                     }
                 },
                 {
-                    text: '<i class="fa fa-sync-alt"></i> Refresh',
+                    text: '<i class="fa fa-sync-alt"></i> Refresh Data',
                     action: function (e, dt, node, config) {
                         dt.draw();
                     },

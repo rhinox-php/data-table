@@ -4,15 +4,17 @@ namespace Rhino\DataTable;
 
 class Select extends Column
 {
-    protected $label = '';
     protected bool $searchable = false;
     protected bool $sortable = false;
-    protected $checkboxName;
+    protected string $checkboxName;
 
-    public function __construct(DataTable $dataTable, $name,  $checkboxName)
+    public function __construct(DataTable $dataTable, string $name, string $checkboxName)
     {
         parent::__construct($dataTable, $name);
         $this->checkboxName = $checkboxName;
+
+        // Default header is blank
+        $this->setHeader('');
     }
 
     public function format($value, $row, $type)
