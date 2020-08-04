@@ -7,7 +7,8 @@ class MySqlColumn extends Column
     protected $query;
     protected $having;
     protected $searchWhere;
-    protected $orderQuery;
+    protected ?string $orderQuery = null;
+    protected ?string $filterQuery = null;
 
     public function __construct(MySqlDataTable $dataTable, string $name)
     {
@@ -35,6 +36,17 @@ class MySqlColumn extends Column
     public function setOrderQuery($orderQuery): self
     {
         $this->orderQuery = $orderQuery;
+        return $this;
+    }
+
+    public function getFilterQuery()
+    {
+        return $this->filterQuery ?: $this->getQuery();
+    }
+
+    public function setFilterQuery($filterQuery): self
+    {
+        $this->filterQuery = $filterQuery;
         return $this;
     }
 

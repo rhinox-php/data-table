@@ -32,11 +32,12 @@ const initDataTable = (dataTableConfig) => {
         //     }
         // })
         .DataTable({
-            dom:
-                "<'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-sm-9 rhinox-data-table-left'B><'col-sm-3 rhinox-data-table-right'f<'rhinox-data-table-advanced'>>>>" +
-                "<'rhinox-data-table-error'>" +
-                "<'rhinox-data-table-scroll'tr>" +
-                "<'rhinox-data-table-footer'<'row'<'col-sm-6'i><'col-sm-6'pl>>>",
+            dom: `
+                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-sm-9 rhinox-data-table-left'B><'col-sm-3 rhinox-data-table-right'f<'rhinox-data-table-advanced'>>>>
+                <'rhinox-data-table-error'>
+                "<'rhinox-data-table-scroll'tr>
+                <'rhinox-data-table-footer'ilp>
+            `,
             processing: true,
             serverSide: true,
             language: {
@@ -218,7 +219,7 @@ const initDataTable = (dataTableConfig) => {
         selectAllState = !selectAllState;
     };
 
-    $(selector).find('.rhinox-data-table-date-range').each(function() {
+    $(selector).find('.rhinox-data-table-date-range').each(function () {
         console.log(this);
         if (!window.moment) {
             console.error('Date range filters require moment.js');
@@ -245,12 +246,24 @@ const initDataTable = (dataTableConfig) => {
             },
         });
 
-        $(this).on('apply.daterangepicker', function(ev, picker) {
+        $(this).on('apply.daterangepicker', function (ev, picker) {
             $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm') + ' to ' + picker.endDate.format('YYYY-MM-DD HH:mm')).trigger('change');
         });
 
-        $(this).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).on('cancel.daterangepicker', function (ev, picker) {
             $(this).val('').trigger('change');
         });
     });
+
+
+    $('.rhinox-data-table-advanced')
+        .html('<i class="fa fa-cog"></i>')
+        .click(function () {
+            $('body').toggleClass('rhinox-data-table-advanced-enabled');
+            localStorage.setItem('advancedTableOptions', $('body').is('.rhinox-data-table-advanced-enabled'));
+        });
+
+    if (localStorage.getItem('advancedTableOptions') == 'true') {
+        $('body').addClass('rhinox-data-table-advanced-enabled');
+    }
 };

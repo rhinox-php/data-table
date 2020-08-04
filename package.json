@@ -2,26 +2,23 @@
     "private": true,
     "browserslist": "> 0.25%, not dead",
     "devDependencies": {
-        "@babel/core": "^7.6.4",
-        "@babel/preset-env": "^7.7.4",
-        "autoprefixer": "^9.7.3",
-        "bootstrap": "^4.4.1",
+        "@babel/core": "^7.11.0",
+        "@babel/preset-env": "^7.11.0",
+        "autoprefixer": "^9.8.6",
         "concurrently": "^4.1.2",
         "gulp": "^4.0.2",
         "gulp-babel": "^8.0.0",
         "gulp-concat": "^2.6.1",
         "gulp-expect-file": "^0.0.7",
-        "gulp-flatten": "^0.4.0",
-        "gulp-htmlmin": "^5.0.1",
         "gulp-postcss": "^8.0.0",
         "gulp-rename": "^1.4.0",
         "gulp-sass": "^4.0.2",
         "gulp-sourcemaps": "^2.6.5",
-        "gulp-uglify": "^3.0.2",
-        "gulp-uglify-es": "^2.0.0",
-        "natives": "^1.1.6"
+        "gulp-uglify-es": "^2.0.0"
     },
-    "dependencies": {
-        "node-sass": "^4.14.1"
+    "scripts": {
+        "start": "concurrently --kill-others --names=\"server,watch\" \"bin/server.sh\" \"npm:watch\"",
+        "start-win": "concurrently --kill-others --names=\"server,watch\" \"bin\\server.bat\" \"npm:watch\"",
+        "watch": "gulp watch"
     }
 }

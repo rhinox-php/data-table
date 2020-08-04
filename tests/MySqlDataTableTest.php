@@ -13,6 +13,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     public function testRender(): void
     {
         $dataTable = $this->getDataTable();
+        $this->assertFalse($dataTable->process(new Request()));
         $html = $dataTable->render();
         $this->assertStringContainsString('<table', $html);
         $this->assertStringContainsString('</table>', $html);
@@ -226,7 +227,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(0, count($json->arr('data')));
     }
 
-    public function testDateRangeFilter(): void
+    public function testDateRangeFilterStartToFinish(): void
     {
         $json = $this->getJsonResponse([
             'columns' => [
@@ -238,7 +239,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
             ],
         ]);
         $this->assertGreaterThan(0, count($json->arr('data')));
+    }
 
+    public function testDateRangeFilterFinishToStart(): void
+    {
         $json = $this->getJsonResponse([
             'columns' => [
                 10 => [
@@ -249,7 +253,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
             ],
         ]);
         $this->assertGreaterThan(0, count($json->arr('data')));
+    }
 
+    public function testDateRangeFilterDate(): void
+    {
         $json = $this->getJsonResponse([
             'columns' => [
                 10 => [
@@ -260,7 +267,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
             ],
         ]);
         $this->assertGreaterThan(0, count($json->arr('data')));
+    }
 
+    public function testDateRangeFilterInvalid(): void
+    {
         $json = $this->getJsonResponse([
             'columns' => [
                 10 => [
@@ -280,6 +290,25 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         ]), 'invalid');
         $this->expectException(QueryException::class);
         $this->getJsonResponse([], $dataTable);
+    }
+
+    public function testCsvExport(): void
+    {
+        $dataTable = $this->getDataTable();
+        $request = new Request([], [
+            'draw' => 1,
+            'csv' => true,
+        ]);
+
+        $this->assertTrue($dataTable->process($request));
+
+        ob_start();
+        $dataTable->sendResponse();
+        $response = trim(ob_get_clean());
+        foreach (explode(PHP_EOL, $response) as $line) {
+            $row = str_getcsv($line);
+            $this->assertCount(10, $row);
+        }
     }
 
     private function getJsonResponse(array $requestParams, ?MySqlDataTable $dataTable = null): InputData
@@ -374,7 +403,8 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->insertColumn('random', function () {
             return rand(0, 100);
         });
-        $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterDateRange(true);
+        $dataTable->addColumn('created_at')->setFilterDateRange(true);
+        $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterQuery('products.created_at')->setFilterDateRange(true);
 
         $dataTable->setDefaultOrder('name', 'asc');
         $dataTable->setExportFileName('products-' . date('Y-m-d-His'));

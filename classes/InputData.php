@@ -39,7 +39,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             return (bool) $this->_data;
         }
 
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         $result = $this->getValue($data, $name, $default);
         if (is_scalar($result)) {
@@ -65,7 +65,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             return (int) $this->_data;
         }
 
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         $result = $this->getValue($data, $name, $default);
         if (is_numeric($result)) {
@@ -91,7 +91,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             return (float) $this->_data;
         }
 
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         $result = $this->getValue($data, $name, $default);
         if (is_numeric($result)) {
@@ -117,7 +117,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             return (string) $this->_data;
         }
 
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         $result = $this->getValue($data, $name, $default);
 
@@ -138,7 +138,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function dateTime($name, $timezone = null, $default = 'now')
     {
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         if ($default === null && !$this->getValue($data, $name, $default)) {
             return null;
@@ -174,7 +174,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
             }
             return new static($this->_data);
         }
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         return new static($this->getValue($data, $name, $default));
     }
@@ -211,7 +211,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function object($name, array $default = null)
     {
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         return $this->getValue($data, $name, $default);
     }
@@ -226,7 +226,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      */
     public function raw($name, $default = null)
     {
-        list($data, $name) = $this->extractDataKey($name, $this->_data);
+        [$data, $name] = $this->extractDataKey($name, $this->_data);
 
         return $this->getValue($data, $name, $default);
     }
@@ -411,6 +411,17 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     public function offsetUnset($offset)
     {
         $this->unset($offset);
+    }
+
+    public function unset($name): InputData
+    {
+        if (is_object($this->_data)) {
+            unset($this->_data->$name);
+        }
+        if (is_array($this->_data)) {
+            unset($this->_data[$name]);
+        }
+        return $this;
     }
 
     public function count()

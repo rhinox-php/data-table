@@ -7,33 +7,34 @@ if (!isset($dataTable)) {
 <div class="rhinox-data-table-wrapper">
     <table id="<?= $dataTable->getId(); ?>" class="table table-striped table-bordered table-hover rhinox-data-table">
         <thead>
-        <tr>
-            <?php foreach ($dataTable->getColumns() as $column): ?>
-                <th class="d-table-header"><?= $column->getHeader(); ?></th>
-            <?php endforeach; ?>
-        </tr>
-        <tr>
-            <?php foreach ($dataTable->getColumns() as $columnId => $column): ?>
-                <td class="rhinox-data-table-col-filter rhinox-data-table-search-<?= $column->getKey(); ?> <?= $columnId == 0 ? 'rhinox-data-table-col-filter-first' : ''; ?>" data-column="<?=$columnId;?>">
-                    <?php if ($column->isSearchable()): ?>
-                        <?php if ($column->hasFilterSelect()): ?>
-                            <select class="form-control" id="rhinox-data-table-filter-<?=strtr($column->getName(), '_', '-');?>">
-                                <option value="">Any</option>
-                                <?php foreach ($column->getFilterSelect() as $label => $query): ?>
-                                    <option value="<?=$label;?>"><?=$label;?></option>
-                                <?php endforeach;?>
-                            </select>
-                        <?php elseif ($column->hasFilterDateRange()): ?>
-                            <input class="form-control rhinox-data-table-column-filter-date-range" type="text" placeholder="Filter <?= $column->getHeader(); ?>" id="rhinox-data-table-date-range-<?= $columnId ?>" name="rhinox-data-table-date-range-<?= $columnId ?>" />
+            <tr>
+                <?php foreach ($dataTable->getColumns() as $column): ?>
+                    <th class="d-table-header"><?= $column->getHeader(); ?></th>
+                <?php endforeach; ?>
+            </tr>
+            <tr class="rhinox-data-table-search-bar">
+                <?php foreach ($dataTable->getColumns() as $columnId => $column): ?>
+                    <td class="rhinox-data-table-col-filter rhinox-data-table-search-<?= $column->getKey(); ?> <?= $columnId == 0 ? 'rhinox-data-table-col-filter-first' : ''; ?>" data-column="<?=$columnId;?>">
+                        <?php if ($column->isSearchable()): ?>
+                            <?php if ($column->hasFilterSelect()): ?>
+                                <select class="custom-select" id="rhinox-data-table-filter-<?=strtr($column->getName(), '_', '-');?>">
+                                    <option value="">Any</option>
+                                    <?php foreach ($column->getFilterSelect() as $label => $query): ?>
+                                        <option value="<?=$label;?>"><?=$label;?></option>
+                                    <?php endforeach;?>
+                                </select>
+                            <?php elseif ($column->hasFilterDateRange()): ?>
+                                <input class="form-control rhinox-data-table-column-filter-date-range" type="text" placeholder="Filter <?= $column->getHeader(); ?>" id="rhinox-data-table-date-range-<?= $columnId ?>" name="rhinox-data-table-date-range-<?= $columnId ?>" />
+                            <?php else: ?>
+                                <?php include __DIR__ . '/bootstrap/column-filter-numeric.php'; ?>
+                                <!-- <input class="form-control rhinox-data-table-column-filter" placeholder="Filter <?= $column->getHeader(); ?>" /> -->
+                            <?php endif;?>
                         <?php else: ?>
-                            <input class="form-control rhinox-data-table-column-filter" placeholder="Filter <?= $column->getHeader(); ?>" />
+                            <input class="form-control" type="hidden" />
                         <?php endif;?>
-                    <?php else: ?>
-                        <input class="form-control" type="hidden" />
-                    <?php endif;?>
-                </td>
-            <?php endforeach;?>
-        </tr>
+                    </td>
+                <?php endforeach;?>
+            </tr>
         </thead>
         <tbody>
         </tbody>

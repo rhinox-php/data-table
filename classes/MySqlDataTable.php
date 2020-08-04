@@ -45,64 +45,22 @@ class MySqlDataTable extends DataTable
             $having = "HAVING ($havingColumns)";
         }
         $columnHaving = [];
+
+        // Apply column filters
         foreach ($this->getInputColumns() as $i => $inputColumn) {
             if ($inputColumn->string('search.value')) {
-                if ($columns[$i->int()]->getAs()) {
-                    if ($columns[$i->int()]->hasFilterSelect()) {
-                        $filterSelect = $columns[$i->int()]->getFilterSelect($inputColumn->string('search.value'));
-                        if ($filterSelect) {
-                            list($selectQuery, $selectBindings) = $filterSelect;
-                            list($selectQuery, $selectBindings) = $this->replaceBindings($selectQuery, $selectBindings);
-                            $columnHaving[] = '(' . $selectQuery . ')';
-                            foreach ($selectBindings as $key => $value) {
-                                $bindings[$key] = $value;
-                            }
-                        }
-                    } elseif ($columns[$i->int()]->hasFilterDateRange()) {
-                        $from = null;
-                        $to = null;
-
-                        $dateRange = $inputColumn->string('search.value');
-                        if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
-                            $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from']);
-                            $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to']);
-                            $from = $from->setTime($from->format('H'), $from->format('i'), 0);
-                            $to = $to->setTime($to->format('H'), $to->format('i'), 59);
-                        } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
-                            $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['from']);
-                            $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['to']);
-                        } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2})/', $dateRange, $matches)) {
-                            $from = \DateTimeImmutable::createFromFormat('Y-m-d', $matches['from']);
-                            $from = $from->setTime(0, 0, 0);
-                            $to = $from->setTime(23, 59, 59);
-                        }
-
-                        if ($from && $to) {
-                            if ($from > $to) {
-                                $temp = $to;
-                                $to = $from;
-                                $from = $temp;
-                            }
-                            $betweenQuery = '(DATE(' . $columns[$i->int()]->getAs() . ') BETWEEN :from AND :to)';
-                            list($betweenQuery, $betweenBindings) = $this->replaceBindings($betweenQuery, [
-                                ':from' => $from->format('Y-m-d H:i:s'),
-                                ':to' => $to->format('Y-m-d H:i:s'),
-                            ]);
-                            foreach ($betweenBindings as $key => $value) {
-                                $bindings[$key] = $value;
-                            }
-                            $columnHaving[] = $betweenQuery;
-                        } else {
-                            $columnHaving[] = '(' . $columns[$i->int()]->getAs() . ' LIKE :search' . ($i->int() + 100) . ')';
-                            $bindings[':search' . ($i->int() + 100)] = '%' . $inputColumn->string('search.value') . '%';
-                        }
-                    } else {
-                        $columnHaving[] = '(' . $columns[$i->int()]->getAs() . ' LIKE :search' . ($i->int() + 100) . ')';
-                        $bindings[':search' . ($i->int() + 100)] = '%' . $inputColumn->string('search.value') . '%';
-                    }
+                $column = $columns[$i->int()];
+                if ($column->hasFilterSelect()) {
+                    $this->applyFilterSelect($column, $inputColumn, $columnHaving, $bindings);
+                } elseif ($column->hasFilterDateRange()) {
+                    $this->applyFilterDateRange($column, $inputColumn, $columnHaving, $bindings);
+                } else {
+                    $this->applyFilterText($column, $inputColumn, $columnHaving, $bindings);
                 }
             }
         }
+
+        // Apply URL filters
         foreach ($input->arr('filter') as $columnName => $value) {
             foreach ($columns as $i => $column) {
                 if ($column->getName() == $columnName->string()) {
@@ -111,6 +69,8 @@ class MySqlDataTable extends DataTable
                 }
             }
         }
+
+        // Merge having queries
         if (!empty($columnHaving)) {
             $columnHaving = implode(' AND ', $columnHaving);
             if ($having) {
@@ -122,7 +82,7 @@ class MySqlDataTable extends DataTable
 
         $havings = [];
         foreach ($this->havings as $extraHaving) {
-            list($havingQuery, $havingBindings) = $this->replaceBindings($extraHaving['sql'], $extraHaving['bindings']);
+            [$havingQuery, $havingBindings] = $this->replaceBindings($extraHaving['sql'], $extraHaving['bindings']);
             $havings[] = '(' . $havingQuery . ')';
             foreach ($havingBindings as $key => $value) {
                 $bindings[$key] = $value;
@@ -216,6 +176,7 @@ class MySqlDataTable extends DataTable
         $this->setMetaValue('queryTime', microtime(true) - $time);
         $this->setMetaValue('sql', $sql);
         $this->setMetaValue('bindings', array_merge($this->bindings, $bindings));
+        // $this->setMetaValue('sqlBinded', $this->replaceBindingsInSql($sql, array_merge($this->bindings, $bindings)));
 
         // Fetch the results
         $data = $statement->fetchAll(\PDO::FETCH_NUM);
@@ -229,7 +190,76 @@ class MySqlDataTable extends DataTable
         $this->setRecordsFiltered($total);
     }
 
-    public function getTable()
+    protected function applyFilterSelect(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
+    {
+        $filterSelect = $column->getFilterSelect($inputColumn->string('search.value'));
+        if ($filterSelect) {
+            [$selectQuery, $selectBindings] = $filterSelect;
+            [$selectQuery, $selectBindings] = $this->replaceBindings($selectQuery, $selectBindings);
+            $columnHaving[] = '(' . $selectQuery . ')';
+            foreach ($selectBindings as $key => $value) {
+                $bindings[$key] = $value;
+            }
+        }
+    }
+
+    protected function applyFilterDateRange(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
+    {
+        $from = null;
+        $to = null;
+
+        $dateRange = $inputColumn->string('search.value');
+        if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
+            $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from']);
+            $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to']);
+            $from = $from->setTime($from->format('H'), $from->format('i'), 0);
+            $to = $to->setTime($to->format('H'), $to->format('i'), 59);
+        } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
+            $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['from']);
+            $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['to']);
+        } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2})/', $dateRange, $matches)) {
+            $from = \DateTimeImmutable::createFromFormat('Y-m-d', $matches['from']);
+            $from = $from->setTime(0, 0, 0);
+            $to = $from->setTime(23, 59, 59);
+        }
+
+        if ($from && $to) {
+            if ($from > $to) {
+                $temp = $to;
+                $to = $from;
+                $from = $temp;
+            }
+            $betweenQuery = '(' . $column->getFilterQuery() . ' BETWEEN :from AND :to)';
+            [$betweenQuery, $betweenBindings] = $this->replaceBindings($betweenQuery, [
+                ':from' => $from->format('Y-m-d H:i:s'),
+                ':to' => $to->format('Y-m-d H:i:s'),
+            ]);
+            foreach ($betweenBindings as $key => $value) {
+                $bindings[$key] = $value;
+            }
+            $columnHaving[] = $betweenQuery;
+        } else {
+            $this->applyFilterText($column, $inputColumn, $columnHaving, $bindings);
+        }
+    }
+
+    protected function applyFilterText(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
+    {
+        [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' LIKE :search)', [
+            ':search' => '%' . $inputColumn->string('search.value') . '%',
+        ]);
+        $columnHaving[] = $textQuery;
+        $this->mergeBindings($bindings, $textBindings);
+    }
+
+    protected function mergeBindings(array &$existingBindings, array $newBindings): void
+    {
+        foreach ($newBindings as $key => $value) {
+            $existingBindings[$key] = $value;
+        }
+    }
+
+    public function getTable(): string
     {
         return $this->table;
     }
@@ -244,14 +274,18 @@ class MySqlDataTable extends DataTable
         return $this->spliceColumn(new MySqlColumnInsert($this, $name, $format), $index);
     }
 
-    public function addJoin($join)
+    // @todo add join with bindings
+    public function addJoin(string $join): self
     {
         $this->joins[] = $join;
+        return $this;
     }
 
-    public function addGroupBy($groupBy)
+    // @todo add group by with bindings
+    public function addGroupBy(string $groupBy): self
     {
         $this->groupBys[] = $groupBy;
+        return $this;
     }
 
     public function addWhere($sql, array $bindings = [])
@@ -281,15 +315,14 @@ class MySqlDataTable extends DataTable
         return $sql;
     }
 
-    // private function debug($sql, $bindings)
+    // private function replaceBindingsInSql($sql, $bindings)
     // {
-    //     $sql = preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
+    //     return preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
     //         if (isset($bindings[$matches[0]])) {
     //             return "'" . addslashes($bindings[$matches[0]]) . "'";
     //         }
     //         return $matches[0];
     //     }, $sql);
-    //     dump($sql, $bindings);
     // }
 
     public function getIdHash(): array

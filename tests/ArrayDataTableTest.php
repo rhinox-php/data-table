@@ -86,7 +86,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
 
         $dataTable->addColumn('i')->setMethod('getI');
         $dataTable->addColumn('color')->setProperty('color');
-        $dataTable->addColumn('choice', 1)->setCallback(fn($row) => var_dump($row->choice));
+        $dataTable->addColumn('choice', 1)->setCallback(fn($row) => $row->choice);
 
         $json = $this->getJsonResponse([], $dataTable);
         $this->assertCount(4, $json['data']);
