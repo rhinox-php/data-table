@@ -1,6 +1,7 @@
 <?php
 
 use Rhino\DataTable\MySqlDataTable;
+use Rhino\DataTable\Preset;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -31,6 +32,7 @@ $dataTable->addAction(function ($row) use ($dataTable) {
         $dataTable->createButton()
             ->setUrl('/button/' . $row['id'])
             ->setText('Button')
+            ->setIcon('cog')
             ->setClasses(['btn', 'btn-primary', 'btn-sm']),
         $dataTable->createDropdown([
             $dataTable->createButton()
@@ -43,40 +45,40 @@ $dataTable->addAction(function ($row) use ($dataTable) {
     ];
 });
 
-$dataTable->addColumn('id')->setPreset('id')->setVisible(false);
+$dataTable->addColumn('id')->setPreset(new Preset\Id())->setVisible(false);
 $dataTable->addColumn('name');
 $dataTable->addColumn('code');
-$dataTable->addColumn('category')->setFilterSelect([
-    'laptop' => [
+$dataTable->addColumn('category')->addFormatter(fn ($value) => ucfirst($value))->setFilterSelect([
+    'Laptop' => [
         'category = :category',
         [
             ':category' => 'laptop',
         ],
     ],
-    'desktop' => [
+    'Desktop' => [
         'category = :category',
         [
             ':category' => 'desktop',
         ],
     ],
-    'tablet' => [
+    'Tablet' => [
         'category = :category',
         [
             ':category' => 'tablet',
         ],
     ],
-    'phone' => [
+    'Phone' => [
         'category = :category',
         [
             ':category' => 'phone',
         ],
     ],
 ]);
-$dataTable->addColumn('unit_price');
-$dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset('number');
+$dataTable->addColumn('unit_price')->setPreset(new Preset\Money());
+$dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset(new Preset\Number());
 // @todo money format should not break line between $ sign
-$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset('money');
-$dataTable->insertColumn('random', function() {
+$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset(new Preset\Money());
+$dataTable->insertColumn('random', function () {
     return rand(0, 100);
 });
 // @todo fix the date range UI

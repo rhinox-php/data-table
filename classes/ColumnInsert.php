@@ -4,10 +4,10 @@ namespace Rhino\DataTable;
 
 class ColumnInsert extends Column
 {
-    public function __construct(DataTable $dataTable, string $name, callable $format)
+    public function __construct(DataTable $dataTable, string $name, callable $formatter)
     {
         $this->name = $name;
-        $this->format = $format;
+        $this->addFormatter($formatter);
     }
 
     public function isSortable()

@@ -5,6 +5,7 @@ namespace Rhino\DataTable\Tests;
 use Rhino\DataTable\Exception\QueryException;
 use Rhino\DataTable\InputData;
 use Rhino\DataTable\MySqlDataTable;
+use Rhino\DataTable\Preset;
 use Symfony\Component\HttpFoundation\Request;
 
 // @todo test url filters http://localhost:8990/examples/kitchen-sink.php?filter[name]=acc
@@ -397,9 +398,9 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                 ],
             ],
         ]);
-        $dataTable->addColumn('unit_price')->setFormat(fn($value) => number_format($value));
-        $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset('number');
-        $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset('money');
+        $dataTable->addColumn('unit_price')->addFormatter(fn($value) => number_format($value));
+        $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset(new Preset\Number());
+        $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset(new Preset\Money());
         $dataTable->insertColumn('random', function () {
             return rand(0, 100);
         });

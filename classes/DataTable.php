@@ -2,6 +2,7 @@
 
 namespace Rhino\DataTable;
 
+use Rhino\DataTable\Preset;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +34,7 @@ abstract class DataTable
     protected $exportFileName = 'export';
     protected $hasAction = false;
     protected $hasSelect = false;
+    protected array $presets = [];
 
     /**
      * Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables (Ajax requests are asynchronous and thus can return out of sequence). This is used as part of the draw return parameter.
@@ -42,6 +44,20 @@ abstract class DataTable
     private ?int $drawCounter = null;
 
     public abstract function processSource(InputData $input);
+
+
+    public function __construct()
+    {
+        $this->presets = [
+            'number' => Preset\Number::class,
+        ];
+    }
+
+    // @todo return type interface
+    public function getPreset(string $name)
+    {
+        return $this->presets[$name] ?? null;
+    }
 
     public function sendResponse()
     {

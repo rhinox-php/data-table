@@ -15,6 +15,7 @@ class MySqlDataTable extends DataTable
 
     public function __construct($pdo, $table)
     {
+        parent::__construct();
         $this->pdo = $pdo;
         $this->table = $table;
     }

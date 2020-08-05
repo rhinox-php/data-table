@@ -2,6 +2,8 @@
 
 namespace Rhino\DataTable;
 
+use Rhino\DataTable\Icon\FontAwesome;
+
 class Button
 {
     protected ?string $url = null;
@@ -24,18 +26,9 @@ class Button
         if ($this->getConfirmation()) {
             $confirmation = ' onclick="if (!confirm(\'' . $this->escapeHtml($this->getConfirmation()) . '\')) { event.stopImmediatePropagation(); event.preventDefault(); }"';
         }
-        switch ($this->getIcon()) {
-            case 'edit':
-                $icon = '<i class="glyphicon glyphicon-pencil"></i>';
-                break;
-
-            case 'link':
-                $icon = '<i class="glyphicon glyphicon-link"></i>';
-                break;
-
-            default:
-                $icon = '';
-                break;
+        $icon = '';
+        if ($this->getIcon()) {
+            $icon = FontAwesome::getMarkup($this->getIcon()) . ' ';
         }
         $classes = implode(' ', $this->getClasses());
         $attributes = [];

@@ -109,6 +109,7 @@ const initDataTable = (dataTableConfig) => {
             //     }
             //     return data;
             // },
+            // @todo provide alternate icon sets
             buttons: [
                 {
                     text: '<i class="fa fa-download"></i> Download CSV',
