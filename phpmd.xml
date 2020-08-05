@@ -7,6 +7,16 @@
     <rule ref="rulesets/codesize.xml"/>
     <rule ref="rulesets/controversial.xml"/>
     <rule ref="rulesets/design.xml"/>
-    <rule ref="rulesets/naming.xml"/>
+    <rule ref="rulesets/naming.xml/ShortVariable">
+        <properties>
+            <property name="minimum" value="2"/>
+            <property name="exceptions" value="a,b" />
+        </properties>
+    </rule>
+    <rule ref="rulesets/naming.xml/LongVariable"/>
+    <rule ref="rulesets/naming.xml/ShortMethodName"/>
+    <rule ref="rulesets/naming.xml/ConstructorWithNameAsEnclosingClass"/>
+    <rule ref="rulesets/naming.xml/ConstantNamingConventions"/>
+    <rule ref="rulesets/naming.xml/BooleanGetMethodName"/>
     <rule ref="rulesets/unusedcode.xml"/>
 </ruleset>

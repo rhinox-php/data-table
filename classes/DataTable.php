@@ -34,7 +34,6 @@ abstract class DataTable
     protected $exportFileName = 'export';
     protected $hasAction = false;
     protected $hasSelect = false;
-    protected array $presets = [];
 
     /**
      * Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables (Ajax requests are asynchronous and thus can return out of sequence). This is used as part of the draw return parameter.
@@ -48,15 +47,6 @@ abstract class DataTable
 
     public function __construct()
     {
-        $this->presets = [
-            'number' => Preset\Number::class,
-        ];
-    }
-
-    // @todo return type interface
-    public function getPreset(string $name)
-    {
-        return $this->presets[$name] ?? null;
     }
 
     public function sendResponse()
@@ -527,7 +517,7 @@ abstract class DataTable
         return $this->columns[] = $action;
     }
 
-    public function getDrawCounter(): int
+    public function getDrawCounter(): ?int
     {
         return $this->drawCounter;
     }

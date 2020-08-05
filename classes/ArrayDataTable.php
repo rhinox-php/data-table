@@ -45,7 +45,7 @@ class ArrayDataTable extends DataTable
             $match = preg_replace('/\s+/', '.*?', $match);
             foreach ($data as $i => $row) {
                 $remove = true;
-                foreach ($row as $key => $value) {
+                foreach ($row as $value) {
                     if (preg_match("/$match/i", $value)) {
                         $remove = false;
                         break;

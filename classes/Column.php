@@ -20,6 +20,7 @@ class Column
     protected $filterEnabled = true;
     protected $filterSelect = [];
     protected $filterDateRange = [];
+    protected $footer;
 
     public function __construct(DataTable $dataTable, $name)
     {
@@ -228,10 +229,10 @@ class Column
         return $value;
     }
 
-    public function getPreset()
-    {
-        return $this->preset;
-    }
+    // public function getPreset()
+    // {
+    //     return $this->preset;
+    // }
 
     public function setPreset(Preset $preset): Column
     {

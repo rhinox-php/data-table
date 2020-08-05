@@ -15,7 +15,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
     private $_data;
 
     /**
-     * @param mixed[] $_data Input data
+     * @param mixed[]|mixed|null $_data Input data
      */
     public function __construct($_data)
     {
@@ -104,7 +104,7 @@ class InputData implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSe
      * Cast to an string.
      *
      * @param string $name    The name/key of input item
-     * @param string $default The default value if the item doesn't exist
+     * @param string|null|mixed $default The default value if the item doesn't exist
      *
      * @return string
      */
