@@ -398,12 +398,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                 ],
             ],
         ]);
-        $dataTable->addColumn('unit_price')->addFormatter(fn($value) => number_format($value));
+        $dataTable->addColumn('unit_price')->addFormatter(fn ($value) => number_format($value));
         $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset(new Preset\Number());
         $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset(new Preset\Money());
-        $dataTable->insertColumn('random', function () {
-            return rand(0, 100);
-        });
+        $dataTable->insertColumn('random', fn () => rand(0, 100));
         $dataTable->addColumn('updated_at')->setFilterDateRange(true);
         $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterQuery('created_at_filter')->setFilterDateRange(true);
         $dataTable->addColumn('deleted_at')->setVisible(false);
@@ -412,11 +410,9 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->setDefaultOrder('name', 'asc');
         $dataTable->setExportFileName('products-' . date('Y-m-d-His'));
 
-        $dataTable->addRowFormatter(function ($row) {
-            return [
-                'class' => $row['random'] < 30 ? 'text-danger' : null,
-            ];
-        });
+        $dataTable->addRowFormatter(fn ($row) => [
+            'class' => $row['random'] < 30 ? 'text-danger' : null,
+        ]);
 
         return $dataTable;
     }
