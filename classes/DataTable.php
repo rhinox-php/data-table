@@ -14,7 +14,6 @@ abstract class DataTable
     protected $id;
     protected $columns = [];
     protected $data;
-    protected $result;
     protected $recordsTotal;
     protected $recordsFiltered;
     protected $start;
@@ -41,6 +40,8 @@ abstract class DataTable
      * @see https://datatables.net/manual/server-side
      */
     private ?int $drawCounter = null;
+
+    public abstract function processSource(InputData $input);
 
     public function sendResponse()
     {
@@ -223,7 +224,7 @@ abstract class DataTable
         return $this->id;
     }
 
-    public function getIdHash(): array
+    protected function getIdHash(): array
     {
         return [];
     }
@@ -240,12 +241,6 @@ abstract class DataTable
     public function getColumns()
     {
         return $this->columns;
-    }
-
-    public function setColumns(array $columns)
-    {
-        $this->columns = $columns;
-        return $this;
     }
 
     public function getColumn($name)
@@ -286,17 +281,6 @@ abstract class DataTable
     public function setData($data)
     {
         $this->data = $data;
-        return $this;
-    }
-
-    public function getResult()
-    {
-        return $this->result;
-    }
-
-    public function setResult($result)
-    {
-        $this->result = $result;
         return $this;
     }
 

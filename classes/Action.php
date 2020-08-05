@@ -33,16 +33,6 @@ class Action extends Column
         return implode(' ', $output);
     }
 
-    public function getAs()
-    {
-        return $this->name;
-    }
-
-    public function getQuery()
-    {
-        return 'NULL';
-    }
-
     public function getCallback()
     {
         return $this->callback;

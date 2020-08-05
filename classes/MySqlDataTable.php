@@ -22,13 +22,20 @@ class MySqlDataTable extends DataTable
     public function processSource(InputData $input)
     {
         $bindings = [];
+        /** @var MySqlColumn[] */
         $columns = $this->getColumns();
 
         // Prepare the select column query
-        $selectColumns = implode(',' . PHP_EOL, array_map(function ($column) {
-            $as = preg_replace('/[^a-z0-9_]/i', '', $column->getAs());
-            return $column->getQuery() . ' AS `' . $as . '`';
-        }, $columns));
+        $selectColumns = [];
+        foreach ($columns as $i => $column) {
+            if ($column instanceof MySqlSelectColumnInterface) {
+                $as = preg_replace('/[^a-z0-9_]/i', '', $column->getAs());
+                $selectColumns[] = $column->getQuery() . ' AS `' . $as . '`';
+            } else {
+                $selectColumns[] = 'NULL AS `non_select_column_' . $i . '`';
+            }
+        }
+        $selectColumns = implode(',' . PHP_EOL, $selectColumns);
 
         // Prepare the having search query
         $having = '';
@@ -36,9 +43,9 @@ class MySqlDataTable extends DataTable
             $i = 1000;
             $havingColumns = [];
             foreach ($columns as $column) {
-                if ($column->getAs()) {
+                if ($column instanceof MySqlSelectColumnInterface && $column->getFilterQuery()) {
                     $bindings[':searchGlobal' . $i] = '%' . $this->getSearch() . '%';
-                    $havingColumns[] = $column->getAs() . ' LIKE :searchGlobal' . $i++;
+                    $havingColumns[] = $column->getFilterQuery() . ' LIKE :searchGlobal' . $i++;
                 }
             }
             $havingColumns = implode(' OR ', $havingColumns);
@@ -64,7 +71,7 @@ class MySqlDataTable extends DataTable
         foreach ($input->arr('filter') as $columnName => $value) {
             foreach ($columns as $i => $column) {
                 if ($column->getName() == $columnName->string()) {
-                    $columnHaving[] = '(' . $column->getAs() . ' LIKE :search' . ($i + 1000) . ')';
+                    $columnHaving[] = '(' . $column->getFilterQuery() . ' LIKE :search' . ($i + 1000) . ')';
                     $bindings[':search' . ($i + 1000)] = '%' . $value->string() . '%';
                 }
             }
@@ -161,7 +168,7 @@ class MySqlDataTable extends DataTable
             OFFSET {$this->getStart()}
         ";
 
-        // $this->debug($sql, array_merge($this->bindings, $bindings));
+        // o($sql, array_merge($this->bindings, $bindings));
 
         // Execute the query
         $time = microtime(true);
@@ -325,7 +332,7 @@ class MySqlDataTable extends DataTable
     //     }, $sql);
     // }
 
-    public function getIdHash(): array
+    protected function getIdHash(): array
     {
         return [$this->getTable()];
     }

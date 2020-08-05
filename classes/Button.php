@@ -44,8 +44,8 @@ class Button
         }
         $attributes = implode(' ', $attributes);
         $target = '';
-        if ($this->target) {
-            $target = 'target="' . $this->target . '"';
+        if ($this->getTarget()) {
+            $target = 'target="' . $this->getTarget() . '"';
         }
         if (!empty($this->getData())) {
             $inputs = [];

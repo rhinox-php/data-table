@@ -99,7 +99,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('mbp_13', $row->string('code'));
-            $this->assertStringContainsStringIgnoringCase('1499', $row->string('unitPrice'));
+            $this->assertStringContainsStringIgnoringCase('1,499', $row->string('unitPrice'));
         }
     }
 
@@ -231,7 +231,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $json = $this->getJsonResponse([
             'columns' => [
-                10 => [
+                11 => [
                     'search' => [
                         'value' => '2014-01-01 00:00:00 to 2016-01-01 00:00:00',
                     ],
@@ -245,7 +245,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $json = $this->getJsonResponse([
             'columns' => [
-                10 => [
+                11 => [
                     'search' => [
                         'value' => '2016-01-01 00:00 to 2014-01-01 00:00',
                     ],
@@ -259,7 +259,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $json = $this->getJsonResponse([
             'columns' => [
-                10 => [
+                11 => [
                     'search' => [
                         'value' => '2013-02-01',
                     ],
@@ -273,7 +273,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $json = $this->getJsonResponse([
             'columns' => [
-                10 => [
+                11 => [
                     'search' => [
                         'value' => 'invalid',
                     ],
@@ -397,14 +397,16 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                 ],
             ],
         ]);
-        $dataTable->addColumn('unit_price');
+        $dataTable->addColumn('unit_price')->setFormat(fn($value) => number_format($value));
         $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset('number');
         $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset('money');
         $dataTable->insertColumn('random', function () {
             return rand(0, 100);
         });
-        $dataTable->addColumn('created_at')->setFilterDateRange(true);
-        $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterQuery('products.created_at')->setFilterDateRange(true);
+        $dataTable->addColumn('updated_at')->setFilterDateRange(true);
+        $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterQuery('created_at_filter')->setFilterDateRange(true);
+        $dataTable->addColumn('deleted_at')->setVisible(false);
+        $dataTable->addColumn('created_at_filter')->setQuery('products.created_at');
 
         $dataTable->setDefaultOrder('name', 'asc');
         $dataTable->setExportFileName('products-' . date('Y-m-d-His'));

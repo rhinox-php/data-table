@@ -8,6 +8,26 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
 {
+    public function testRender(): void
+    {
+        $dataTable = $this->getDataTable();
+        $this->assertFalse($dataTable->process(new Request()));
+        $html = $dataTable->render();
+        $this->assertStringContainsString('<table', $html);
+        $this->assertStringContainsString('</table>', $html);
+    }
+
+    public function testSetId(): void
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->setId('test-table');
+        $this->assertFalse($dataTable->process(new Request()));
+        $html = $dataTable->render();
+        $this->assertStringContainsString('<table', $html);
+        $this->assertStringContainsString('id="test-table"', $html);
+        $this->assertStringContainsString('</table>', $html);
+    }
+
     public function testIndexedArray(): void
     {
         $data = [
@@ -86,7 +106,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
 
         $dataTable->addColumn('i')->setMethod('getI');
         $dataTable->addColumn('color')->setProperty('color');
-        $dataTable->addColumn('choice', 1)->setCallback(fn($row) => $row->choice);
+        $dataTable->addColumn('choice', 1)->setCallback(fn ($row) => $row->choice);
 
         $json = $this->getJsonResponse([], $dataTable);
         $this->assertCount(4, $json['data']);

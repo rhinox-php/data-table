@@ -33,16 +33,6 @@ class Select extends Column
         // return (new TagCheckbox(new InputData(['name' => 'datatable[' . $row[$this->checkboxName] . ']', 'attributes' => ['data-row' => json_encode($row)],])))->render();
     }
 
-    public function getAs()
-    {
-        return $this->name;
-    }
-
-    public function getQuery()
-    {
-        return 'NULL';
-    }
-
     public function getClassName()
     {
         return 'rhinox-data-table-select';

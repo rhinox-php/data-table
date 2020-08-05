@@ -2,7 +2,7 @@
 
 namespace Rhino\DataTable;
 
-class MySqlColumn extends Column
+class MySqlColumn extends Column implements MySqlSelectColumnInterface
 {
     protected $query;
     protected $having;
@@ -14,7 +14,6 @@ class MySqlColumn extends Column
     {
         parent::__construct($dataTable, $name);
         $this->setQuery($dataTable ? $dataTable->getTable() . '.' . $name : $name);
-        $this->setHaving($name);
     }
 
     public function getQuery()
@@ -39,7 +38,7 @@ class MySqlColumn extends Column
         return $this;
     }
 
-    public function getFilterQuery()
+    public function getFilterQuery(): string
     {
         return $this->filterQuery ?: $this->getQuery();
     }
@@ -53,28 +52,6 @@ class MySqlColumn extends Column
     public function getAs()
     {
         return $this->getName();
-    }
-
-    public function getHaving()
-    {
-        return $this->having;
-    }
-
-    public function setHaving($having): self
-    {
-        $this->having = $having;
-        return $this;
-    }
-
-    public function getSearchWhere()
-    {
-        return $this->searchWhere;
-    }
-
-    public function setSearchWhere($searchWhere): self
-    {
-        $this->searchWhere = $searchWhere;
-        return $this;
     }
 
     public function getDataTable(): MySqlDataTable
