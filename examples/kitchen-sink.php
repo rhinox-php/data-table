@@ -45,7 +45,7 @@ $dataTable->addAction(function ($row) use ($dataTable) {
     ];
 });
 
-$dataTable->addColumn('id')->setPreset(new Preset\Id())->setVisible(false);
+$dataTable->addColumn('id')->addPreset(new Preset\Id())->setVisible(false);
 $dataTable->addColumn('name');
 $dataTable->addColumn('code');
 $dataTable->addColumn('category')->addFormatter(fn ($value) => ucfirst($value))->setFilterSelect([
@@ -74,10 +74,10 @@ $dataTable->addColumn('category')->addFormatter(fn ($value) => ucfirst($value))-
         ],
     ],
 ]);
-$dataTable->addColumn('unit_price')->setPreset(new Preset\Money());
-$dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset(new Preset\Number());
+$dataTable->addColumn('unit_price')->addPreset(new Preset\Money());
+$dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->addPreset(new Preset\Number());
 // @todo money format should not break line between $ sign
-$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset(new Preset\Money());
+$dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->addPreset(new Preset\Money());
 $dataTable->insertColumn('random', function () {
     return rand(0, 100);
 });

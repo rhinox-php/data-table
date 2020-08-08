@@ -403,8 +403,8 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
             ],
         ]);
         $dataTable->addColumn('unit_price')->addFormatter(fn ($value) => number_format($value));
-        $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->setPreset(new Preset\Number());
-        $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->setPreset(new Preset\Money());
+        $dataTable->addColumn('total_quantity')->setQuery('SUM(line_items.quantity)')->setHeader('Total Quantity')->addPreset(new Preset\Number());
+        $dataTable->addColumn('total_sales')->setQuery('SUM(line_items.quantity * products.unit_price)')->setHeader('Total Sales')->addPreset(new Preset\Money());
         $dataTable->insertColumn('random', fn () => rand(0, 100));
         $dataTable->addColumn('updated_at')->setFilterDateRange(true);
         $dataTable->addColumn('created_at')->setQuery('DATE_FORMAT(products.created_at, "%M %Y")')->setOrderQuery('products.created_at')->setFilterQuery('created_at_filter')->setFilterDateRange(true);

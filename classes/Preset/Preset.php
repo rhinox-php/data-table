@@ -6,7 +6,7 @@ use Rhino\DataTable\Column;
 
 abstract class Preset
 {
-    public function format($value, $row, $type): string
+    public function format($value, $row, $type)
     {
         return $value;
     }

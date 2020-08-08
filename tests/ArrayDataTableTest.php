@@ -47,22 +47,22 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(4, $json['data']);
     }
 
-    // public function testObjectArray(): void
-    // {
-    //     $dataTable = new ArrayDataTable([
-    //         (object) ['i' => 1, 'color' => 'red', 'choice' => 'yes'],
-    //         (object) ['i' => 2, 'color' => 'blue', 'choice' => 'no'],
-    //         (object) ['i' => 3, 'color' => 'blue', 'choice' => 'yes'],
-    //         (object) ['i' => 4, 'color' => null, 'choice' => 'no'],
-    //     ]);
+    public function testObjectArray(): void
+    {
+        $dataTable = new ArrayDataTable([
+            (object) ['i' => 1, 'color' => 'red', 'choice' => 'yes'],
+            (object) ['i' => 2, 'color' => 'blue', 'choice' => 'no'],
+            (object) ['i' => 3, 'color' => 'blue', 'choice' => 'yes'],
+            (object) ['i' => 4, 'color' => null, 'choice' => 'no'],
+        ]);
 
-    //     $dataTable->addColumn('i')->setProperty('i');
-    //     $dataTable->addColumn('color')->setProperty('color');
-    //     $dataTable->addColumn('choice', 1)->setProperty('choice');
+        $dataTable->addColumn('i')->setProperty('i');
+        $dataTable->addColumn('color')->setProperty('color');
+        $dataTable->addColumn('choice', 1)->setProperty('choice');
 
-    //     $json = $this->getJsonResponse([], $dataTable);
-    //     $this->assertCount(4, $json['data']);
-    // }
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertCount(4, $json['data']);
+    }
 
     public function testClassArray(): void
     {
@@ -127,7 +127,6 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         $response = ob_get_clean();
         return InputData::jsonDecode($response);
     }
-
 
     private function getDataTable(): ArrayDataTable
     {

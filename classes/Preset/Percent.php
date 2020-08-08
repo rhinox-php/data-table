@@ -4,7 +4,7 @@ namespace Rhino\DataTable\Preset;
 
 use Rhino\DataTable\Column;
 
-class Money extends Preset
+class Percent extends Preset
 {
     public function configure(Column $column): void
     {
@@ -15,10 +15,8 @@ class Money extends Preset
 
     public function format($value, $row, $type)
     {
-        // @todo handle other currencies
-        // @todo allow overriding null result
         if ($value !== null) {
-            $value = '$ ' . number_format($value ?: 0, 2);
+            $value = round($value) . ' %';
         }
         return $value;
     }
