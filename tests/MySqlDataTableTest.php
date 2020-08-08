@@ -306,9 +306,13 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         ob_start();
         $dataTable->sendResponse();
         $response = trim(ob_get_clean());
-        foreach (explode(PHP_EOL, $response) as $line) {
-            $row = str_getcsv($line);
-            $this->assertCount(10, $row);
+
+        $handle = fopen("php://memory", 'r+');
+        fputs($handle, $response);
+        rewind($handle);
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $this->assertCount(12, $row);
         }
     }
 
