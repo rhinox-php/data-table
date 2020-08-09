@@ -9,6 +9,66 @@ use Symfony\Component\HttpFoundation\Request;
 
 class PresetTest extends \PHPUnit\Framework\TestCase
 {
+    public function testArray(): void
+    {
+        $dataTable = new ArrayDataTable([
+            [[4, 2, 3]],
+            [5],
+            [null],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\ArrayList());
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertStringContainsString('<li>2</li><li>3</li><li>4</li>', $json->string('data.0.value'));
+        $this->assertStringContainsString('<ul', $json->string('data.0.value'));
+        $this->assertStringContainsString('</ul>', $json->string('data.0.value'));
+        $this->assertStringContainsString('<li>5</li>', $json->string('data.1.value'));
+
+        $dataTable = new ArrayDataTable([
+            [[4, 2, 3]],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\ArrayList())->setSortFunction(fn ($a, $b) => $b - $a));
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertStringContainsString('<li>4</li><li>3</li><li>2</li>', $json->string('data.0.value'));
+
+        $dataTable = new ArrayDataTable([
+            [[4, 2, 3]],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\ArrayList());
+        $csv = $this->getJsonResponse([
+            'csv' => true,
+        ], $dataTable);
+        $this->assertStringContainsString('2, 3, 4', $csv);
+    }
+
+    public function testBytes(): void
+    {
+        $dataTable = new ArrayDataTable([
+            [100],
+            [100 * 1024],
+            [100 * 1024 * 1024],
+            [100 * 1024 * 1024 * 1024],
+            [100 * 1024 * 1024 * 1024 * 1024],
+            [100 * 1024 * 1024 * 1024 * 1024 * 1024],
+            [100 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024],
+            [100 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Bytes());
+        $json = $this->getJsonResponse([
+            'order' => [[
+                'column' => 0,
+                'dir' => 'asc',
+            ]],
+        ], $dataTable);
+        $this->assertEquals('100 B', $json->string('data.0.value'));
+        $this->assertEquals('100 KB', $json->string('data.1.value'));
+        $this->assertEquals('100 MB', $json->string('data.2.value'));
+        $this->assertEquals('100 GB', $json->string('data.3.value'));
+        $this->assertEquals('100 TB', $json->string('data.4.value'));
+        $this->assertEquals('100 PB', $json->string('data.5.value'));
+        $this->assertEquals('100 EB', $json->string('data.6.value'));
+        $this->assertEquals('102400 EB', $json->string('data.7.value'));
+    }
+
     public function testBoolean(): void
     {
         $dataTable = new ArrayDataTable([
@@ -58,7 +118,10 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('', $json->string('data.3.value'));
     }
 
-    private function getJsonResponse(array $requestParams, ?ArrayDataTable $dataTable = null): InputData
+    /**
+     * @return InputData|string
+     */
+    private function getJsonResponse(array $requestParams, ?ArrayDataTable $dataTable = null)
     {
         $dataTable = $dataTable ?: $this->getDataTable();
         $request = new Request([], array_merge([
@@ -71,6 +134,9 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         ob_start();
         $dataTable->sendResponse();
         $response = ob_get_clean();
+        if (isset($requestParams['csv'])) {
+            return $response;
+        }
         return InputData::jsonDecode($response);
     }
 

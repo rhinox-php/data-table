@@ -84,14 +84,18 @@ class ArrayDataTable extends DataTable
             foreach ($orderBy as ['columnIndex' => $columnIndex, 'direction' => $direction]) {
                 $aValue = $a[$columnIndex] ?? null;
                 $bValue = $b[$columnIndex] ?? null;
-                // @todo handle complex variable types
+                // @todo handle complex variable types, dates, arrays, etc
+                // @todo sorting numbers bigger than INT_MAX gives incorrect results
                 // if ($aValue instanceof DateTime) {
                 //     $aValue = $aValue->format(MYSQL_FORMAT);
                 // }
                 // if ($bValue instanceof DateTime) {
                 //     $bValue = $bValue->format(MYSQL_FORMAT);
                 // }
-                return strnatcasecmp((string) $aValue, (string) $bValue) * $direction;
+                if ((is_string($aValue) || is_numeric($aValue)) && (is_string($bValue) || is_numeric($bValue))) {
+                    return strnatcasecmp((string) $aValue, (string) $bValue) * $direction;
+                }
+                return 0;
             }
         });
         return $data;

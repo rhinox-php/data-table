@@ -34,7 +34,7 @@ namespace debug {
             var_dump($arg);
             echo PHP_EOL;
             $output = ob_get_clean();
-            $output = strip_tags($output);
+            // $output = strip_tags($output);
             $output = html_entity_decode($output);
             echo $output;
             flush();
