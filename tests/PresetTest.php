@@ -40,6 +40,23 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $this->assertStringContainsString('2, 3, 4', $csv);
     }
 
+    public function testBoolean(): void
+    {
+        $dataTable = new ArrayDataTable([
+            [true],
+            ['123'],
+            [false],
+            [null],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Boolean());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo option values
+        $this->assertEquals('Yes', $json->string('data.0.value'));
+        $this->assertEquals('Yes', $json->string('data.1.value'));
+        $this->assertEquals('-', $json->string('data.2.value'));
+        $this->assertEquals('-', $json->string('data.3.value'));
+    }
+
     public function testBytes(): void
     {
         $dataTable = new ArrayDataTable([
@@ -69,21 +86,25 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('102400 EB', $json->string('data.7.value'));
     }
 
-    public function testBoolean(): void
+    public function testDate(): void
     {
+        $now = new \DateTime();
         $dataTable = new ArrayDataTable([
-            [true],
-            ['123'],
-            [false],
+            [$now],
             [null],
+            ['invalid date'],
+            ['2019-09-24'],
+            ['2019-07-24'],
+            ['2019-08-24'],
         ]);
-        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Boolean());
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Date());
         $json = $this->getJsonResponse([], $dataTable);
-        // @todo option values
-        $this->assertEquals('Yes', $json->string('data.0.value'));
-        $this->assertEquals('Yes', $json->string('data.1.value'));
-        $this->assertEquals('-', $json->string('data.2.value'));
-        $this->assertEquals('-', $json->string('data.3.value'));
+        o($json);
+        $this->assertEquals($now->format('Y-m-d'), $json->string('data.0.value'));
+        $this->assertEquals('2019-07-24', $json->string('data.1.value'));
+        $this->assertEquals('2019-08-24', $json->string('data.2.value'));
+        $this->assertEquals('2019-09-24', $json->string('data.3.value'));
+        // @todo test custom format with sorting
     }
 
     public function testId(): void
@@ -94,9 +115,10 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['123'],
             [null],
         ]);
-        $dataTable->addColumn('id')->setIndex(0);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Id());
         $json = $this->getJsonResponse([], $dataTable);
         // @todo need to confirm what ID preset should do
+        $this->markTestIncomplete();
     }
 
     public function testMoney(): void
