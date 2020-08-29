@@ -2,6 +2,8 @@
 
 namespace Rhino\DataTable;
 
+use Rhino\InputData\InputData;
+
 class Select extends Column
 {
     protected bool $searchable = false;

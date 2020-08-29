@@ -6,7 +6,8 @@ class Dropdown
 {
     protected $buttons;
 
-    public function __construct(array $buttons) {
+    public function __construct(array $buttons)
+    {
         $this->buttons = $buttons;
     }
 
@@ -27,5 +28,4 @@ class Dropdown
         HTML;
         return $result;
     }
-
 }

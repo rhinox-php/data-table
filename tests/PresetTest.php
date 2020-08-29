@@ -3,8 +3,8 @@
 namespace Rhino\DataTable\Tests;
 
 use Rhino\DataTable\ArrayDataTable;
-use Rhino\DataTable\InputData;
 use Rhino\DataTable\Preset;
+use Rhino\InputData\InputData;
 use Symfony\Component\HttpFoundation\Request;
 
 class PresetTest extends \PHPUnit\Framework\TestCase

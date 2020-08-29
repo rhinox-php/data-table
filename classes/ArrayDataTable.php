@@ -2,6 +2,8 @@
 
 namespace Rhino\DataTable;
 
+use Rhino\InputData\InputData;
+
 class ArrayDataTable extends DataTable
 {
     protected $array = [];

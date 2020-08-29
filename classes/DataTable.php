@@ -2,7 +2,7 @@
 
 namespace Rhino\DataTable;
 
-use Rhino\DataTable\Preset;
+use Rhino\InputData\InputData;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,8 +42,7 @@ abstract class DataTable
      */
     private ?int $drawCounter = null;
 
-    public abstract function processSource(InputData $input);
-
+    abstract public function processSource(InputData $input);
 
     public function __construct()
     {

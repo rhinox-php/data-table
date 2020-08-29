@@ -13,6 +13,7 @@ class GroupLink extends Preset
     {
         $this->setUrl($url);
     }
+
     public function configure(Column $column): void
     {
         $column->addFormatter([$this, 'format']);

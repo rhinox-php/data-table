@@ -4,7 +4,7 @@ namespace Rhino\DataTable\Preset;
 
 use Rhino\DataTable\Column;
 
-class Percent extends Preset
+class Trim extends Preset
 {
     public function configure(Column $column): void
     {

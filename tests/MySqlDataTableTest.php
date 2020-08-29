@@ -3,9 +3,9 @@
 namespace Rhino\DataTable\Tests;
 
 use Rhino\DataTable\Exception\QueryException;
-use Rhino\DataTable\InputData;
 use Rhino\DataTable\MySqlDataTable;
 use Rhino\DataTable\Preset;
+use Rhino\InputData\MutableInputData;
 use Symfony\Component\HttpFoundation\Request;
 
 // @todo test url filters http://localhost:8990/examples/kitchen-sink.php?filter[name]=acc
@@ -316,7 +316,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    private function getJsonResponse(array $requestParams, ?MySqlDataTable $dataTable = null): InputData
+    private function getJsonResponse(array $requestParams, ?MySqlDataTable $dataTable = null): MutableInputData
     {
         $dataTable = $dataTable ?: $this->getDataTable();
         $request = new Request([], array_merge([
@@ -329,7 +329,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         ob_start();
         $dataTable->sendResponse();
         $response = ob_get_clean();
-        return InputData::jsonDecode($response);
+        return MutableInputData::jsonDecode($response);
     }
 
     private function getPdo(?array $options = null): \PDO

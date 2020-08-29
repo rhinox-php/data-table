@@ -4,7 +4,6 @@ namespace Rhino\DataTable;
 
 class ArrayColumn extends Column
 {
-
     protected $callback = null;
     protected $method = null;
     protected $property = null;

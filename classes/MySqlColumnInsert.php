@@ -8,7 +8,8 @@ class MySqlColumnInsert extends ColumnInsert
         return 'NULL';
     }
 
-    public function getAs() {
+    public function getAs()
+    {
         return $this->getName();
     }
 }
