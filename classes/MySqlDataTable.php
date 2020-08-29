@@ -6,6 +6,7 @@ use Rhino\InputData\InputData;
 
 class MySqlDataTable extends DataTable
 {
+    protected $bindingCount = 1000;
     private $pdo;
     private $table;
     private $joins = [];
@@ -13,7 +14,6 @@ class MySqlDataTable extends DataTable
     private $bindings = [];
     private $wheres = [];
     private $havings = [];
-    protected $bindingCount = 1000;
 
     public function __construct($pdo, $table)
     {
@@ -200,6 +200,77 @@ class MySqlDataTable extends DataTable
         $this->setRecordsFiltered($total);
     }
 
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    public function addColumn(string $name, int $index = null): MySqlColumn
+    {
+        return $this->spliceColumn(new MySqlColumn($this, $name), $index);
+    }
+
+    public function insertColumn(string $name, callable $format, int $index = null): MySqlColumnInsert
+    {
+        return $this->spliceColumn(new MySqlColumnInsert($this, $name, $format), $index);
+    }
+
+    // @todo add join with bindings
+    public function addJoin(string $join): self
+    {
+        $this->joins[] = $join;
+        return $this;
+    }
+
+    // @todo add group by with bindings
+    public function addGroupBy(string $groupBy): self
+    {
+        $this->groupBys[] = $groupBy;
+        return $this;
+    }
+
+    public function addWhere($sql, array $bindings = [])
+    {
+        $this->wheres[] = [
+            'sql' => $sql,
+            'bindings' => $bindings,
+        ];
+    }
+
+    public function addHaving($sql, array $bindings = [])
+    {
+        $this->havings[] = [
+            'sql' => $sql,
+            'bindings' => $bindings,
+        ];
+    }
+
+    public function bind($sql, $bindings)
+    {
+        // @todo check if this can be combined with replaceBindings
+        foreach ($bindings as $key => $value) {
+            $bindKey = ':binding' . (1000 + count($this->bindings));
+            $sql = str_replace($key, $bindKey, $sql);
+            $this->bindings[$bindKey] = $value;
+        }
+        return $sql;
+    }
+
+    public function replaceBindings($query, array $bindings)
+    {
+        $result = [];
+        foreach ($bindings as $key => $value) {
+            $key = ':' . trim($key, ':');
+            $newKey = ':binding' . ($this->bindingCount++);
+            $query = str_replace($key, $newKey, $query);
+            $result[$newKey] = $value;
+        }
+        return [
+            $query,
+            $result,
+        ];
+    }
+
     protected function applyFilterSelect(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
     {
         $filterSelect = $column->getFilterSelect($inputColumn->string('search.value'));
@@ -269,62 +340,6 @@ class MySqlDataTable extends DataTable
         }
     }
 
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    public function addColumn(string $name, int $index = null): MySqlColumn
-    {
-        return $this->spliceColumn(new MySqlColumn($this, $name), $index);
-    }
-
-    public function insertColumn(string $name, callable $format, int $index = null): MySqlColumnInsert
-    {
-        return $this->spliceColumn(new MySqlColumnInsert($this, $name, $format), $index);
-    }
-
-    // @todo add join with bindings
-    public function addJoin(string $join): self
-    {
-        $this->joins[] = $join;
-        return $this;
-    }
-
-    // @todo add group by with bindings
-    public function addGroupBy(string $groupBy): self
-    {
-        $this->groupBys[] = $groupBy;
-        return $this;
-    }
-
-    public function addWhere($sql, array $bindings = [])
-    {
-        $this->wheres[] = [
-            'sql' => $sql,
-            'bindings' => $bindings,
-        ];
-    }
-
-    public function addHaving($sql, array $bindings = [])
-    {
-        $this->havings[] = [
-            'sql' => $sql,
-            'bindings' => $bindings,
-        ];
-    }
-
-    public function bind($sql, $bindings)
-    {
-        // @todo check if this can be combined with replaceBindings
-        foreach ($bindings as $key => $value) {
-            $bindKey = ':binding' . (1000 + count($this->bindings));
-            $sql = str_replace($key, $bindKey, $sql);
-            $this->bindings[$bindKey] = $value;
-        }
-        return $sql;
-    }
-
     // private function replaceBindingsInSql($sql, $bindings)
     // {
     //     return preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
@@ -338,20 +353,5 @@ class MySqlDataTable extends DataTable
     protected function getIdHash(): array
     {
         return [$this->getTable()];
-    }
-
-    public function replaceBindings($query, array $bindings)
-    {
-        $result = [];
-        foreach ($bindings as $key => $value) {
-            $key = ':' . trim($key, ':');
-            $newKey = ':binding' . ($this->bindingCount++);
-            $query = str_replace($key, $newKey, $query);
-            $result[$newKey] = $value;
-        }
-        return [
-            $query,
-            $result,
-        ];
     }
 }

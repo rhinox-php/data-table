@@ -57,11 +57,6 @@ class Button
         return '<a href="' . $this->getUrl() . '" ' . $confirmation . ' class="' . $classes . '" ' . $attributes . ' ' . $target . '>' . $icon . $this->getText() . '</a>';
     }
 
-    protected function escapeHtml(string $value, bool $doubleEncode = true): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', $doubleEncode);
-    }
-
     public function getUrl(): ?string
     {
         return $this->url;
@@ -182,5 +177,10 @@ class Button
     {
         $this->visible = $visible;
         return $this;
+    }
+
+    protected function escapeHtml(string $value, bool $doubleEncode = true): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', $doubleEncode);
     }
 }

@@ -42,11 +42,11 @@ abstract class DataTable
      */
     private ?int $drawCounter = null;
 
-    abstract public function processSource(InputData $input);
-
     public function __construct()
     {
     }
+
+    abstract public function processSource(InputData $input);
 
     public function sendResponse()
     {
@@ -128,12 +128,6 @@ abstract class DataTable
         }
     }
 
-    protected function sendJson(): bool
-    {
-        $this->response = new JsonResponse($this->getJsonResponseData());
-        return true;
-    }
-
     public function getJsonResponseData(): array
     {
         $data = $this->getData();
@@ -174,49 +168,6 @@ abstract class DataTable
         return $this->response;
     }
 
-    protected function sendCsv()
-    {
-        $this->response = new StreamedResponse(null, 200, [
-            'Content-Type' => 'application/csv',
-            'Content-Disposition' => 'attachment; filename=' . $this->getExportFileName() . '.csv',
-        ]);
-        $this->response->setCache([
-            'no_cache' => true,
-        ]);
-        $this->response->setCallback(function () {
-            $data = $this->getData();
-
-            $columns = array_values($this->getColumns());
-
-            $outstream = fopen('php://output', 'w');
-            $outputRow = [];
-            foreach ($columns as $c => $column) {
-                if ($column->isExportable()) {
-                    $outputRow[$c] = $column->getHeader();
-                }
-            }
-            fputcsv($outstream, $outputRow);
-
-            foreach ($data as $row) {
-                $outputRow = [];
-                $indexedRow = [];
-                foreach ($columns as $c => $column) {
-                    if ($column->isExportable()) {
-                        $indexedRow[$column->getName()] = $row[$c];
-                    }
-                }
-                foreach ($columns as $c => $column) {
-                    if ($column->isExportable()) {
-                        $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
-                    }
-                }
-                fputcsv($outstream, $outputRow);
-            }
-            fclose($outstream);
-        });
-        return true;
-    }
-
     public function getId()
     {
         if (!$this->id) {
@@ -227,11 +178,6 @@ abstract class DataTable
             $this->id = 'datatable-' . md5(implode(':', $hash));
         }
         return $this->id;
-    }
-
-    protected function getIdHash(): array
-    {
-        return [];
     }
 
     public function setId($id)
@@ -266,16 +212,6 @@ abstract class DataTable
             }
         }
         return null;
-    }
-
-    protected function spliceColumn($column, ?int $index = null)
-    {
-        if ($index === null) {
-            $this->columns[] = $column;
-        } else {
-            array_splice($this->columns, $index, 0, [$column]);
-        }
-        return $column;
     }
 
     public function getData()
@@ -525,5 +461,69 @@ abstract class DataTable
     {
         $this->drawCounter = $drawCounter;
         return $this;
+    }
+
+    protected function sendJson(): bool
+    {
+        $this->response = new JsonResponse($this->getJsonResponseData());
+        return true;
+    }
+
+    protected function sendCsv()
+    {
+        $this->response = new StreamedResponse(null, 200, [
+            'Content-Type' => 'application/csv',
+            'Content-Disposition' => 'attachment; filename=' . $this->getExportFileName() . '.csv',
+        ]);
+        $this->response->setCache([
+            'no_cache' => true,
+        ]);
+        $this->response->setCallback(function () {
+            $data = $this->getData();
+
+            $columns = array_values($this->getColumns());
+
+            $outstream = fopen('php://output', 'w');
+            $outputRow = [];
+            foreach ($columns as $c => $column) {
+                if ($column->isExportable()) {
+                    $outputRow[$c] = $column->getHeader();
+                }
+            }
+            fputcsv($outstream, $outputRow);
+
+            foreach ($data as $row) {
+                $outputRow = [];
+                $indexedRow = [];
+                foreach ($columns as $c => $column) {
+                    if ($column->isExportable()) {
+                        $indexedRow[$column->getName()] = $row[$c];
+                    }
+                }
+                foreach ($columns as $c => $column) {
+                    if ($column->isExportable()) {
+                        $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
+                    }
+                }
+                fputcsv($outstream, $outputRow);
+            }
+            fclose($outstream);
+        });
+        return true;
+    }
+
+    protected function getIdHash(): array
+    {
+        return [];
+    }
+
+    protected function spliceColumn($column, ?int $index = null)
+    {
+        if ($index === null) {
+            $this->columns[] = $column;
+        } else {
+            array_splice($this->columns, $index, 0, [$column]);
+        }
+        return $column;
     }
 }

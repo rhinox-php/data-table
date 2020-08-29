@@ -103,15 +103,6 @@ class ArrayDataTable extends DataTable
         return $data;
     }
 
-    protected function spliceData(array $data): array
-    {
-        // @todo test no limit length
-        if ($this->getLength() == -1) {
-            return $data;
-        }
-        return array_splice($data, $this->getStart(), $this->getLength());
-    }
-
     public function getArray()
     {
         return $this->array;
@@ -126,5 +117,14 @@ class ArrayDataTable extends DataTable
     public function addColumn(string $name, int $index = null): ArrayColumn
     {
         return $this->spliceColumn(new ArrayColumn($this, $name), $index);
+    }
+
+    protected function spliceData(array $data): array
+    {
+        // @todo test no limit length
+        if ($this->getLength() == -1) {
+            return $data;
+        }
+        return array_splice($data, $this->getStart(), $this->getLength());
     }
 }

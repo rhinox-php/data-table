@@ -1,12 +1,12 @@
 <?php
 
-$finder = \PhpCsFixer\Finder::create()
+$finder = (new \PhpCsFixer\Finder())
     ->in([
         realpath(__DIR__ . '/../classes'),
         realpath(__DIR__ . '/../tests'),
     ]);
 
-return \PhpCsFixer\Config::create()
+return (new \PhpCsFixer\Config())
     ->setUsingCache(false)
     ->setRules([
         '@PSR2' => true,
@@ -46,16 +46,16 @@ return \PhpCsFixer\Config::create()
             'constant_public',
             'constant_protected',
             'constant_private',
-            // 'property_public',
-            // 'property_protected',
-            // 'property_private',
-            // 'construct',
-            // 'destruct',
-            // 'magic',
-            // 'phpunit',
-            // 'method_public',
-            // 'method_protected',
-            // 'method_private',
+            'property_public',
+            'property_protected',
+            'property_private',
+            'construct',
+            'destruct',
+            'magic',
+            'phpunit',
+            'method_public',
+            'method_protected',
+            'method_private',
         ],
     ])
     ->setFinder($finder);
