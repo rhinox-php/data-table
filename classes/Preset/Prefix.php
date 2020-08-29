@@ -20,10 +20,10 @@ class Prefix extends Preset
 
     public function format($value, $row, $type)
     {
-        if ($value !== null && $this->getPrefix() !== null) {
-            $value = $this->getPrefix() . $value;
+        if ($value === null) {
+            return null;
         }
-        return $value;
+        return $this->getPrefix() . $value;
     }
 
     public function getPrefix(): string

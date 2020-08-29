@@ -24,8 +24,12 @@ class Date extends Preset
         if ($value === null) {
             return null;
         }
-        if ($value instanceof \DateTimeInterface) {
+        if ($value instanceof \DateTime) {
             $date = $value;
+            $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
+        } elseif ($value instanceof \DateTimeImmutable) {
+            $date = $value;
+            $date = $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
         } else {
             try {
                 $date = new \DateTimeImmutable($value, new \DateTimeZone($this->getTimeZone()));

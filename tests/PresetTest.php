@@ -99,12 +99,87 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Date());
         $json = $this->getJsonResponse([], $dataTable);
-        o($json);
         $this->assertEquals($now->format('Y-m-d'), $json->string('data.0.value'));
         $this->assertEquals('2019-07-24', $json->string('data.1.value'));
         $this->assertEquals('2019-08-24', $json->string('data.2.value'));
         $this->assertEquals('2019-09-24', $json->string('data.3.value'));
         // @todo test custom format with sorting
+    }
+
+    public function testDateTime(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\DateTime());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testEnum(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['foo'],
+            ['baz'],
+            [null],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Enum([
+            'foo' => 'Bar',
+        ]));
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertEquals('Bar', $json->string('data.0.value'));
+        $this->assertEquals('baz', $json->string('data.1.value'));
+        $this->assertEquals('', $json->string('data.2.value'));
+    }
+
+    public function testGroup(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Group());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testGroupLink(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\GroupLink());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testHtml(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Html());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testHuman(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['abc-def'],
+            ['abc_def'],
+            [null],
+        ]);
+        // @todo should this handle camel case
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Human());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo need to fix sort order
+        $this->assertEquals('Abc Def', $json->string('data.0.value'));
+        $this->assertEquals('Abc Def', $json->string('data.1.value'));
+        $this->assertEquals('', $json->string('data.2.value'));
     }
 
     public function testId(): void
@@ -118,6 +193,72 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Id());
         $json = $this->getJsonResponse([], $dataTable);
         // @todo need to confirm what ID preset should do
+        $this->markTestIncomplete();
+    }
+
+    public function testJsonArray(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonArray());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testJsonArrayKey(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonArrayKey());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testJsonObject(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonObject());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testJsonString(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonString());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testLength(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Length());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testLink(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Link());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
         $this->markTestIncomplete();
     }
 
@@ -138,6 +279,52 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('$ 1,234,567,890.00', $json->string('data.1.value'));
         $this->assertEquals('$ 123.00', $json->string('data.2.value'));
         $this->assertEquals('', $json->string('data.3.value'));
+    }
+
+    public function testNumber(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Number());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
+    }
+
+    public function testPrefix(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+            [null],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Prefix('P: '));
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertEquals('P: 123', $json->string('data.0.value'));
+        $this->assertEquals('', $json->string('data.1.value'));
+    }
+
+    public function testSuffix(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+            [null],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Suffix('-S'));
+        $json = $this->getJsonResponse([], $dataTable);
+        $this->assertEquals('123-S', $json->string('data.0.value'));
+        $this->assertEquals('', $json->string('data.1.value'));
+    }
+
+    public function testTrim(): void
+    {
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Trim());
+        $json = $this->getJsonResponse([], $dataTable);
+        // @todo complete test
+        $this->markTestIncomplete();
     }
 
     /**
