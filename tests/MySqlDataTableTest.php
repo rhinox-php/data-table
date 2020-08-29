@@ -20,6 +20,17 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $this->assertStringContainsString('</table>', $html);
     }
 
+    public function testButtons(): void
+    {
+        $json = $this->getJsonResponse([]);
+        $this->assertStringContainsString('button-attribute1="value1"', $json->string('data.0.action1'));
+        $this->assertStringContainsString('button-attribute2="value2"', $json->string('data.0.action1'));
+        $this->assertStringContainsString('<i class="fa fa-cog"></i>', $json->string('data.0.action1'));
+        $this->assertStringNotContainsString('Hidden Button', $json->string('data.0.action1'));
+        $this->assertStringContainsString('Link Button', $json->string('data.0.action1'));
+        $this->assertStringContainsString('Submit Button', $json->string('data.0.action1'));
+    }
+
     public function testJsonResponse(): void
     {
         $json = $this->getJsonResponse([]);
@@ -354,12 +365,23 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
             return [
                 $dataTable->createButton()
                     ->setUrl('/button/' . $row['id'])
-                    ->setText('Button')
+                    ->setText('Link Button')
+                    ->setIcon('cog')
+                    ->setAttributes([
+                        'button-attribute1' => 'value1',
+                    ])
+                    ->addAttribute('button-attribute2', 'value2')
                     ->setClasses(['btn', 'btn-primary', 'btn-sm']),
+                $dataTable->createButton()
+                    ->setText('Hidden Button')
+                    ->setVisible(false),
+                $dataTable->createButton()
+                    ->setText('Hidden Button')
+                    ->setText('Submit Button')
+                    ->setData([
+                        'id' => $row['id'],
+                    ]),
                 $dataTable->createDropdown([
-                    $dataTable->createButton()
-                        ->setUrl('/button/' . $row['id'])
-                        ->setText('Button'),
                     $dataTable->createButton()
                         ->setUrl('/button/delete')
                         ->setData([

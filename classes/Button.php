@@ -14,7 +14,6 @@ class Button
     protected array $data = [];
     protected ?string $icon = null;
     protected ?string $target = null;
-    protected ?string $csrfToken = null;
     protected bool $visible = true;
 
     public function render(): ?string
@@ -42,13 +41,12 @@ class Button
         }
         if (!empty($this->getData())) {
             $inputs = [];
+            // @todo allow setting default data from child class for things like csrf tokens
             foreach ($this->getData() as $key => $value) {
                 $inputs[] = '<input type="hidden" name="' . $key . '" value="' . $value . '" />';
             }
-            // @todo move csrf token to laravel specific data table
             return '
                 <form action="' . $this->getUrl() . '" method="post" ' . $target . ' class="rhinox-data-table-button-form">
-                    <input type="hidden" name="_token" value="' . $this->getCsrfToken() . '" />
                     ' . implode(PHP_EOL, $inputs) . '
                     <button class="btn ' . $classes . ' rhinox-data-table-button"' . $confirmation . ' ' . $attributes . '>' . $icon . $this->getText() . '</button>
                 </form>
@@ -154,17 +152,6 @@ class Button
     public function setTarget($target): self
     {
         $this->target = $target;
-        return $this;
-    }
-
-    public function getCsrfToken(): ?string
-    {
-        return $this->csrfToken;
-    }
-
-    public function setCsrfToken($csrfToken): self
-    {
-        $this->csrfToken = $csrfToken;
         return $this;
     }
 
