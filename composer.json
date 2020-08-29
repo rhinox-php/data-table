@@ -1,5 +1,6 @@
 {
     "name": "rhinox/data-table",
+    "license": "MIT",
     "require": {
         "symfony/http-foundation": ">3.0"
     },
