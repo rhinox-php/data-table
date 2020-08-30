@@ -30,12 +30,12 @@ class Truncate extends Preset
         return $value;
     }
 
-    public function getMaxLength(): string
+    public function getMaxLength(): int
     {
         return $this->maxLength;
     }
 
-    public function setMaxLength(string $maxLength): self
+    public function setMaxLength(int $maxLength): self
     {
         $this->maxLength = $maxLength;
         return $this;

@@ -28,12 +28,12 @@ class Percent extends Preset
         return $value;
     }
 
-    public function getDecimalPlaces(): string
+    public function getDecimalPlaces(): int
     {
         return $this->decimalPlaces;
     }
 
-    public function setDecimalPlaces(string $decimalPlaces): self
+    public function setDecimalPlaces(int $decimalPlaces): self
     {
         $this->decimalPlaces = $decimalPlaces;
         return $this;
