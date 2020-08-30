@@ -6,7 +6,7 @@ use Rhino\DataTable\Column;
 
 class Percent extends Preset
 {
-    private int $decimalPlaces;
+    private int $decimalPlaces = 0;
 
     public function __construct(int $decimalPlaces = 0)
     {

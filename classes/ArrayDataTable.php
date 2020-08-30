@@ -63,26 +63,6 @@ class ArrayDataTable extends DataTable
         return $data;
     }
 
-    protected function formatData(array $data, string $outputType): array
-    {
-        /** @var ArrayColumn[] */
-        $columns = array_values($this->getColumns());
-        foreach ($data as $rowIndex => $row) {
-            // Get row data indexed by column key
-            $indexedRow = [];
-            foreach ($columns as $columnIndex => $column) {
-                $indexedRow[$column->getKey()] = $row[$columnIndex];
-            }
-
-            // Run column formatters
-            foreach ($columns as $columnIndex => $column) {
-                $indexedRow[$column->getKey()] = $column->format($indexedRow[$column->getKey()], $indexedRow, $outputType);
-            }
-            $data[$rowIndex] = $indexedRow;
-        }
-        return $data;
-    }
-
     protected function sortData(array $data): array
     {
         // @todo test overriding default sort
@@ -105,14 +85,6 @@ class ArrayDataTable extends DataTable
             foreach ($orderBy as ['columnIndex' => $columnIndex, 'direction' => $direction]) {
                 $aValue = $a[$columnIndex] ?? '';
                 $bValue = $b[$columnIndex] ?? '';
-                // $aValue = $a[$columns[$columnIndex]->getKey()] ?? '';
-                // $bValue = $b[$columns[$columnIndex]->getKey()] ?? '';
-                if ($aValue === null) {
-                    $aValue = '';
-                }
-                if ($bValue === null) {
-                    $bValue = '';
-                }
                 if (is_numeric($aValue) && is_numeric($bValue)) {
                     return ($aValue <=> $bValue) * $direction;
                 }

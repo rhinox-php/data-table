@@ -211,9 +211,9 @@ class MySqlDataTable extends DataTable
         return $this->spliceColumn(new MySqlColumn($this, $name), $index);
     }
 
-    public function insertColumn(string $name, callable $format, int $index = null): MySqlColumnInsert
+    public function insertColumn(string $name, callable $format, int $index = null): ColumnInsert
     {
-        return $this->spliceColumn(new MySqlColumnInsert($this, $name, $format), $index);
+        return $this->spliceColumn(new ColumnInsert($this, $name, $format), $index);
     }
 
     // @todo add join with bindings
@@ -294,8 +294,8 @@ class MySqlDataTable extends DataTable
         if (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
             $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['from']);
             $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $matches['to']);
-            $from = $from->setTime($from->format('H'), $from->format('i'), 0);
-            $to = $to->setTime($to->format('H'), $to->format('i'), 59);
+            $from = $from->setTime((int) $from->format('H'), (int) $from->format('i'), 0);
+            $to = $to->setTime((int) $to->format('H'), (int) $to->format('i'), 59);
         } elseif (preg_match('/(?<from>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) to (?<to>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/', $dateRange, $matches)) {
             $from = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['from']);
             $to = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches['to']);

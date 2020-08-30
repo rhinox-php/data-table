@@ -8,6 +8,7 @@ class ColumnInsert extends Column
     {
         $this->name = $name;
         $this->addFormatter($formatter);
+        $this->setExportable(true);
     }
 
     public function isSortable()

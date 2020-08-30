@@ -20,7 +20,7 @@ class Suffix extends Preset
 
     public function format($value, $row, $type)
     {
-        if ($value !== null && $this->getSuffix() !== null) {
+        if ($value !== null) {
             $value = $value . $this->getSuffix();
         }
         return $value;

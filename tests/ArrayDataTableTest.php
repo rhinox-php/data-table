@@ -67,7 +67,8 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
     public function testClassArray(): void
     {
         $makeClass = function ($i, $color, $choice) {
-            return new class($i, $color, $choice) {
+            return new class ($i, $color, $choice)
+            {
                 private $i;
                 public $color;
                 public $choice;
@@ -109,6 +110,36 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
 
         $json = $this->getJsonResponse([], $dataTable);
         $this->assertCount(4, $json['data']);
+    }
+
+    /**
+     * @dataProvider provideSort
+     */
+    public function testSort(array $rows, array $expectedValues, string $direction)
+    {
+        $dataTable = new ArrayDataTable($rows);
+        $dataTable->addColumn('value')->setIndex(0);
+        $json = $this->getJsonResponse([
+            'order' => [[
+                'column' => 0,
+                'dir' => $direction,
+            ]],
+        ], $dataTable);
+        foreach ($expectedValues as $i => $expectedValue) {
+            $this->assertEquals($expectedValue, $json->arr('data')->arr($i)->string('value'));
+        }
+    }
+
+    public function provideSort()
+    {
+        return [
+            [[[2], [1], [3]], [1, 2, 3], 'asc'],
+            [[[2], [1], [3]], [3, 2, 1], 'desc'],
+            [[[['foo' => 1]], [['bar' => 2]]], [
+                htmlspecialchars(json_encode(['bar' => 2]), ENT_QUOTES, 'UTF-8', false),
+                htmlspecialchars(json_encode(['foo' => 1]), ENT_QUOTES, 'UTF-8', false),
+            ], 'asc'],
+        ];
     }
 
     private function getJsonResponse(array $requestParams, ?ArrayDataTable $dataTable = null): InputData

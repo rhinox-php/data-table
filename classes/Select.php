@@ -14,6 +14,7 @@ class Select extends Column
     {
         parent::__construct($dataTable, $name);
         $this->checkboxName = $checkboxName;
+        $this->setExportable(false);
 
         // Default header is blank
         $this->setHeader('');
@@ -38,10 +39,5 @@ class Select extends Column
     public function getClassName()
     {
         return 'rhinox-data-table-select';
-    }
-
-    public function isExportable()
-    {
-        return false;
     }
 }

@@ -13,6 +13,7 @@ class Action extends Column
     {
         parent::__construct($dataTable, $name);
         $this->callback = $callback;
+        $this->setExportable(false);
     }
 
     public function format($value, $row, $type)
@@ -41,10 +42,5 @@ class Action extends Column
     public function getClassName()
     {
         return parent::getClassName() . ' rhinox-data-table-action';
-    }
-
-    public function isExportable()
-    {
-        return false;
     }
 }

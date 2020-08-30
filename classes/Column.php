@@ -67,18 +67,22 @@ class Column
         if (empty($formatters)) {
             // Fallback to HTML encoded formatter
             if ($type === 'html') {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                }
                 return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false);
             }
-        }
-        foreach ($formatters as $formatter) {
-            $value = $formatter($value, $row, $type);
-            if ($value instanceof \Generator || $value instanceof \Iterator) {
-                $value = iterator_to_array($value);
+        } else {
+            foreach ($formatters as $formatter) {
+                $value = $formatter($value, $row, $type);
+                if ($value instanceof \Generator || $value instanceof \Iterator) {
+                    $value = iterator_to_array($value);
+                }
+                if (is_array($value)) {
+                    $value = implode(' ', $value);
+                }
+                $value = (string) $value;
             }
-            if (is_array($value)) {
-                $value = implode(' ', $value);
-            }
-            $value = (string) $value;
         }
         return $value;
     }
@@ -89,7 +93,12 @@ class Column
         return $this;
     }
 
-    public function setExportable($exportable)
+    public function isExportable(): bool
+    {
+        return $this->exportable;
+    }
+
+    public function setExportable(bool $exportable)
     {
         $this->exportable = $exportable;
         return $this;
@@ -198,11 +207,6 @@ class Column
     //     $value = ucwords($value);
     //     return $value;
     // }
-
-    public function isExportable()
-    {
-        return true;
-    }
 
     public function getFooter()
     {

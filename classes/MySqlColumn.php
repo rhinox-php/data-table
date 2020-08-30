@@ -13,7 +13,7 @@ class MySqlColumn extends Column implements MySqlSelectColumnInterface
     public function __construct(MySqlDataTable $dataTable, string $name)
     {
         parent::__construct($dataTable, $name);
-        $this->setQuery($dataTable ? $dataTable->getTable() . '.' . $name : $name);
+        $this->setQuery($dataTable->getTable() . '.' . $name);
     }
 
     public function getQuery()
