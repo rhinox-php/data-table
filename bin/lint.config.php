@@ -51,11 +51,11 @@ return (new \PhpCsFixer\Config())
             'property_private',
             'construct',
             'destruct',
-            'magic',
-            'phpunit',
-            'method_public',
-            'method_protected',
-            'method_private',
+            // 'magic',
+            // 'phpunit',
+            // 'method_public',
+            // 'method_protected',
+            // 'method_private',
         ],
     ])
     ->setFinder($finder);

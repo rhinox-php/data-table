@@ -3,7 +3,7 @@
     "license": "MIT",
     "require": {
         "symfony/http-foundation": ">3.0",
-        "rhinox/input-data": "^0.9.0"
+        "rhinox/input-data": "^0.9.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
