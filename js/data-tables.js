@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $.extend(true, $.fn.DataTable.ext.classes, {
         sWrapper: 'dataTables_wrapper dt-bootstrap4',
-        sFilterInput: 'form-control form-control-sm',
+        sFilterInput: 'form-control',
         sLengthSelect: 'custom-select form-control',
         sProcessing: 'dataTables_processing card',
         sPageButton: 'paginate_button page-item',
@@ -55,7 +55,7 @@ const initDataTable = (dataTableConfig) => {
         // })
         .DataTable({
             dom: `
-                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced'>>>>
+                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced btn'>>>>
                 <'rhinox-data-table-error'>
                 "<'rhinox-data-table-scroll'tr>
                 <'rhinox-data-table-footer'ilp>
