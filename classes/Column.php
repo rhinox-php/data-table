@@ -44,7 +44,7 @@ class Column
         return $this->header !== null ? $this->header : Human::humanise($this->getName());
     }
 
-    public function setHeader($header)
+    public function setHeader(string $header)
     {
         $this->header = $header;
         return $this;
@@ -61,7 +61,7 @@ class Column
         return $this;
     }
 
-    public function format($value, $row, $type)
+    public function format($value, array $row, string $type)
     {
         $formatters = $this->getFormatters();
         if (empty($formatters)) {
@@ -139,7 +139,10 @@ class Column
         return $this;
     }
 
-    public function getFilterSelect($label = null)
+    /**
+     * @param null|string $label
+     */
+    public function getFilterSelect(?string $label = null)
     {
         if ($label) {
             return isset($this->filterSelect[$label]) ? $this->filterSelect[$label] : null;
@@ -179,7 +182,7 @@ class Column
         return $this->className;
     }
 
-    public function addClass($class)
+    public function addClass(string $class)
     {
         $this->className .= ' ' . $class;
         return $this;

@@ -246,7 +246,7 @@ class MySqlDataTable extends DataTable
         ];
     }
 
-    public function bind($sql, $bindings)
+    public function bind(string $sql, array $bindings)
     {
         // @todo check if this can be combined with replaceBindings
         foreach ($bindings as $key => $value) {
@@ -257,7 +257,7 @@ class MySqlDataTable extends DataTable
         return $sql;
     }
 
-    public function replaceBindings($query, array $bindings)
+    public function replaceBindings(string $query, array $bindings)
     {
         $result = [];
         foreach ($bindings as $key => $value) {

@@ -12,14 +12,14 @@ abstract class DataTable
 {
     protected Request $request;
     protected Response $response;
-    protected $id;
-    protected $columns = [];
-    protected $data;
-    protected $recordsTotal;
-    protected $recordsFiltered;
-    protected $start;
-    protected $length;
-    protected $search;
+    protected ?string $id = null;
+    protected array $columns = [];
+    protected array $data;
+    protected int $recordsTotal;
+    protected int $recordsFiltered;
+    protected int $start;
+    protected int $length;
+    protected ?string $search;
     protected InputData $inputColumns;
     protected ?array $order = null;
     protected ?array $defaultOrder = null;
@@ -219,7 +219,7 @@ abstract class DataTable
         return $this->data;
     }
 
-    public function setData($data)
+    public function setData(array $data)
     {
         $this->data = $data;
         return $this;
@@ -230,7 +230,7 @@ abstract class DataTable
         return $this->recordsTotal;
     }
 
-    public function setRecordsTotal($recordsTotal)
+    public function setRecordsTotal(int $recordsTotal)
     {
         $this->recordsTotal = $recordsTotal;
         return $this;
@@ -241,7 +241,7 @@ abstract class DataTable
         return $this->recordsFiltered;
     }
 
-    public function setRecordsFiltered($recordsFiltered)
+    public function setRecordsFiltered(int $recordsFiltered)
     {
         $this->recordsFiltered = $recordsFiltered;
         return $this;
@@ -252,13 +252,13 @@ abstract class DataTable
         return $this->start;
     }
 
-    public function setStart($start)
+    public function setStart(int $start)
     {
         $this->start = $start;
         return $this;
     }
 
-    public function setLength($length)
+    public function setLength(int $length)
     {
         $this->length = $length;
         return $this;
@@ -274,7 +274,7 @@ abstract class DataTable
         return $this->search;
     }
 
-    public function setSearch($search)
+    public function setSearch(?string $search)
     {
         $this->search = $search;
         return $this;

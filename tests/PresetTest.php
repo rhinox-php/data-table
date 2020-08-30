@@ -173,7 +173,6 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Group())->setLimit(3));
         $json = $this->getJsonResponse([], $dataTable);
         $this->assertEquals('a, b, c...', $json->string('data.0.value'));
-        var_dump($json);
     }
 
     public function testHtml(): void
