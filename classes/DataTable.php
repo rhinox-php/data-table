@@ -46,6 +46,7 @@ abstract class DataTable
     }
 
     abstract protected function processSource(InputData $input);
+
     // abstract protected function iterateRows(InputData $input, string $outputType): \Generator;
 
     public function sendResponse()

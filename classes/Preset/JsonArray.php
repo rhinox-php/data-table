@@ -29,7 +29,8 @@ class JsonArray extends Preset
         return implode(', ', $decoded);
     }
 
-    protected function wrapHtml(array $data): string {
+    protected function wrapHtml(array $data): string
+    {
         if (empty($data)) {
             return '';
         }

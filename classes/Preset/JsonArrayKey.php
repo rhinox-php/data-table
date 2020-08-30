@@ -35,7 +35,8 @@ class JsonArrayKey extends Preset
         return implode(', ', $result);
     }
 
-    protected function wrapHtml(array $data): string {
+    protected function wrapHtml(array $data): string
+    {
         if (empty($data)) {
             return '';
         }

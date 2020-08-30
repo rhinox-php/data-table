@@ -336,7 +336,6 @@ class PresetTest extends \PHPUnit\Framework\TestCase
 
     public function testPrefix(): void
     {
-
         $dataTable = new ArrayDataTable([
             ['123'],
             [null],

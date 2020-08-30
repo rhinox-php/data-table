@@ -148,9 +148,6 @@ class Column
         return $this;
     }
 
-    /**
-     * @param null|string $label
-     */
     public function getFilterSelect(?string $label = null)
     {
         if ($label) {

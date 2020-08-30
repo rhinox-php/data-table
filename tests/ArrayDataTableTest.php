@@ -67,8 +67,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
     public function testClassArray(): void
     {
         $makeClass = function ($i, $color, $choice) {
-            return new class ($i, $color, $choice)
-            {
+            return new class($i, $color, $choice) {
                 private $i;
                 public $color;
                 public $choice;
