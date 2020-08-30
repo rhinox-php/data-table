@@ -6,8 +6,8 @@ use Rhino\DataTable\Column;
 
 class Bytes extends Preset
 {
-    const SHORT_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
-    const LONG_UNITS = ['Bytes', 'Kilobytes', 'Megabytes', 'Gigabytes', 'Terabytes', 'Petabytes', 'Exabytes'];
+    const SHORT_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    const LONG_UNITS = ['Bytes', 'Kilobytes', 'Megabytes', 'Gigabytes', 'Terabytes', 'Petabytes'];
 
     private $units = self::SHORT_UNITS;
 

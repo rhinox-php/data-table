@@ -7,6 +7,10 @@
 }
 
 .rhinox-data-table-wrapper {
+    @import 'table-buttons';
+    @import 'filter';
+    @import 'footer';
+
     thead {
         .rhinox-data-table-search-bar {
             @include display-advanced(table-row);
@@ -28,10 +32,10 @@
                 }
             }
 
-            .rhinox-data-table-col-filter-first {
-                padding: 8px;
-                white-space: nowrap;
-            }
+            // .rhinox-data-table-col-filter-first {
+            //     padding: 8px;
+            //     white-space: nowrap;
+            // }
         }
     }
 
@@ -94,23 +98,6 @@
         display: inline-block;
     }
 
-    .rhinox-data-table-footer {
-        display: flex;
-        align-items: center;
-
-        .dataTables_paginate {
-        }
-
-        .dataTables_length {
-            @include display-advanced;
-        }
-
-        .dataTables_info {
-            flex: 1;
-            padding-top: 0 !important;
-        }
-    }
-
     .rhinox-data-table-advanced {
         padding: 0 1rem;
         cursor: pointer;
@@ -121,4 +108,5 @@
         justify-content: flex-end;
         align-items: end;
     }
+
 }

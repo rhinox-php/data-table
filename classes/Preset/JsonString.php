@@ -13,6 +13,10 @@ class JsonString extends Preset
 
     public function format($value, $row, $type)
     {
+        $decoded = json_decode($value);
+        if (!$decoded) {
+            return $value;
+        }
         return json_decode($value);
     }
 }

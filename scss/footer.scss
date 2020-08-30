@@ -1,0 +1,50 @@
+.rhinox-data-table-footer {
+    display: flex;
+    // align-items: center;
+
+    .dataTables_paginate {}
+
+    .rhinox-data-table-length {
+        @include display-advanced;
+        display: block;
+
+        label {
+            margin: 0;
+            font-weight: normal;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        select {
+            width: auto;
+            display: inline-block;
+        }
+    }
+
+    .dataTables_info {
+        flex: 1;
+        padding-top: 0 !important;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        margin: 0 !important;
+    }
+
+    @media (max-width: 720px) {
+        flex-direction: column;
+        text-align: center;
+
+        .dataTables_paginate {
+            width: 100%;
+        }
+
+        .dataTables_length {
+            width: 100%;
+        }
+
+        .dataTables_info {
+            width: 100%;
+        }
+    }
+}

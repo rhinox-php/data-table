@@ -8,6 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
     $.fn.dataTable.ext.errMode = 'throw';
     $.fn.DataTable.ext.pager.numbers_length = 13;
 
+    $.extend(true, $.fn.DataTable.ext.classes, {
+        sWrapper: 'dataTables_wrapper dt-bootstrap4',
+        sFilterInput: 'form-control form-control-sm',
+        sLengthSelect: 'custom-select form-control',
+        sProcessing: 'dataTables_processing card',
+        sPageButton: 'paginate_button page-item',
+        sInfo: 'rhinox-data-table-info btn',
+        sPaging: 'rhinox-data-table-paginate ',
+        sLength: 'rhinox-data-table-length',
+    });
+
+    $.extend(true, $.fn.DataTable.Buttons.defaults, {
+        dom: {
+            container: {
+                className: 'dt-buttons btn-group flex-wrap rhinox-data-table-buttons',
+            },
+            button: {
+                className: 'btn rhinox-data-table-button',
+            },
+        },
+    });
+
     for (const dataTableConfig of initialDataTables) {
         initDataTable(dataTableConfig);
     }
@@ -33,7 +55,7 @@ const initDataTable = (dataTableConfig) => {
         // })
         .DataTable({
             dom: `
-                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-sm-9 rhinox-data-table-left'B><'col-sm-3 rhinox-data-table-right'f<'rhinox-data-table-advanced'>>>>
+                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced'>>>>
                 <'rhinox-data-table-error'>
                 "<'rhinox-data-table-scroll'tr>
                 <'rhinox-data-table-footer'ilp>
@@ -44,6 +66,8 @@ const initDataTable = (dataTableConfig) => {
                 buttons: {
                     colvis: 'Change columns',
                 },
+                sSearch: '',
+                sSearchPlaceholder: 'Search',
             },
             autoWidth: false,
             orderCellsTop: true,
@@ -111,8 +135,18 @@ const initDataTable = (dataTableConfig) => {
             // },
             // @todo provide alternate icon sets
             buttons: [
+                ...dataTableConfig.tableButtons.map((tableButton) => {
+                    return {
+                        text: tableButton.text,
+                        method: tableButton.method,
+                        data: tableButton.data,
+                        url: tableButton.url,
+                        className: tableButton.class,
+                    };
+                }),
                 {
                     text: '<i class="fa fa-download"></i> Download CSV',
+                    className: 'btn-secondary',
                     action: function (e, dt, node, config) {
                         let arrayToObject = function (mixed) {
                             if (Array.isArray(mixed)) {
@@ -134,25 +168,40 @@ const initDataTable = (dataTableConfig) => {
                         let params = arrayToObject(dt.ajax.params());
                         params.csv = true;
                         $.redirect(location.href, params, 'post');
-                    }
+                    },
                 },
-                'colvis',
+                (dt, conf) => {
+                    return {
+                        extend: 'collection',
+                        text: function (dt) {
+                            return dt.i18n('buttons.colvis', 'Column visibility');
+                        },
+                        className: 'btn-secondary buttons-colvis',
+                        buttons: [{
+                            extend: 'columnsToggle',
+                            columns: conf.columns,
+                            columnText: conf.columnText,
+                        }],
+                    };
+                },
                 {
-                    text: '<i class="fa fa-reload"></i> Reset Settings',
+                    text: '<i class="fa fa-reload"></i> Reset settings',
+                    className: 'btn-secondary',
                     action: function (e, dt, node, config) {
                         localStorage.removeItem(dataTableConfig.id);
                         window.location.reload();
                     }
                 },
                 {
-                    text: '<i class="fa fa-sync-alt"></i> Refresh Data',
+                    text: '<i class="fa fa-sync-alt"></i> Refresh data',
+                    className: 'btn-secondary rhinox-data-table-advanced-button',
                     action: function (e, dt, node, config) {
                         dt.draw();
                     },
-                    className: 'rhinox-data-table-advanced-button',
                 },
                 {
-                    text: 'Select All',
+                    text: 'Select all',
+                    className: 'btn-secondary',
                     action: function (e, dt, node, config) {
                         selectAll();
                     },

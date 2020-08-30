@@ -25,7 +25,7 @@ class Link extends Preset
                 if (isset($row[$matches[1]])) {
                     return $row[$matches[1]];
                 }
-                return $matches[1];
+                return $matches[0];
             }, $this->getUrl());
             $value = '<a href="' . $url . '">' . htmlspecialchars($value) . '</a>';
         }

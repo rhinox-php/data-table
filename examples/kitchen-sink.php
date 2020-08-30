@@ -26,6 +26,13 @@ $dataTable->addGroupBy('products.id');
 // @todo download excel
 // @todo csv/excel column formatters
 
+$dataTable->addTableButton([
+    'href' => '/add',
+    'text' => 'Add new entry',
+    'class' => 'btn-primary',
+    'confirm' => 'Are you sure you want to do this?',
+]);
+
 $dataTable->addSelect();
 $dataTable->addAction(function ($row) use ($dataTable) {
     return [
@@ -45,7 +52,7 @@ $dataTable->addAction(function ($row) use ($dataTable) {
     ];
 });
 
-$dataTable->addColumn('id')->addPreset(new Preset\Id())->setVisible(false);
+$dataTable->addColumn('id')->setVisible(false);
 $dataTable->addColumn('name');
 $dataTable->addColumn('code');
 $dataTable->addColumn('category')->addFormatter(fn ($value) => ucfirst($value))->setFilterSelect([

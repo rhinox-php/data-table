@@ -15,6 +15,7 @@ class Group extends Preset
 
     public function format($value, $row, $type)
     {
+        // @todo show more link
         $data = explode(',', $value);
         $data = array_filter($data);
         $sliced = false;

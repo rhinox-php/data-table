@@ -149,7 +149,8 @@ class MySqlDataTable extends DataTable
 
         // Order by
         $orderBy = [];
-        foreach ($this->order as $columnIndex => $direction) {
+        $order = $this->getOrder() ?: $this->getDefaultOrder() ?: [];
+        foreach ($order as $columnIndex => $direction) {
             $direction = $direction == 'desc' ? 'DESC' : 'ASC';
             if ($columns[$columnIndex]->isSortable()) {
                 $orderBy[] = $columns[$columnIndex]->getOrderQuery() . ' ' . $direction;

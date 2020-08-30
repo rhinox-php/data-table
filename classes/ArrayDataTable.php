@@ -34,7 +34,7 @@ class ArrayDataTable extends DataTable
         $this->setData($data);
     }
 
-    public function filterData(array $data): array
+    protected function filterData(array $data): array
     {
         // @todo column filtering
 
@@ -63,41 +63,71 @@ class ArrayDataTable extends DataTable
         return $data;
     }
 
-    public function sortData(array $data): array
+    protected function formatData(array $data, string $outputType): array
     {
+        /** @var ArrayColumn[] */
+        $columns = array_values($this->getColumns());
+        foreach ($data as $rowIndex => $row) {
+            // Get row data indexed by column key
+            $indexedRow = [];
+            foreach ($columns as $columnIndex => $column) {
+                $indexedRow[$column->getKey()] = $row[$columnIndex];
+            }
+
+            // Run column formatters
+            foreach ($columns as $columnIndex => $column) {
+                $indexedRow[$column->getKey()] = $column->format($indexedRow[$column->getKey()], $indexedRow, $outputType);
+            }
+            $data[$rowIndex] = $indexedRow;
+        }
+        return $data;
+    }
+
+    protected function sortData(array $data): array
+    {
+        // @todo test overriding default sort
+        $order = $this->getOrder() ?: $this->getDefaultOrder();
+        if ($order === null) {
+            return $data;
+        }
+
         $orderBy = [];
-        foreach ($this->getOrder() as $columnIndex => $direction) {
+        foreach ($order as $columnIndex => $direction) {
             $orderBy[] = [
                 'columnIndex' => $columnIndex,
                 'direction' => $direction === 'desc' ? -1 : 1,
             ];
         }
 
-        // @todo handle overriding default sort
-        if (empty($orderBy)) {
-            $orderBy[] = [
-                'columnIndex' => 0,
-                'direction' => -1,
-            ];
-        }
-
         // @todo implement multi column sort
-        usort($data, function ($a, $b) use ($orderBy) {
+        $columns = array_values($this->getColumns());
+        usort($data, function ($a, $b) use ($orderBy, $columns) {
             foreach ($orderBy as ['columnIndex' => $columnIndex, 'direction' => $direction]) {
-                $aValue = $a[$columnIndex] ?? null;
-                $bValue = $b[$columnIndex] ?? null;
+                $aValue = $a[$columnIndex] ?? '';
+                $bValue = $b[$columnIndex] ?? '';
+                // $aValue = $a[$columns[$columnIndex]->getKey()] ?? '';
+                // $bValue = $b[$columns[$columnIndex]->getKey()] ?? '';
+                if ($aValue === null) {
+                    $aValue = '';
+                }
+                if ($bValue === null) {
+                    $bValue = '';
+                }
+                if (is_numeric($aValue) && is_numeric($bValue)) {
+                    return ($aValue <=> $bValue) * $direction;
+                }
                 // @todo handle complex variable types, dates, arrays, etc
                 // @todo sorting numbers bigger than INT_MAX gives incorrect results
-                // if ($aValue instanceof DateTime) {
-                //     $aValue = $aValue->format(MYSQL_FORMAT);
-                // }
-                // if ($bValue instanceof DateTime) {
-                //     $bValue = $bValue->format(MYSQL_FORMAT);
-                // }
-                if ((is_string($aValue) || is_numeric($aValue)) && (is_string($bValue) || is_numeric($bValue))) {
+                if ($aValue instanceof \DateTimeInterface) {
+                    $aValue = $aValue->format(DATE_ISO8601);
+                }
+                if ($bValue instanceof \DateTimeInterface) {
+                    $bValue = $bValue->format(DATE_ISO8601);
+                }
+                if (is_scalar($aValue) && is_scalar($bValue)) {
                     return strnatcasecmp((string) $aValue, (string) $bValue) * $direction;
                 }
-                return 0;
+                return strnatcasecmp(json_encode($aValue), json_encode($bValue)) * $direction;
             }
         });
         return $data;
@@ -117,6 +147,14 @@ class ArrayDataTable extends DataTable
     public function addColumn(string $name, int $index = null): ArrayColumn
     {
         return $this->spliceColumn(new ArrayColumn($this, $name), $index);
+    }
+
+    /**
+     * @return ArrayColumn[]
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
     }
 
     protected function spliceData(array $data): array

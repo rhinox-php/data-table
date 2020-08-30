@@ -62,6 +62,7 @@ $jsonConfig = [
     'columnDefs' => $columnDefs,
     'defaultOrder' => $dataTable->getDefaultOrder(),
     'saveState' => $dataTable->getSaveState(),
+    'tableButtons' => $dataTable->getTableButtons(),
 ];
 ?>
 <script>

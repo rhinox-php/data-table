@@ -23,8 +23,5 @@
         "phpmd/phpmd": "^2.8",
         "brianium/paratest": "^4.1",
         "friendsofphp/php-cs-fixer": "^2.16"
-    },
-    "suggests": {
-        "php-units-of-measure/php-units-of-measure": "For formatting of measurements"
     }
 }

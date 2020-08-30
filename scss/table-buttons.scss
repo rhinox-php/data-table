@@ -1,0 +1,25 @@
+.rhinox-data-table-buttons {
+    .rhinox-data-table-advanced-button {
+        @include display-advanced;
+    }
+
+    .dropdown-menu {
+        padding: 0;
+    }
+
+    @media (max-width: 720px) {
+        display: block;
+
+        .rhinox-data-table-button,
+        .btn-group {
+            display: block;
+            width: 100%;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .dt-button-collection {
+            width: 100%;
+        }
+    }
+}

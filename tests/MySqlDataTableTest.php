@@ -360,6 +360,14 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addJoin('LEFT JOIN line_items ON line_items.product_id = products.id');
         $dataTable->addGroupBy('products.id');
 
+        $dataTable->addTableButton([
+            'name' => 'test',
+            'type' => 'button',
+            'text' => 'Test',
+            'class' => 'test',
+            'confirm' => 'Are you sure you want to do this?',
+        ]);
+
         $dataTable->addSelect();
         $dataTable->addAction(function ($row) use ($dataTable) {
             return [

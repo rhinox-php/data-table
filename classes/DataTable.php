@@ -20,20 +20,19 @@ abstract class DataTable
     protected $start;
     protected $length;
     protected $search;
-    protected $inputColumns = [];
-    protected $order = [];
-    protected $defaultOrder = [
-        // [1, 'desc'],
-    ];
-    protected $tableButtons = [];
-    protected $rowFormatters = [];
-    protected $meta = [];
+    protected InputData $inputColumns;
+    protected ?array $order = null;
+    protected ?array $defaultOrder = null;
+    protected array $tableButtons = [];
+    protected array $rowFormatters = [];
+    protected array $meta = [];
     protected string $url = '';
-    protected $saveState = true;
-    protected $rememberSettingsEnabled = true;
-    protected $exportFileName = 'export';
-    protected $hasAction = false;
-    protected $hasSelect = false;
+    protected bool $saveState = true;
+    // @todo why both saveState and rememberSettingsEnabled
+    protected bool $rememberSettingsEnabled = true;
+    protected string $exportFileName = 'export';
+    protected bool $hasAction = false;
+    protected bool $hasSelect = false;
 
     /**
      * Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables (Ajax requests are asynchronous and thus can return out of sequence). This is used as part of the draw return parameter.
@@ -46,7 +45,8 @@ abstract class DataTable
     {
     }
 
-    abstract public function processSource(InputData $input);
+    abstract protected function processSource(InputData $input);
+    // abstract protected function iterateRows(InputData $input, string $outputType): \Generator;
 
     public function sendResponse()
     {
@@ -189,7 +189,7 @@ abstract class DataTable
     /**
      * @return Column[]
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
@@ -280,18 +280,18 @@ abstract class DataTable
         return $this;
     }
 
-    public function getInputColumns()
+    public function getInputColumns(): InputData
     {
         return $this->inputColumns;
     }
 
-    public function setInputColumns($inputColumns)
+    public function setInputColumns(InputData $inputColumns)
     {
         $this->inputColumns = $inputColumns;
         return $this;
     }
 
-    public function getOrder()
+    public function getOrder(): ?array
     {
         return $this->order;
     }
@@ -308,13 +308,17 @@ abstract class DataTable
         return $this;
     }
 
-    public function getDefaultOrder()
+    public function getDefaultOrder(): ?array
     {
         return $this->defaultOrder;
     }
 
-    public function setDefaultOrder(string $column, string $direction)
+    public function setDefaultOrder(?string $column, string $direction = 'asc')
     {
+        if ($column === null) {
+            $this->defaultOrder = null;
+            return $this;
+        }
         if ($direction !== 'asc' && $direction !== 'desc') {
             throw new Exception\ConfigException('Invalid default order direction, must be "asc" or "desc", got: ' . $direction);
         }

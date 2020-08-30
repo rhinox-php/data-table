@@ -13,21 +13,32 @@ class JsonArrayKey extends Preset
 
     public function format($value, $row, $type)
     {
-        if ($type == 'html') {
-            if ($value) {
-                $result = [];
-                foreach (json_decode($value) as $key => $checked) {
-                    if ($checked) {
-                        if ($options) {
-                            $key = $options($key);
-                        }
-                        $result[] = '<li>' . $key . '</li>';
-                    }
-                }
-                natcasesort($result);
-                return '<ul class="rhinox-data-table-json-array">' . implode('', $result) . '</ul>';
-            }
+        if (!$value) {
+            return $value;
         }
-        return $value;
+        $decoded = json_decode($value, true);
+        if (!is_array($decoded)) {
+            return $value;
+        }
+        // @todo support applying callback to values
+        $result = [];
+        foreach ($decoded as $key => $checked) {
+            if (!$checked) {
+                continue;
+            }
+            $result[] = $key;
+        }
+        natcasesort($result);
+        if ($type == 'html') {
+            return $this->wrapHtml($result);
+        }
+        return implode(', ', $result);
+    }
+
+    protected function wrapHtml(array $data): string {
+        if (empty($data)) {
+            return '';
+        }
+        return '<ul class="rhinox-data-table-json-array"><li>' . implode('</li><li>', $data) . '</li></ul>';
     }
 }
