@@ -7,6 +7,8 @@
 }
 
 .rhinox-data-table-wrapper {
+    position: relative;
+
     @import 'table-buttons';
     @import 'filter';
     @import 'footer';
@@ -39,6 +41,27 @@
         }
     }
 
+    tbody {
+        tr:last-child {
+            td {
+                border-bottom-width: 3px;
+            }
+        }
+    }
+
+    tfoot {
+        td {
+            border-top-width: 0px;
+            border-bottom-width: 1px;
+        }
+    }
+
+    &.rhinox-data-table-processing {
+        table {
+            opacity: 0.5;
+        }
+    }
+
     .dt-button-collection {
         display: block;
         padding: 0;
@@ -47,12 +70,13 @@
 
     .rhinox-data-table {
         width: 100% !important;
+        margin-bottom: 0 !important;
     }
 
     .rhinox-data-table-scroll {
         overflow: auto;
         min-height: 400px;
-        border-bottom: 1px solid #c8c8c8;
+        border-bottom: 1px solid #dee2e6;
     }
 
     .rhinox-data-table-page-size {

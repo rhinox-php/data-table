@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $.fn.DataTable.ext.pager.numbers_length = 13;
 
     $.extend(true, $.fn.DataTable.ext.classes, {
-        sWrapper: 'dataTables_wrapper dt-bootstrap4',
+        sWrapper: 'rhinox-data-table-wrapper dataTables_wrapper dt-bootstrap4',
         sFilterInput: 'form-control',
         sLengthSelect: 'custom-select form-control',
         sProcessing: 'dataTables_processing card',
@@ -39,20 +39,6 @@ const initDataTable = (dataTableConfig) => {
     console.log('Initializing data table', dataTableConfig);
     const selector = '#' + dataTableConfig.id;
     const table = $(selector)
-        // .on('xhr.dt', function (e, settings, json, xhr) {
-        //     if (json && json.footers) {
-        //         for (let columnName in json.footers) {
-        //             $('#<?=$id;?>-' + columnName).html(json.footers[columnName]);
-        //         }
-        //     }
-        // })
-        // .on('processing.dt', function (e, settings, processing) {
-        //     if (processing) {
-        //         $(selector).addClass('rhinox-data-table-loading');
-        //     } else {
-        //         $(selector).removeClass('rhinox-data-table-loading');
-        //     }
-        // })
         .DataTable({
             dom: `
                 <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced btn'>>>>
@@ -236,6 +222,9 @@ const initDataTable = (dataTableConfig) => {
             footer.hide();
         } else {
             for (const footerRow of json.footerRows) {
+                if (!footerRow) {
+                    continue;
+                }
                 const row = $('<tr>');
                 let columnIndex = 0;
                 for (const footerColumn of footerRow) {
@@ -250,17 +239,25 @@ const initDataTable = (dataTableConfig) => {
         }
     });
 
+    $(selector).on('processing.dt', function (e, settings, processing) {
+        if (processing) {
+            $(selector).closest('.rhinox-data-table-wrapper').addClass('rhinox-data-table-processing');
+        } else {
+            $(selector).closest('.rhinox-data-table-wrapper').removeClass('rhinox-data-table-processing');
+        }
+    });
+
     // Column searching
     let searchDebounce = null;
 
-    $(selector).closest('.dataTables_wrapper').on('keyup change', '.rhinox-data-table-column-filter', function () {
+    $(selector).closest('.rhinox-data-table-wrapper').on('keyup change', '.rhinox-data-table-column-filter', function () {
         if (searchDebounce) {
             clearTimeout(searchDebounce);
         }
         searchDebounce = setTimeout(function () {
             searchDebounce = null;
             let draw = false;
-            $(selector).closest('.dataTables_wrapper').find('.rhinox-data-table-column-filter').each(function () {
+            $(selector).closest('.rhinox-data-table-wrapper').find('.rhinox-data-table-column-filter').each(function () {
                 let value = $(this).find(':input').val();
                 let column = table.column($(this).data('column'));
                 if (column.search() !== value) {
