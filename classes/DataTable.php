@@ -464,6 +464,16 @@ abstract class DataTable
         return $this->columns[] = new Select($this, 'select' . count($this->columns), $checkboxName);
     }
 
+    public function hasSelect(): bool
+    {
+        foreach ($this->getColumns() as $column) {
+            if ($column instanceof Select) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function addAction($callback): Action
     {
         $action = new Action($this, $callback, 'action' . count($this->columns));

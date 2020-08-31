@@ -65,6 +65,7 @@ $jsonConfig = [
     'saveState' => $dataTable->getSaveState(),
     'tableButtons' => $dataTable->getTableButtons(),
     'searchCols' => $searchCols,
+    'hasSelect' => $this->hasSelect(),
 ];
 ?>
 <script>

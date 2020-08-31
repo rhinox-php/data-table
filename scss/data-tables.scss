@@ -1,8 +1,8 @@
 @mixin display-advanced($display: block) {
-    display: none;
+    display: none !important;
 
     .rhinox-data-table-advanced-enabled & {
-        display: $display;
+        display: $display !important;
     }
 }
 
@@ -62,12 +62,6 @@
         }
     }
 
-    .dt-button-collection {
-        display: block;
-        padding: 0;
-        margin: 0;
-    }
-
     .rhinox-data-table {
         width: 100% !important;
         margin-bottom: 0 !important;
@@ -97,11 +91,6 @@
     .rhinox-data-table-pagination {
         width: 50%;
         float: right;
-    }
-
-    .dataTables_length {
-        float: left;
-        margin-right: 10px;
     }
 
     .rhinox-data-table-number {

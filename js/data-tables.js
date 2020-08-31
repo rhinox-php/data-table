@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $.extend(true, $.fn.DataTable.Buttons.defaults, {
         dom: {
             container: {
-                className: 'dt-buttons btn-group flex-wrap rhinox-data-table-buttons',
+                className: 'dt-buttons rhinox-data-table-buttons',
             },
             button: {
                 className: 'btn rhinox-data-table-button',
@@ -38,6 +38,91 @@ document.addEventListener('DOMContentLoaded', () => {
 const initDataTable = (dataTableConfig) => {
     console.log('Initializing data table', dataTableConfig);
     const selector = '#' + dataTableConfig.id;
+
+    const buttons = [];
+    buttons.push(...dataTableConfig.tableButtons.map((tableButton) => {
+        return {
+            text: tableButton.text,
+            method: tableButton.method,
+            data: tableButton.data,
+            url: tableButton.url,
+            className: tableButton.class,
+            action: (e, dt, node, config) => {
+                if (tableButton.confirm && !confirm(tableButton.confirm)) {
+                    return;
+                }
+                if (tableButton.href) {
+                    window.location = tableButton.href;
+                }
+                // @todo support submit buttons
+            },
+        };
+    }));
+    buttons.push({
+        text: '<i class="fa fa-download"></i> Download CSV',
+        className: 'btn-secondary',
+        action: function (e, dt, node, config) {
+            let arrayToObject = function (mixed) {
+                if (Array.isArray(mixed)) {
+                    let object = {};
+                    for (let i = 0; i < mixed.length; i++) {
+                        object[i] = arrayToObject(mixed[i]);
+                    }
+                    return object;
+                }
+                if (typeof mixed === 'object') {
+                    let object = {};
+                    for (let key in mixed) {
+                        object[key] = arrayToObject(mixed[key]);
+                    }
+                    return object;
+                }
+                return mixed;
+            };
+            let params = arrayToObject(dt.ajax.params());
+            params.csv = true;
+            $.redirect(location.href, params, 'post');
+        },
+    });
+    buttons.push((dt, conf) => {
+        return {
+            extend: 'collection',
+            text: function (dt) {
+                return dt.i18n('buttons.colvis', 'Column visibility');
+            },
+            className: 'btn-secondary buttons-colvis rhinox-data-table-advanced-button',
+            buttons: [{
+                extend: 'columnsToggle',
+                columns: conf.columns,
+                columnText: conf.columnText,
+            }],
+        };
+    });
+    buttons.push({
+        text: '<i class="fa fa-reload"></i> Reset settings',
+        className: 'btn-secondary rhinox-data-table-advanced-button',
+        action: function (e, dt, node, config) {
+            localStorage.removeItem(dataTableConfig.id);
+            window.location.reload();
+        }
+    });
+    buttons.push({
+        text: '<i class="fa fa-sync-alt"></i> Refresh data',
+        className: 'btn-secondary rhinox-data-table-advanced-button',
+        action: function (e, dt, node, config) {
+            dt.draw();
+        },
+    });
+    if (dataTableConfig.hasSelect) {
+        buttons.push({
+            text: 'Select all',
+            className: 'btn-secondary',
+            action: function (e, dt, node, config) {
+                selectAll();
+            },
+        });
+    }
+
     const table = $(selector)
         .DataTable({
             dom: `
@@ -121,88 +206,7 @@ const initDataTable = (dataTableConfig) => {
             //     return data;
             // },
             // @todo provide alternate icon sets
-            buttons: [
-                ...dataTableConfig.tableButtons.map((tableButton) => {
-                    return {
-                        text: tableButton.text,
-                        method: tableButton.method,
-                        data: tableButton.data,
-                        url: tableButton.url,
-                        className: tableButton.class,
-                        action: (e, dt, node, config) => {
-                            if (tableButton.confirm && !confirm(tableButton.confirm)) {
-                                return;
-                            }
-                            if (tableButton.href) {
-                                window.location = tableButton.href;
-                            }
-                            // @todo support submit buttons
-                        },
-                    };
-                }),
-                {
-                    text: '<i class="fa fa-download"></i> Download CSV',
-                    className: 'btn-secondary',
-                    action: function (e, dt, node, config) {
-                        let arrayToObject = function (mixed) {
-                            if (Array.isArray(mixed)) {
-                                let object = {};
-                                for (let i = 0; i < mixed.length; i++) {
-                                    object[i] = arrayToObject(mixed[i]);
-                                }
-                                return object;
-                            }
-                            if (typeof mixed === 'object') {
-                                let object = {};
-                                for (let key in mixed) {
-                                    object[key] = arrayToObject(mixed[key]);
-                                }
-                                return object;
-                            }
-                            return mixed;
-                        };
-                        let params = arrayToObject(dt.ajax.params());
-                        params.csv = true;
-                        $.redirect(location.href, params, 'post');
-                    },
-                },
-                (dt, conf) => {
-                    return {
-                        extend: 'collection',
-                        text: function (dt) {
-                            return dt.i18n('buttons.colvis', 'Column visibility');
-                        },
-                        className: 'btn-secondary buttons-colvis',
-                        buttons: [{
-                            extend: 'columnsToggle',
-                            columns: conf.columns,
-                            columnText: conf.columnText,
-                        }],
-                    };
-                },
-                {
-                    text: '<i class="fa fa-reload"></i> Reset settings',
-                    className: 'btn-secondary',
-                    action: function (e, dt, node, config) {
-                        localStorage.removeItem(dataTableConfig.id);
-                        window.location.reload();
-                    }
-                },
-                {
-                    text: '<i class="fa fa-sync-alt"></i> Refresh data',
-                    className: 'btn-secondary rhinox-data-table-advanced-button',
-                    action: function (e, dt, node, config) {
-                        dt.draw();
-                    },
-                },
-                {
-                    text: 'Select all',
-                    className: 'btn-secondary',
-                    action: function (e, dt, node, config) {
-                        selectAll();
-                    },
-                },
-            ],
+            buttons,
         });
 
     $(selector).on('xhr.dt', (e, settings, json, xhr, bb) => {

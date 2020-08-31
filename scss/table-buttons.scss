@@ -1,25 +1,37 @@
 .rhinox-data-table-buttons {
-    .rhinox-data-table-advanced-button {
-        @include display-advanced;
-    }
+    display: flex;
+    flex-wrap: wrap;
 
     .dropdown-menu {
         padding: 0;
     }
 
-    @media (max-width: 720px) {
-        display: block;
+    >.btn,
+    >.btn-group>.btn,
+    .rhinox-data-table-buttons {
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
 
-        .rhinox-data-table-button,
-        .btn-group {
+    .rhinox-data-table-advanced-button {
+        @include display-advanced(inline-block);
+    }
+
+    @media (max-width: 720px) {
+        >.btn,
+        >.btn-group>.btn,
+        .rhinox-data-table-buttons {
             display: block;
             width: 100%;
             border-radius: 0;
             margin: 0;
         }
 
-        .dt-button-collection {
+        >.btn-group,
+        .dt-button-collection,
+        .dropdown-menu {
             width: 100%;
+            text-align: center;
         }
     }
 }
