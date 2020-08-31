@@ -31,7 +31,7 @@ class Prefix extends Preset
         return $this->prefix;
     }
 
-    public function setPrefix(string $prefix): self
+    public function setPrefix(string $prefix)
     {
         $this->prefix = $prefix;
         return $this;

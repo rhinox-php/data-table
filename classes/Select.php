@@ -2,21 +2,18 @@
 
 namespace Rhino\DataTable;
 
-use Rhino\InputData\InputData;
-
 class Select extends Column
 {
-    protected bool $searchable = false;
-    protected bool $sortable = false;
-    protected string $checkboxName;
+    private string $checkboxName;
 
     public function __construct(DataTable $dataTable, string $name, string $checkboxName)
     {
         parent::__construct($dataTable, $name);
         $this->checkboxName = $checkboxName;
         $this->setExportable(false);
-
-        // Default header is blank
+        $this->setSearchable(false);
+        $this->setSortable(false);
+        $this->addClass('rhinox-data-table-select');
         $this->setHeader('');
     }
 
@@ -28,16 +25,11 @@ class Select extends Column
         $id = uniqid('checkbox-');
         return '
             <div class="custom-control custom-checkbox">
-                <input type="hidden" name="datatable[' . $row[$this->name] . ']" value="0" />
-                <input type="checkbox" class="custom-control-input" id="' . $id . '" name="datatable[' . $row[$this->name] . ']" value="1" data-row="' . json_encode($row) . '" />
+                <input type="hidden" name="datatable[' . $row[$this->getName()] . ']" value="0" />
+                <input type="checkbox" class="custom-control-input" id="' . $id . '" name="datatable[' . $row[$this->getName()] . ']" value="1" data-row="' . json_encode($row) . '" />
                 <label class="custom-control-label" for="' . $id . '"></label>
             </div>
         ';
         // return (new TagCheckbox(new InputData(['name' => 'datatable[' . $row[$this->checkboxName] . ']', 'attributes' => ['data-row' => json_encode($row)],])))->render();
-    }
-
-    public function getClassName()
-    {
-        return 'rhinox-data-table-select';
     }
 }

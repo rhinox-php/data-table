@@ -2,6 +2,7 @@
 
 namespace Rhino\DataTable\Tests;
 
+use Rhino\DataTable\Exception\ConfigException;
 use Rhino\DataTable\Exception\QueryException;
 use Rhino\DataTable\MySqlDataTable;
 use Rhino\DataTable\Preset;
@@ -9,7 +10,7 @@ use Rhino\InputData\MutableInputData;
 use Symfony\Component\HttpFoundation\Request;
 
 // @todo test url filters http://localhost:8990/examples/kitchen-sink.php?filter[name]=acc
-class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
+class MySqlDataTableTest extends BaseTest
 {
     public function testRender(): void
     {
@@ -20,9 +21,27 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $this->assertStringContainsString('</table>', $html);
     }
 
+    public function testGetters(): void
+    {
+        $dataTable = $this->getDataTable();
+        $this->assertSame($dataTable, $dataTable->getColumn('code')->getDataTable());
+        $this->assertNull($dataTable->getColumn('invalid_column'));
+        $this->assertNull($dataTable->getColumnIndex('invalid_column'));
+    }
+
+    public function testAction(): void
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->addAction(function ($row) use ($dataTable) {
+            return 'Test static string';
+        });
+        $json = $this->getResponse([], $dataTable);
+        $this->assertSame('Test static string', $json->string('data.0.action14'));
+    }
+
     public function testButtons(): void
     {
-        $json = $this->getJsonResponse([]);
+        $json = $this->getResponse([], $this->getDataTable());
         $this->assertStringContainsString('button-attribute1="value1"', $json->string('data.0.action1'));
         $this->assertStringContainsString('button-attribute2="value2"', $json->string('data.0.action1'));
         $this->assertStringContainsString('<i class="fa fa-cog"></i>', $json->string('data.0.action1'));
@@ -33,38 +52,44 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
 
     public function testJsonResponse(): void
     {
-        $json = $this->getJsonResponse([]);
+        $json = $this->getResponse([], $this->getDataTable());
         $this->assertCount(10, $json['data']);
     }
 
     public function testOrder(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'draw' => 1,
             'json' => true,
             'order' => [[
                 'column' => 7,
                 'dir' => 'asc',
             ]],
-        ]);
+        ], $this->getDataTable());
         $this->assertCount(10, $json['data']);
-        $totalQuantity = $json->arr('data')->map(function ($row) {
-            return $row->int('totalQuantity');
-        })->getData();
-        $sortedTotalQuantity = $totalQuantity;
-        sort($sortedTotalQuantity);
-        $this->assertEquals($sortedTotalQuantity, $totalQuantity);
+        $previous = 0;
+        foreach ($json->arr('data') as $row) {
+            $this->assertGreaterThanOrEqual($previous, $row->int('totalQuantity'));
+            $previous = $row->int('totalQuantity');
+        }
+    }
+
+    public function testInvalidOrder(): void
+    {
+        $dataTable = $this->getDataTable();
+        $this->expectException(ConfigException::class);
+        $dataTable->setDefaultOrder('foo', 'invalid');
     }
 
     public function testGlobalSearch(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'draw' => 1,
             'json' => true,
             'search' => [
                 'value' => 'mbp_15_retina_mid_15',
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('mbp_15_retina_mid_15', implode(',', $row->arr()->getData()));
@@ -73,7 +98,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
 
     public function testColumnSearch(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'draw' => 1,
             'json' => true,
             'columns' => [
@@ -83,7 +108,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('mbp_15_retina_mid_15', $row->string('code'));
@@ -92,7 +117,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
 
     public function testMultiColumnSearch(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'draw' => 1,
             'json' => true,
             'columns' => [
@@ -107,7 +132,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('mbp_13', $row->string('code'));
@@ -117,7 +142,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
 
     public function testGlobalAndColumnSearch(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'draw' => 1,
             'json' => true,
             'search' => [
@@ -130,7 +155,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('a', $row->string('name'));
@@ -144,7 +169,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addHaving('code LIKE :test', [
             ':test' => 'mbp_13%',
         ]);
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertGreaterThan(0, count($json->arr('data')));
         foreach ($json->arr('data') as $row) {
             $this->assertStringContainsStringIgnoringCase('mbp_13', $row->string('code'));
@@ -157,7 +182,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addHaving('code LIKE :test', [
             ':test' => 'mbp_13%',
         ]);
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'search' => [
                 'value' => '1499',
             ],
@@ -176,7 +201,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addWhere('products.created_at > :date', [
             ':date' => $date->format('Y-m-d H:i:s'),
         ]);
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'order' => [[
                 'column' => 8,
                 'dir' => 'asc',
@@ -194,29 +219,31 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('high_value')->setQuery('IF(products.unit_price > :limit, "High Value", "Standard")', [
             ':limit' => 1399,
         ]);
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertGreaterThan(0, count($json->arr('data')));
-        $highValue = $json->arr('data')->map(fn ($row) => $row->string('highValue'))->getData();
-        $this->assertContains('High Value', $highValue);
-        $this->assertContains('Standard', $highValue);
+        foreach ($json->arr('data') as $row) {
+            if (str_replace(',', '', $row->string('unitPrice')) > 1399) {
+                $this->assertSame('High Value', $row->string('highValue'));
+            } else {
+                $this->assertSame('Standard', $row->string('highValue'));
+            }
+        }
     }
 
     public function testUrlFilters(): void
     {
-        $json = $this->getJsonResponse([
+        $dataTable = $this->getDataTable();
+        $this->getResponse([
             'filter' => [
                 'code' => 'mbp_13',
             ],
-        ]);
-        $this->assertGreaterThan(0, count($json->arr('data')));
-        foreach ($json->arr('data') as $row) {
-            $this->assertStringContainsStringIgnoringCase('mbp_13', $row->string('code'));
-        }
+        ], $dataTable);
+        $this->assertSame('mbp_13', $dataTable->getColumn('code')->getDefaultColumnFilter());
     }
 
     public function testSelectFilter(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 5 => [
                     'search' => [
@@ -224,10 +251,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
 
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 5 => [
                     'search' => [
@@ -235,13 +262,13 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertEquals(0, count($json->arr('data')));
     }
 
     public function testDateRangeFilterStartToFinish(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 11 => [
                     'search' => [
@@ -249,13 +276,13 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
     }
 
     public function testDateRangeFilterFinishToStart(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 11 => [
                     'search' => [
@@ -263,13 +290,13 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
     }
 
     public function testDateRangeFilterDate(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 11 => [
                     'search' => [
@@ -277,13 +304,13 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertGreaterThan(0, count($json->arr('data')));
     }
 
     public function testDateRangeFilterInvalid(): void
     {
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'columns' => [
                 11 => [
                     'search' => [
@@ -291,7 +318,7 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-        ]);
+        ], $this->getDataTable());
         $this->assertEquals(0, count($json->arr('data')));
     }
 
@@ -299,9 +326,10 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $dataTable = new MySqlDataTable($this->getPdo([
             \PDO::ATTR_EMULATE_PREPARES => false,
-        ]), 'invalid');
+        ]), 'invalid_table');
+        $dataTable->addColumn('invalid_column');
         $this->expectException(QueryException::class);
-        $this->getJsonResponse([], $dataTable);
+        $this->getResponse([], $dataTable);
     }
 
     public function testCsvExport(): void
@@ -328,20 +356,22 @@ class MySqlDataTableTest extends \PHPUnit\Framework\TestCase
         fclose($handle);
     }
 
-    private function getJsonResponse(array $requestParams, ?MySqlDataTable $dataTable = null): MutableInputData
+    public function testSetMeta(): void
     {
-        $dataTable = $dataTable ?: $this->getDataTable();
-        $request = new Request([], array_merge([
-            'draw' => 1,
-            'json' => true,
-        ], $requestParams));
+        $dataTable = $this->getDataTable();
+        $dataTable->setMeta([
+            'foo' => 'bar',
+        ]);
+        $json = $this->getResponse([], $dataTable);
+        $this->assertSame('bar', $json->string('meta.foo'));
+    }
 
-        $this->assertTrue($dataTable->process($request));
-
-        ob_start();
-        $dataTable->sendResponse();
-        $response = ob_get_clean();
-        return MutableInputData::jsonDecode($response);
+    public function testSetUrl(): void
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->setUrl('/another/url');
+        $html = $dataTable->render();
+        $this->assertStringContainsString('"url":"\/another\/url"', $html);
     }
 
     private function getPdo(?array $options = null): \PDO

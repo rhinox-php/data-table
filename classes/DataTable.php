@@ -8,31 +8,35 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+// @todo implement multiple column sorting
+// @todo Check for consistency for works like sort/order filter/search
 abstract class DataTable
 {
-    protected Request $request;
-    protected Response $response;
-    protected ?string $id = null;
-    protected array $columns = [];
-    protected array $data;
-    protected int $recordsTotal;
-    protected int $recordsFiltered;
-    protected int $start;
-    protected int $length;
-    protected ?string $search;
-    protected InputData $inputColumns;
-    protected ?array $order = null;
-    protected ?array $defaultOrder = null;
-    protected array $tableButtons = [];
-    protected array $rowFormatters = [];
-    protected array $meta = [];
-    protected string $url = '';
-    protected bool $saveState = true;
+    private Request $request;
+    private Response $response;
+    private ?string $id = null;
+    private array $columns = [];
+    private array $data;
+    private array $footerRows = [];
+    private int $recordsTotal;
+    private int $recordsFiltered;
+    private int $start;
+    private int $length;
+    private ?string $search;
+    private InputData $inputColumns;
+    private ?array $order = null;
+    private ?array $defaultOrder = null;
+    private array $tableButtons = [];
+    private array $rowFormatters = [];
+    private array $meta = [];
+    private string $url = '';
+    private bool $saveState = true;
     // @todo why both saveState and rememberSettingsEnabled
-    protected bool $rememberSettingsEnabled = true;
-    protected string $exportFileName = 'export';
-    protected bool $hasAction = false;
-    protected bool $hasSelect = false;
+    private bool $rememberSettingsEnabled = true;
+    private string $exportFileName = 'export';
+    private bool $hasAction = false;
+    private bool $hasSelect = false;
+    private bool $debug = false;
 
     /**
      * Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables (Ajax requests are asynchronous and thus can return out of sequence). This is used as part of the draw return parameter.
@@ -101,7 +105,16 @@ abstract class DataTable
         // @todo input data as input
         $input = new InputData(array_merge($request->query->all(), $request->request->all()));
         $this->setDrawCounter($input->int('draw'));
-        $this->request = $request;
+
+        // Apply URL filters
+        foreach ($input->arr('filter') as $columnName => $value) {
+            foreach ($this->getColumns() as $column) {
+                if ($column->getName() == $columnName->string()) {
+                    $column->setDefaultColumnFilter($value->string());
+                }
+            }
+        }
+
         if (!$request->isXmlHttpRequest() && !$input->bool('csv') && !$input->bool('json')) {
             return false;
         }
@@ -132,7 +145,7 @@ abstract class DataTable
     public function getJsonResponseData(): array
     {
         $data = $this->getData();
-        $columns = array_values($this->getColumns());
+        $columns = $this->getColumns();
         foreach ($data as $rowIndex => $row) {
             // Get row data indexed by column key
             $indexedRow = [];
@@ -155,11 +168,27 @@ abstract class DataTable
             $data[$rowIndex] = $indexedRow;
         }
 
+        // Format footers
+        $footerRows = $this->getFooterRows();
+        foreach ($footerRows as $footerRowIndex => $footerRow) {
+            if (!$footerRow) {
+                continue;
+            }
+            $indexedRow = [];
+            foreach ($columns as $columnIndex => $column) {
+                $indexedRow[$column->getKey()] = $footerRow[$columnIndex];
+            }
+            foreach ($columns as $columnIndex => $column) {
+                $footerRows[$footerRowIndex][$columnIndex] = $column->format($indexedRow[$column->getKey()], $indexedRow, 'html');
+            }
+        }
+
         return [
             'draw' => $this->getDrawCounter(),
             'recordsTotal' => $this->getRecordsTotal(),
             'recordsFiltered' => $this->getRecordsFiltered(),
             'data' => $data,
+            'footerRows' => $footerRows,
             'meta' => $this->getMeta(),
         ];
     }
@@ -195,7 +224,7 @@ abstract class DataTable
         return $this->columns;
     }
 
-    public function getColumn($name)
+    public function getColumn(string $name): ?Column
     {
         foreach ($this->columns as $column) {
             if ($column->getName() == $name) {
@@ -205,7 +234,7 @@ abstract class DataTable
         return null;
     }
 
-    public function getColumnIndex($name)
+    public function getColumnIndex($name): ?int
     {
         foreach ($this->columns as $i => $column) {
             if ($column->getName() == $name) {
@@ -223,6 +252,17 @@ abstract class DataTable
     public function setData(array $data)
     {
         $this->data = $data;
+        return $this;
+    }
+
+    public function getFooterRows()
+    {
+        return $this->footerRows;
+    }
+
+    public function setFooterRows(array $footerRows)
+    {
+        $this->footerRows = $footerRows;
         return $this;
     }
 
@@ -297,13 +337,7 @@ abstract class DataTable
         return $this->order;
     }
 
-    public function setOrder($order)
-    {
-        $this->order = $order;
-        return $this;
-    }
-
-    public function addOrder($column, $direction)
+    public function addOrder(string $column, string $direction)
     {
         $this->order[$column] = $direction;
         return $this;
@@ -327,22 +361,6 @@ abstract class DataTable
             $this->getColumnIndex($column),
             $direction,
         ]];
-        return $this;
-    }
-
-    public function setDefaultOrderMulti(array $defaultOrder)
-    {
-        // @todo implement me
-        $defaultOrder = array_map(function ($defaultOrder) {
-            if (is_string($defaultOrder[0])) {
-                return [
-                    $this->getColumnIndex($defaultOrder[0]),
-                    $defaultOrder[1],
-                ];
-            }
-            return $defaultOrder;
-        }, $defaultOrder);
-        $this->defaultOrder = $defaultOrder;
         return $this;
     }
 
@@ -486,16 +504,16 @@ abstract class DataTable
         $this->response->setCallback(function () {
             $data = $this->getData();
 
-            $columns = array_values($this->getColumns());
+            $columns = $this->getColumns();
 
-            $outstream = fopen('php://output', 'w');
+            $outputStream = fopen('php://output', 'w');
             $outputRow = [];
-            foreach ($columns as $c => $column) {
+            foreach ($columns as $column) {
                 if ($column->isExportable()) {
-                    $outputRow[$c] = $column->getHeader();
+                    $outputRow[] = $column->getHeader();
                 }
             }
-            fputcsv($outstream, $outputRow);
+            fputcsv($outputStream, $outputRow);
 
             foreach ($data as $row) {
                 $outputRow = [];
@@ -510,9 +528,10 @@ abstract class DataTable
                         $outputRow[$c] = $column->format($row[$c], $indexedRow, 'csv');
                     }
                 }
-                fputcsv($outstream, $outputRow);
+                fputcsv($outputStream, $outputRow);
             }
-            fclose($outstream);
+            // @todo footers
+            fclose($outputStream);
         });
         return true;
     }
@@ -530,5 +549,16 @@ abstract class DataTable
             array_splice($this->columns, $index, 0, [$column]);
         }
         return $column;
+    }
+
+    public function getDebug(): bool
+    {
+        return $this->debug;
+    }
+
+    public function setDebug(bool $debug)
+    {
+        $this->debug = $debug;
+        return $this;
     }
 }

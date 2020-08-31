@@ -23,9 +23,10 @@ if (!isset($dataTable)) {
                                         <option value="<?=$label;?>"><?=$label;?></option>
                                     <?php endforeach;?>
                                 </select>
-                            <?php elseif ($column->hasFilterDateRange()): ?>
+                            <?php elseif ($column->getFilterDateRange()): ?>
                                 <input class="form-control rhinox-data-table-column-filter-date-range" type="text" placeholder="Filter <?= $column->getHeader(); ?>" id="rhinox-data-table-date-range-<?= $columnId ?>" name="rhinox-data-table-date-range-<?= $columnId ?>" />
                             <?php else: ?>
+                                <?php // @todo text filters ?>
                                 <?php include __DIR__ . '/bootstrap/column-filter-numeric.php'; ?>
                                 <!-- <input class="form-control rhinox-data-table-column-filter" placeholder="Filter <?= $column->getHeader(); ?>" /> -->
                             <?php endif;?>
@@ -42,6 +43,7 @@ if (!isset($dataTable)) {
 </div>
 <?php
 $columnDefs = [];
+$searchCols = [];
 $i = 0;
 foreach ($dataTable->getColumns() as $column) {
     $columnDefs[] = [
@@ -52,6 +54,7 @@ foreach ($dataTable->getColumns() as $column) {
         'visible' => $column->isVisible(),
         'className' => $column->getClassName(),
     ];
+    // Default column filter values
     $searchCols[] = $column->getDefaultColumnFilter() ? [
         'search' => $column->getDefaultColumnFilter(),
     ] : null;
@@ -63,9 +66,10 @@ $jsonConfig = [
     'defaultOrder' => $dataTable->getDefaultOrder(),
     'saveState' => $dataTable->getSaveState(),
     'tableButtons' => $dataTable->getTableButtons(),
+    'searchCols' => $searchCols,
 ];
 ?>
 <script>
     window.rhinoxDataTables = window.rhinoxDataTables || [];
-    window.rhinoxDataTables.push(<?= json_encode($jsonConfig); ?>);
+    window.rhinoxDataTables.push(<?= json_encode($jsonConfig, $dataTable->getDebug() ? JSON_PRETTY_PRINT : null); ?>);
 </script>

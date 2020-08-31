@@ -6,7 +6,7 @@ use Rhino\InputData\InputData;
 
 class MySqlDataTable extends DataTable
 {
-    protected $bindingCount = 1000;
+    private $bindingCount = 1000;
     private $pdo;
     private $table;
     private $joins = [];
@@ -23,6 +23,60 @@ class MySqlDataTable extends DataTable
     }
 
     public function processSource(InputData $input)
+    {
+        [$sql, $bindings] = $this->getQuery();
+        [$statement, $queryTime] = $this->runQuery($sql, $bindings);
+
+        // @todo test debug meta data, enabled and disabled
+        if ($this->getDebug()) {
+            $this->setMetaValue('queryTime', $queryTime);
+            $this->setMetaValue('sql', $sql);
+            $this->setMetaValue('bindings', $bindings);
+            $this->setMetaValue('sqlBound', $this->replaceBindingsInSql($sql, $bindings));
+        }
+
+        // Fetch the results
+        $data = $statement->fetchAll(\PDO::FETCH_NUM);
+        $this->setData($data);
+
+
+        // Get the total results
+        [$statement] = $this->runQuery('SELECT FOUND_ROWS()');
+        $total = (int) $statement->fetchColumn(0);
+        // @todo get real total records by doing COUNT(*)
+        $this->setRecordsTotal($total);
+        $this->setRecordsFiltered($total);
+
+        $this->processFooters();
+    }
+
+    /**
+     * @return (\PDOStatement|float)[]
+     */
+    protected function runQuery(string $sql, array $bindings = []): array
+    {
+        $startTime = microtime(true);
+        $statement = $this->pdo->prepare($sql);
+        if (!$statement) {
+            throw new Exception\QueryException('Error preparing SQL query', $this->pdo->errorInfo(), $sql);
+        }
+        $statement->execute($bindings);
+        $queryTime = microtime(true) - $startTime;
+
+        return [$statement, $queryTime];
+        // @todo disable debug meta data by default
+        // @todo test debug meta data, enabled and disabled
+        $this->setMetaValue('queryTime', microtime(true) - $time);
+        $this->setMetaValue('sql', $sql);
+        $this->setMetaValue('bindings', $bindings);
+        // $this->setMetaValue('sqlBound', $this->replaceBindingsInSql($sql, array_merge($this->bindings, $bindings)));
+
+    }
+
+    /**
+     * @return (string|array)[]
+     */
+    protected function getQuery(bool $calcFoundRows = true, bool $limit = true): array
     {
         $bindings = [];
         /** @var MySqlColumn[] */
@@ -62,20 +116,10 @@ class MySqlDataTable extends DataTable
                 $column = $columns[$i->int()];
                 if ($column->hasFilterSelect()) {
                     $this->applyFilterSelect($column, $inputColumn, $columnHaving, $bindings);
-                } elseif ($column->hasFilterDateRange()) {
+                } elseif ($column->getFilterDateRange()) {
                     $this->applyFilterDateRange($column, $inputColumn, $columnHaving, $bindings);
                 } else {
                     $this->applyFilterText($column, $inputColumn, $columnHaving, $bindings);
-                }
-            }
-        }
-
-        // Apply URL filters
-        foreach ($input->arr('filter') as $columnName => $value) {
-            foreach ($columns as $i => $column) {
-                if ($column->getName() == $columnName->string()) {
-                    $columnHaving[] = '(' . $column->getFilterQuery() . ' LIKE :search' . ($i + 1000) . ')';
-                    $bindings[':search' . ($i + 1000)] = '%' . $value->string() . '%';
                 }
             }
         }
@@ -158,9 +202,15 @@ class MySqlDataTable extends DataTable
         }
         $orderBy = empty($orderBy) ? '' : ('ORDER BY ' . implode(', ', $orderBy));
 
-        // Build the query
-        $sql = "
-            SELECT SQL_CALC_FOUND_ROWS
+        $calcFoundRows = $calcFoundRows ? 'SQL_CALC_FOUND_ROWS' : '';
+
+        $limit = $limit ? <<<SQL
+            LIMIT {$this->getLength()}
+            OFFSET {$this->getStart()}
+        SQL : '';
+
+        $sql = <<<SQL
+            SELECT $calcFoundRows
                 $selectColumns
             FROM {$this->table}
             $joins
@@ -168,37 +218,59 @@ class MySqlDataTable extends DataTable
             $groupBys
             $having
             $orderBy
-            LIMIT {$this->getLength()}
-            OFFSET {$this->getStart()}
-        ";
+            $limit
+        SQL;
 
-        // o($sql, array_merge($this->bindings, $bindings));
+        $bindings = array_merge($this->bindings, $bindings);
 
-        // Execute the query
-        $time = microtime(true);
-        $statement = $this->pdo->prepare($sql);
-        if (!$statement) {
-            throw new Exception\QueryException('Error preparing SQL query', $this->pdo->errorInfo(), $sql);
+        return [$sql, $bindings];
+    }
+
+    protected function processFooters()
+    {
+        $this->setFooterRows([
+            $this->processFooterRow(true, 0),
+            $this->processFooterRow(false, 1),
+        ]);
+    }
+
+    protected function processFooterRow(bool $limit, int $rowIndex): ?array
+    {
+        $footerColumns = [];
+        foreach ($this->getColumns() as $columnIndex => $column) {
+            $footer = $column->getFooter();
+            if ($footer instanceof MySqlFooter) {
+                $footerColumns[$columnIndex] = $footer->getQuery() . ' AS column' . $columnIndex;
+            }
         }
-        $statement->execute(array_merge($this->bindings, $bindings));
-
-        // @todo disable debug meta data by default
-        // @todo test debug meta data, enabled and disabled
-        $this->setMetaValue('queryTime', microtime(true) - $time);
-        $this->setMetaValue('sql', $sql);
-        $this->setMetaValue('bindings', array_merge($this->bindings, $bindings));
-        // $this->setMetaValue('sqlBinded', $this->replaceBindingsInSql($sql, array_merge($this->bindings, $bindings)));
-
-        // Fetch the results
-        $data = $statement->fetchAll(\PDO::FETCH_NUM);
-        $this->setData($data);
-
-        // Get the total results
-        $statement = $this->pdo->prepare('SELECT FOUND_ROWS()');
-        $statement->execute();
-        $total = (int) $statement->fetchColumn(0);
-        $this->setRecordsTotal($total);
-        $this->setRecordsFiltered($total);
+        if (empty($footerColumns)) {
+            return null;
+        }
+        [$sql, $bindings] = $this->getQuery(false, $limit);
+        $footerColumns = implode(',' . PHP_EOL, $footerColumns);
+        $footerSql = <<<SQL
+            SELECT $footerColumns
+            FROM ($sql) AS footerResult
+        SQL;
+        [$statement, $footerQueryTime] = $this->runQuery($footerSql, $bindings);
+        if ($this->getDebug()) {
+            $this->setMetaValue('footerQueryTime', $footerQueryTime);
+            $this->setMetaValue('footerSql', $footerSql);
+            $this->setMetaValue('footerSqlBound', $this->replaceBindingsInSql($footerSql, $bindings));
+        }
+        $footerQueryResult = $statement->fetch(\PDO::FETCH_NUM);
+        $footerResult = [];
+        foreach ($this->getColumns() as $columnIndex => $column) {
+            $footer = $column->getFooter();
+            if ($footer instanceof MySqlFooter) {
+                $footerResult[$columnIndex] = array_shift($footerQueryResult);
+            } elseif ($footer instanceof Footer) {
+                $footerResult[$columnIndex] = $footer->getText()[$rowIndex] ?? '';
+            } else {
+                $footerResult[$columnIndex] = '';
+            }
+        }
+        return $footerResult;
     }
 
     public function getTable(): string
@@ -217,14 +289,14 @@ class MySqlDataTable extends DataTable
     }
 
     // @todo add join with bindings
-    public function addJoin(string $join): self
+    public function addJoin(string $join)
     {
         $this->joins[] = $join;
         return $this;
     }
 
     // @todo add group by with bindings
-    public function addGroupBy(string $groupBy): self
+    public function addGroupBy(string $groupBy)
     {
         $this->groupBys[] = $groupBy;
         return $this;
@@ -341,18 +413,29 @@ class MySqlDataTable extends DataTable
         }
     }
 
-    // private function replaceBindingsInSql($sql, $bindings)
-    // {
-    //     return preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
-    //         if (isset($bindings[$matches[0]])) {
-    //             return "'" . addslashes($bindings[$matches[0]]) . "'";
-    //         }
-    //         return $matches[0];
-    //     }, $sql);
-    // }
-
     protected function getIdHash(): array
     {
         return [$this->getTable()];
+    }
+
+    /**
+     * @return MySqlColumn[]
+     */
+    public function getColumns(): array
+    {
+        return parent::getColumns();
+    }
+
+    /**
+     * This is for debugging only.
+     */
+    private function replaceBindingsInSql($sql, $bindings)
+    {
+        return preg_replace_callback('/:[a-z0-9]+/', function ($matches) use ($bindings) {
+            if (isset($bindings[$matches[0]])) {
+                return "'" . addslashes($bindings[$matches[0]]) . "'";
+            }
+            return $matches[0];
+        }, $sql);
     }
 }

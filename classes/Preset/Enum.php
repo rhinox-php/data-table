@@ -33,7 +33,7 @@ class Enum extends Preset
         return $this->enums;
     }
 
-    public function setEnums(array $enums): self
+    public function setEnums(array $enums)
     {
         $this->enums = $enums;
         return $this;

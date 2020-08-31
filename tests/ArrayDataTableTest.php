@@ -6,7 +6,7 @@ use Rhino\DataTable\ArrayDataTable;
 use Rhino\InputData\InputData;
 use Symfony\Component\HttpFoundation\Request;
 
-class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
+class ArrayDataTableTest extends BaseTest
 {
     public function testRender(): void
     {
@@ -43,7 +43,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('color')->setIndex(1);
         $dataTable->addColumn('choice', 1)->setIndex(2);
 
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertCount(4, $json['data']);
     }
 
@@ -60,7 +60,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('color')->setProperty('color');
         $dataTable->addColumn('choice', 1)->setProperty('choice');
 
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertCount(4, $json['data']);
     }
 
@@ -107,8 +107,56 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('color')->setProperty('color');
         $dataTable->addColumn('choice', 1)->setCallback(fn ($row) => $row->choice);
 
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertCount(4, $json['data']);
+    }
+
+    public function testColumnFiltering()
+    {
+        $dataTable = new ArrayDataTable([
+            [1, 'red', 'yes'],
+            [2, 'green', 'no'],
+            [3, 'blue', 'yes'],
+            [4, null, 'no'],
+        ]);
+        $dataTable->addColumn('int')->setIndex(0);
+        $dataTable->addColumn('color')->setIndex(1);
+        $dataTable->addColumn('bool')->setIndex(2);
+        $json = $this->getResponse([
+            'columns' => [
+                2 => [
+                    'search' => [
+                        'value' => 'yes',
+                    ],
+                ],
+            ],
+        ], $dataTable);
+        $this->assertCount(2, $json->arr('data'));
+        $this->assertSame('yes', $json->string('data.0.bool'));
+        $this->assertSame('yes', $json->string('data.1.bool'));
+    }
+
+    public function testSearchableFlag()
+    {
+        $dataTable = new ArrayDataTable([
+            [1, 'red', 'yes'],
+            [2, 'green', 'no'],
+            [3, 'blue', 'yes'],
+            [4, null, 'no'],
+        ]);
+        $dataTable->addColumn('int')->setIndex(0);
+        $dataTable->addColumn('color')->setIndex(1);
+        $dataTable->addColumn('bool')->setIndex(2)->setSearchable(false);
+        $json = $this->getResponse([
+            'columns' => [
+                2 => [
+                    'search' => [
+                        'value' => 'yes',
+                    ],
+                ],
+            ],
+        ], $dataTable);
+        $this->assertCount(4, $json->arr('data'));
     }
 
     /**
@@ -118,7 +166,7 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
     {
         $dataTable = new ArrayDataTable($rows);
         $dataTable->addColumn('value')->setIndex(0);
-        $json = $this->getJsonResponse([
+        $json = $this->getResponse([
             'order' => [[
                 'column' => 0,
                 'dir' => $direction,
@@ -141,20 +189,19 @@ class ArrayDataTableTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    private function getJsonResponse(array $requestParams, ?ArrayDataTable $dataTable = null): InputData
+    public function testSortableFlag()
     {
-        $dataTable = $dataTable ?: $this->getDataTable();
-        $request = new Request([], array_merge([
-            'draw' => 1,
-            'json' => true,
-        ], $requestParams));
-
-        $this->assertTrue($dataTable->process($request));
-
-        ob_start();
-        $dataTable->sendResponse();
-        $response = ob_get_clean();
-        return InputData::jsonDecode($response);
+        $dataTable = new ArrayDataTable([[2], [1], [3]]);
+        $dataTable->addColumn('value')->setIndex(0)->setSortable(false);
+        $json = $this->getResponse([
+            'order' => [[
+                'column' => 0,
+                'dir' => 'asc',
+            ]],
+        ], $dataTable);
+        $this->assertEquals(2, $json->string('data.0.value'));
+        $this->assertEquals(1, $json->string('data.1.value'));
+        $this->assertEquals(3, $json->string('data.2.value'));
     }
 
     private function getDataTable(): ArrayDataTable

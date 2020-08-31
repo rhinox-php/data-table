@@ -2,40 +2,11 @@
 
 namespace Rhino\DataTable\Preset;
 
-use Rhino\DataTable\Column;
-
-class Percent extends Preset
+class Percent extends Number
 {
-    private int $decimalPlaces = 0;
-
-    public function __construct(int $decimalPlaces = 0)
+    public function __construct()
     {
-        $this->setDecimalPlaces($decimalPlaces);
-    }
-
-    public function configure(Column $column): void
-    {
-        $column->addClass('rhinox-data-table-align-right');
-        $column->addClass('rhinox-data-table-number');
-        $column->addFormatter([$this, 'format']);
-    }
-
-    public function format($value, $row, $type)
-    {
-        if ($value !== null) {
-            $value = number_format($value, $this->getDecimalPlaces()) . ' %';
-        }
-        return $value;
-    }
-
-    public function getDecimalPlaces(): int
-    {
-        return $this->decimalPlaces;
-    }
-
-    public function setDecimalPlaces(int $decimalPlaces): self
-    {
-        $this->decimalPlaces = $decimalPlaces;
-        return $this;
+        $this->setDecimalPlaces(0);
+        $this->setSuffix(' %');
     }
 }

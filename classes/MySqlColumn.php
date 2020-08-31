@@ -4,16 +4,16 @@ namespace Rhino\DataTable;
 
 class MySqlColumn extends Column implements MySqlSelectColumnInterface
 {
-    protected $query;
-    protected $having;
-    protected $searchWhere;
-    protected ?string $orderQuery = null;
-    protected ?string $filterQuery = null;
+    private $query;
+    private $having;
+    private $searchWhere;
+    private ?string $orderQuery = null;
+    private ?string $filterQuery = null;
 
     public function __construct(MySqlDataTable $dataTable, string $name)
     {
         parent::__construct($dataTable, $name);
-        $this->setQuery($dataTable->getTable() . '.' . $name);
+        $this->setQuery($this->getDataTable()->getTable() . '.' . $name);
     }
 
     public function getQuery()
@@ -21,7 +21,7 @@ class MySqlColumn extends Column implements MySqlSelectColumnInterface
         return $this->query;
     }
 
-    public function setQuery(string $query, array $bindings = []): self
+    public function setQuery(string $query, array $bindings = [])
     {
         $this->query = $this->getDataTable()->bind($query, $bindings);
         return $this;
@@ -32,7 +32,7 @@ class MySqlColumn extends Column implements MySqlSelectColumnInterface
         return $this->orderQuery ?: $this->getQuery();
     }
 
-    public function setOrderQuery($orderQuery): self
+    public function setOrderQuery($orderQuery)
     {
         $this->orderQuery = $orderQuery;
         return $this;
@@ -43,7 +43,7 @@ class MySqlColumn extends Column implements MySqlSelectColumnInterface
         return $this->filterQuery ?: $this->getQuery();
     }
 
-    public function setFilterQuery($filterQuery): self
+    public function setFilterQuery($filterQuery)
     {
         $this->filterQuery = $filterQuery;
         return $this;
@@ -54,8 +54,20 @@ class MySqlColumn extends Column implements MySqlSelectColumnInterface
         return $this->getName();
     }
 
+    // public function getFooter(): ?MySqlFooter
+    // {
+    //     return parent::getFooter();
+    // }
+
+    public function setFooter(Footer $footer)
+    {
+        $footer->setDataTable($this->getDataTable());
+        $footer->setColumn($this);
+        return parent::setFooter($footer);
+    }
+
     public function getDataTable(): MySqlDataTable
     {
-        return $this->dataTable;
+        return parent::getDataTable();
     }
 }

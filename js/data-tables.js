@@ -71,7 +71,7 @@ const initDataTable = (dataTableConfig) => {
             },
             autoWidth: false,
             orderCellsTop: true,
-            order: dataTableConfig.defaultOrder,
+            order: dataTableConfig.defaultOrder || undefined,
             ajax: {
                 url: dataTableConfig.url,
                 type: 'POST',
@@ -91,7 +91,8 @@ const initDataTable = (dataTableConfig) => {
             },
             columnDefs: dataTableConfig.columnDefs,
             lengthMenu: [[10, 25, 50, 100, 250, 500], [10, 25, 50, 100, 250, 500]],
-            stateSave: true,
+            searchCols: dataTableConfig.searchCols,
+            stateSave: false,
             stateSaveCallback: function (settings, data) {
                 localStorage.setItem(dataTableConfig.id, JSON.stringify(data));
             },
@@ -142,6 +143,15 @@ const initDataTable = (dataTableConfig) => {
                         data: tableButton.data,
                         url: tableButton.url,
                         className: tableButton.class,
+                        action: (e, dt, node, config) => {
+                            if (tableButton.confirm && !confirm(tableButton.confirm)) {
+                                return;
+                            }
+                            if (tableButton.href) {
+                                window.location = tableButton.href;
+                            }
+                            // @todo support submit buttons
+                        },
                     };
                 }),
                 {
@@ -209,18 +219,48 @@ const initDataTable = (dataTableConfig) => {
             ],
         });
 
+    $(selector).on('xhr.dt', (e, settings, json, xhr, bb) => {
+        // Handle footer data
+        let footer = $(selector).find('> tfoot');
+
+        // Create footer if it doesn't exist
+        if (!footer.length) {
+            footer = $('<tfoot>').appendTo(selector);
+        }
+
+        // Clear the old footers
+        footer.html('');
+
+        if (!json.footerRows) {
+            // Hide the footer if the server did not send footer data
+            footer.hide();
+        } else {
+            for (const footerRow of json.footerRows) {
+                const row = $('<tr>');
+                let columnIndex = 0;
+                for (const footerColumn of footerRow) {
+                    $('<td>')
+                        .addClass(dataTableConfig.columnDefs[columnIndex].className)
+                        .html(footerColumn)
+                        .appendTo(row);
+                    columnIndex++;
+                }
+                footer.append(row);
+            }
+        }
+    });
 
     // Column searching
     let searchDebounce = null;
 
-    $(selector).closest('.dataTables_wrapper').on('keyup change', '.rhinox-data-table-col-filter', function () {
+    $(selector).closest('.dataTables_wrapper').on('keyup change', '.rhinox-data-table-column-filter', function () {
         if (searchDebounce) {
             clearTimeout(searchDebounce);
         }
         searchDebounce = setTimeout(function () {
             searchDebounce = null;
             let draw = false;
-            $(selector).closest('.dataTables_wrapper').find('.rhinox-data-table-col-filter').each(function () {
+            $(selector).closest('.dataTables_wrapper').find('.rhinox-data-table-column-filter').each(function () {
                 let value = $(this).find(':input').val();
                 let column = table.column($(this).data('column'));
                 if (column.search() !== value) {

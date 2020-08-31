@@ -37,7 +37,7 @@ class Group extends Preset
         return $this->limit;
     }
 
-    public function setLimit(int $limit): self
+    public function setLimit(int $limit)
     {
         $this->limit = $limit;
         return $this;

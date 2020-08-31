@@ -30,6 +30,11 @@ $dataTable->addTableButton([
     'href' => '/add',
     'text' => 'Add new entry',
     'class' => 'btn-primary',
+]);
+$dataTable->addTableButton([
+    'href' => '?filter[code]=mbp_13',
+    'text' => 'Filter URL',
+    'class' => 'btn-primary',
     'confirm' => 'Are you sure you want to do this?',
 ]);
 
@@ -54,7 +59,7 @@ $dataTable->addAction(function ($row) use ($dataTable) {
 
 $dataTable->addColumn('id')->setVisible(false);
 $dataTable->addColumn('name');
-$dataTable->addColumn('code');
+$dataTable->addColumn('code')->setDefaultColumnFilter('mbp');
 $dataTable->addColumn('category')->addFormatter(fn ($value) => ucfirst($value))->setFilterSelect([
     'Laptop' => [
         'category = :category',

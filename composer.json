@@ -15,6 +15,11 @@
             "include.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Rhino\\DataTable\\Tests\\": "tests/"
+        }
+    },
     "require-dev": {
         "phan/phan": "^3.0",
         "phpunit/phpunit": "^9.2",

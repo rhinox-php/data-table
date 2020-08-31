@@ -8,9 +8,9 @@ use Symfony\Component\HttpFoundation\Request;
 class GlobalFilterTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @dataProvider providePagination
+     * @dataProvider provideGlobalFilter
      */
-    public function testPagination(?string $searchString, array $expected, int $expectedCount): void
+    public function testGlobalFilter(?string $searchString, array $expected, int $expectedCount): void
     {
         $data = [
             [1, 'red', 'yes'],
@@ -42,7 +42,7 @@ class GlobalFilterTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function providePagination()
+    public function provideGlobalFilter()
     {
         return [
             [

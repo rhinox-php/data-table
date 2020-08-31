@@ -6,15 +6,15 @@ use Rhino\DataTable\Icon\FontAwesome;
 
 class Button
 {
-    protected ?string $url = null;
-    protected ?string $text = null;
-    protected array $classes = [];
-    protected array $attributes = [];
-    protected ?string $confirmation = null;
-    protected array $data = [];
-    protected ?string $icon = null;
-    protected ?string $target = null;
-    protected bool $visible = true;
+    private ?string $url = null;
+    private ?string $text = null;
+    private array $classes = [];
+    private array $attributes = [];
+    private ?string $confirmation = null;
+    private array $data = [];
+    private ?string $icon = null;
+    private ?string $target = null;
+    private bool $visible = true;
 
     public function render(): ?string
     {
@@ -80,37 +80,37 @@ class Button
         return $this->icon;
     }
 
-    public function setUrl($url): self
+    public function setUrl($url)
     {
         $this->url = $url;
         return $this;
     }
 
-    public function setText($text): self
+    public function setText($text)
     {
         $this->text = $text;
         return $this;
     }
 
-    public function setConfirmation($confirmation): self
+    public function setConfirmation($confirmation)
     {
         $this->confirmation = $confirmation;
         return $this;
     }
 
-    public function setData($data): self
+    public function setData($data)
     {
         $this->data = $data;
         return $this;
     }
 
-    public function setIcon($icon): self
+    public function setIcon($icon)
     {
         $this->icon = $icon;
         return $this;
     }
 
-    public function setClasses($classes): self
+    public function setClasses($classes)
     {
         $this->classes = $classes;
         return $this;
@@ -121,13 +121,13 @@ class Button
         return $this->classes;
     }
 
-    public function addClass($class): self
+    public function addClass($class)
     {
         $this->classes[] = $class;
         return $this;
     }
 
-    public function setAttributes($attributes): self
+    public function setAttributes($attributes)
     {
         $this->attributes = $attributes;
         return $this;
@@ -138,7 +138,7 @@ class Button
         return $this->attributes;
     }
 
-    public function addAttribute($name, $value): self
+    public function addAttribute($name, $value)
     {
         $this->attributes[$name] = $value;
         return $this;
@@ -149,7 +149,7 @@ class Button
         return $this->target;
     }
 
-    public function setTarget($target): self
+    public function setTarget($target)
     {
         $this->target = $target;
         return $this;
@@ -160,7 +160,7 @@ class Button
         return $this->visible;
     }
 
-    public function setVisible(bool $visible): self
+    public function setVisible(bool $visible)
     {
         $this->visible = $visible;
         return $this;

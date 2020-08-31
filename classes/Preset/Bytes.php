@@ -37,7 +37,7 @@ class Bytes extends Preset
         return $this->units;
     }
 
-    public function setUnits(array $units): self
+    public function setUnits(array $units)
     {
         $this->units = $units;
         return $this;

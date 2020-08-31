@@ -3,11 +3,12 @@
 namespace Rhino\DataTable\Tests;
 
 use Rhino\DataTable\ArrayDataTable;
+use Rhino\DataTable\Column;
 use Rhino\DataTable\Preset;
 use Rhino\InputData\InputData;
 use Symfony\Component\HttpFoundation\Request;
 
-class PresetTest extends \PHPUnit\Framework\TestCase
+class PresetTest extends BaseTest
 {
     public function testArray(): void
     {
@@ -17,7 +18,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [null],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\ArrayList());
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertStringContainsString('<li>2</li><li>3</li><li>4</li>', $json->string('data.0.value'));
         $this->assertStringContainsString('<ul', $json->string('data.0.value'));
         $this->assertStringContainsString('</ul>', $json->string('data.0.value'));
@@ -27,14 +28,14 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [[4, 2, 3]],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\ArrayList())->setSortFunction(fn ($a, $b) => $b - $a));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertStringContainsString('<li>4</li><li>3</li><li>2</li>', $json->string('data.0.value'));
 
         $dataTable = new ArrayDataTable([
             [[4, 2, 3]],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\ArrayList());
-        $csv = $this->getJsonResponse([
+        $csv = $this->getResponse([
             'csv' => true,
         ], $dataTable);
         $this->assertStringContainsString('2, 3, 4', $csv);
@@ -49,7 +50,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [null],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Boolean());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         // @todo option values
         $this->assertEquals('-', $json->string('data.0.value'));
         $this->assertEquals('-', $json->string('data.1.value'));
@@ -69,7 +70,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [100 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Bytes());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('100 B', $json->string('data.0.value'));
         $this->assertEquals('100 KB', $json->string('data.1.value'));
         $this->assertEquals('100 MB', $json->string('data.2.value'));
@@ -88,7 +89,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [100 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Bytes())->setUnits(Preset\Bytes::LONG_UNITS));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('100 Bytes', $json->string('data.0.value'));
         $this->assertEquals('100 Kilobytes', $json->string('data.1.value'));
         $this->assertEquals('100 Megabytes', $json->string('data.2.value'));
@@ -113,7 +114,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['2019-08-24'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Date())->setTimeZone('UTC'));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('2019-07-24', $json->string('data.1.value'));
         $this->assertEquals('2019-08-24', $json->string('data.2.value'));
@@ -138,7 +139,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['2019-08-24 23:59:59'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\DateTime())->setTimeZone('UTC'));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('2019-07-24 13:14:15', $json->string('data.1.value'));
         $this->assertEquals('2019-08-24 23:59:59', $json->string('data.2.value'));
@@ -158,7 +159,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Enum([
             'foo' => 'Bar',
         ]));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('baz', $json->string('data.1.value'));
         // Note the sort is done before formatting
@@ -171,7 +172,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['a,b,c,d'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Group())->setLimit(3));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('a, b, c...', $json->string('data.0.value'));
     }
 
@@ -181,7 +182,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['<b>Foo</b>'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Html());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('<b>Foo</b>', $json->string('data.0.value'));
     }
 
@@ -195,7 +196,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         ]);
         // @todo should this handle camel case
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Human());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         // @todo need to fix sort order
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('Abc, Def', $json->string('data.1.value'));
@@ -212,13 +213,13 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['[]'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonArray());
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertStringContainsString('<li>1</li><li>2</li><li>3</li>', $json->string('data.0.value'));
         $this->assertSame('', $json->string('data.1.value'));
         $this->assertSame('{', $json->string('data.2.value'));
         $this->assertSame('', $json->string('data.3.value'));
 
-        $csv = $this->getJsonResponse([
+        $csv = $this->getResponse([
             'csv' => true,
         ], $dataTable, false);
         $this->assertStringContainsString('1, 2, 3', $csv);
@@ -233,14 +234,14 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['[]'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonArrayKey());
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertStringContainsString('<li>baz</li><li>foo</li>', $json->string('data.0.value'));
         $this->assertStringNotContainsString('<li>bar</li>', $json->string('data.0.value'));
         $this->assertSame('', $json->string('data.1.value'));
         $this->assertSame('{', $json->string('data.2.value'));
         $this->assertSame('', $json->string('data.3.value'));
 
-        $csv = $this->getJsonResponse([
+        $csv = $this->getResponse([
             'csv' => true,
         ], $dataTable, false);
         $this->assertStringContainsString('baz, foo', $csv);
@@ -256,13 +257,13 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['[]'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonObject());
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertStringContainsString('<li><b>foo:</b> bar</li>', $json->string('data.0.value'));
         $this->assertSame('', $json->string('data.1.value'));
         $this->assertSame('{', $json->string('data.2.value'));
         $this->assertSame('', $json->string('data.3.value'));
 
-        $csv = $this->getJsonResponse([
+        $csv = $this->getResponse([
             'csv' => true,
         ], $dataTable, false);
         $this->assertStringContainsString('foo: bar', $csv);
@@ -275,7 +276,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['"broken'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\JsonString());
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertSame('test', $json->string('data.0.value'));
         $this->assertSame('"broken', $json->string('data.1.value'));
     }
@@ -287,7 +288,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
         ]);
         $dataTable->addColumn('value1')->setIndex(0)->addPreset(new Preset\Link('/foo/bar/{value1}/{value2}'));
         $dataTable->addColumn('value2')->setIndex(1)->addPreset(new Preset\Link('/foo/bar/{value3}'));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertSame('<a href="/foo/bar/123/foo">123</a>', $json->string('data.0.value1'));
         $this->assertSame('<a href="/foo/bar/{value3}">foo</a>', $json->string('data.0.value2'));
     }
@@ -301,11 +302,11 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [null],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Money());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         // @todo test class names
         // @todo currencies
         // @todo decimal places
-        $this->assertEquals('', $json->string('data.0.value'));
+        $this->assertEquals('-', $json->string('data.0.value'));
         $this->assertEquals('$ 123.00', $json->string('data.1.value'));
         $this->assertEquals('$ 1,234,567,890.00', $json->string('data.2.value'));
         $this->assertEquals('$ 9,876,543,210.00', $json->string('data.3.value'));
@@ -317,7 +318,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['123'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Number());
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
     }
 
     public function testPercent(): void
@@ -328,7 +329,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['1000'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Percent())->setDecimalPlaces(2));
-        $json = $this->getJsonResponse([], $dataTable, false);
+        $json = $this->getResponse([], $dataTable, false);
         $this->assertEquals('123.00 %', $json->string('data.0.value'));
         $this->assertEquals('7.65 %', $json->string('data.1.value'));
         $this->assertEquals('1,000.00 %', $json->string('data.2.value'));
@@ -341,7 +342,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [null],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Prefix('P: '));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('P: 123', $json->string('data.1.value'));
     }
@@ -353,7 +354,7 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             [null],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset(new Preset\Suffix('-S'));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('', $json->string('data.0.value'));
         $this->assertEquals('123-S', $json->string('data.1.value'));
     }
@@ -365,36 +366,48 @@ class PresetTest extends \PHPUnit\Framework\TestCase
             ['12345'],
         ]);
         $dataTable->addColumn('value')->setIndex(0)->addPreset((new Preset\Truncate())->setMaxLength(3));
-        $json = $this->getJsonResponse([], $dataTable);
+        $json = $this->getResponse([], $dataTable);
         $this->assertEquals('123', $json->string('data.0.value'));
         $this->assertEquals('123...', $json->string('data.1.value'));
     }
 
-    /**
-     * @return InputData|string
-     */
-    private function getJsonResponse(array $requestParams, ArrayDataTable $dataTable = null, bool $sorted = true)
+    public function testArrayReturn(): void
     {
-        if (!$sorted) {
-            $dataTable->setDefaultOrder(null);
-        }
-        $request = new Request([], array_merge([
-            'draw' => 1,
-            'json' => true,
-            'order' => $sorted ? [[
-                'column' => 0,
-                'dir' => 'asc',
-            ]] : null,
-        ], $requestParams));
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new class extends Preset\Preset {
+            public function configure(Column $column): void
+            {
+                $column->addFormatter([$this, 'format']);
+            }
 
-        $this->assertTrue($dataTable->process($request));
+            public function format($value, $row, $type)
+            {
+                return [1, 2, 3];
+            }
+        });
+        $json = $this->getResponse([], $dataTable);
+        $this->assertEquals('1, 2, 3', $json->string('data.0.value'));
 
-        ob_start();
-        $dataTable->sendResponse();
-        $response = ob_get_clean();
-        if (isset($requestParams['csv'])) {
-            return $response;
-        }
-        return InputData::jsonDecode($response);
+        $dataTable = new ArrayDataTable([
+            ['123'],
+        ]);
+        $dataTable->addColumn('value')->setIndex(0)->addPreset(new class extends Preset\Preset {
+            public function configure(Column $column): void
+            {
+                $column->addFormatter([$this, 'format']);
+            }
+
+            public function format($value, $row, $type)
+            {
+                yield 3;
+                yield 2;
+                yield 1;
+            }
+        });
+        $json = $this->getResponse([], $dataTable);
+        $this->assertEquals('3, 2, 1', $json->string('data.0.value'));
     }
+
 }

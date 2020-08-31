@@ -4,11 +4,11 @@ namespace Rhino\DataTable;
 
 class ArrayColumn extends Column
 {
-    protected $callback = null;
-    protected $method = null;
-    protected $property = null;
-    protected $index = null;
-    protected $accessorType = null;
+    private $callback = null;
+    private $method = null;
+    private $property = null;
+    private $index = null;
+    private $accessorType = null;
 
     public function processSource($row)
     {
@@ -26,7 +26,10 @@ class ArrayColumn extends Column
                 $index = $this->getIndex();
                 return $row[$index];
         }
+        // @codeCoverageIgnoreStart
+        // This can only happen if extending these classes
         throw new \Exception('Cannot process column: ' . $this->getName());
+        // @codeCoverageIgnoreEnd
     }
 
     public function getCallback()

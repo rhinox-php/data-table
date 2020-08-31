@@ -4,21 +4,23 @@ namespace Rhino\DataTable;
 
 class Action extends Column
 {
-    protected $callback;
-    protected $header = '';
-    protected bool $searchable = false;
-    protected bool $sortable = false;
+    /** @var callable */
+    private $callback;
 
-    public function __construct(DataTable $dataTable, $callback, $name = 'action')
+    public function __construct(DataTable $dataTable, callable $callback, string $name = 'action')
     {
         parent::__construct($dataTable, $name);
         $this->callback = $callback;
         $this->setExportable(false);
+        $this->setSearchable(false);
+        $this->setSortable(false);
+        $this->addClass('rhinox-data-table-action');
+        $this->setHeader('');
     }
 
     public function format($value, $row, $type)
     {
-        $method = $this->callback;
+        $method = $this->getCallback();
         $result = $method($row, $type);
         if (!is_array($result)) {
             $result = [$result];
@@ -37,10 +39,5 @@ class Action extends Column
     public function getCallback()
     {
         return $this->callback;
-    }
-
-    public function getClassName()
-    {
-        return parent::getClassName() . ' rhinox-data-table-action';
     }
 }

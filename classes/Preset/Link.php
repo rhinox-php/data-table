@@ -37,7 +37,7 @@ class Link extends Preset
         return $this->url;
     }
 
-    public function setUrl(string $url): self
+    public function setUrl(string $url)
     {
         $this->url = $url;
         return $this;

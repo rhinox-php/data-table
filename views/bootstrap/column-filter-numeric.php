@@ -9,5 +9,5 @@
             <div class="dropdown-item">Equals</div>
         </div>
     </div>
-    <input type="text" class="form-control rhinox-data-table-column-filter" placeholder="Filter <?= $column->getHeader(); ?>" />
+    <input type="text" class="form-control rhinox-data-table-column-filter" placeholder="Filter <?= $column->getHeader(); ?>" value="<?= $column->getDefaultColumnFilter(); ?>" />
 </div>

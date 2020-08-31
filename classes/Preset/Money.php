@@ -2,24 +2,12 @@
 
 namespace Rhino\DataTable\Preset;
 
-use Rhino\DataTable\Column;
-
-class Money extends Preset
+class Money extends Number
 {
-    public function configure(Column $column): void
+    public function __construct()
     {
-        $column->addClass('rhinox-data-table-align-right');
-        $column->addClass('rhinox-data-table-number');
-        $column->addFormatter([$this, 'format']);
-    }
-
-    public function format($value, $row, $type)
-    {
-        // @todo handle other currencies
-        // @todo allow overriding null result
-        if ($value !== null) {
-            $value = '$ ' . number_format($value ?: 0, 2);
-        }
-        return $value;
+        $this->setDecimalPlaces(2);
+        $this->setNullValue('-');
+        $this->setPrefix('$ ');
     }
 }

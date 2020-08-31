@@ -4,7 +4,7 @@ namespace Rhino\DataTable;
 
 class Dropdown
 {
-    protected $buttons;
+    private $buttons;
 
     public function __construct(array $buttons)
     {

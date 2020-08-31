@@ -6,18 +6,10 @@ class ColumnInsert extends Column
 {
     public function __construct(DataTable $dataTable, string $name, callable $formatter)
     {
-        $this->name = $name;
+        parent::__construct($dataTable, $name);
         $this->addFormatter($formatter);
-        $this->setExportable(true);
-    }
-
-    public function isSortable()
-    {
-        return false;
-    }
-
-    public function isSearchable()
-    {
-        return false;
+        $this->setExportable(false);
+        $this->setSearchable(false);
+        $this->setSortable(false);
     }
 }

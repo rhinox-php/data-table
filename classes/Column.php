@@ -7,21 +7,21 @@ use Rhino\DataTable\Preset\Preset;
 
 class Column
 {
-    protected DataTable $dataTable;
-    protected string $name;
-    protected $header = null;
-    protected string $className = '';
-    // protected $preset;
-    protected array $formatters = [];
-    protected bool $exportable = true;
-    protected bool $visible = true;
-    protected bool $searchable = true;
-    protected bool $sortable = true;
-    protected $defaultColumnFilter = null;
-    protected $filterEnabled = true;
-    protected $filterSelect = [];
-    protected $filterDateRange = [];
-    protected $footer;
+    private DataTable $dataTable;
+    private string $name;
+    private $header = null;
+    private string $className = '';
+    private array $presets = [];
+    private array $formatters = [];
+    private bool $exportable = true;
+    private bool $visible = true;
+    private bool $searchable = true;
+    private bool $sortable = true;
+    private $defaultColumnFilter = null;
+    private $filterEnabled = true;
+    private $filterSelect = [];
+    private $filterDateRange = [];
+    private ?Footer $footer = null;
 
     public function __construct(DataTable $dataTable, $name)
     {
@@ -55,7 +55,7 @@ class Column
         return $this->formatters;
     }
 
-    public function addFormatter(callable $formatter): self
+    public function addFormatter(callable $formatter)
     {
         $this->formatters[] = $formatter;
         return $this;
@@ -79,7 +79,7 @@ class Column
                     $value = iterator_to_array($value);
                 }
                 if (is_array($value)) {
-                    $value = implode(' ', $value);
+                    $value = implode(', ', $value);
                 }
                 $value = (string) $value;
             }
@@ -87,8 +87,9 @@ class Column
         return $value;
     }
 
-    public function addPreset(Preset $preset): Column
+    public function addPreset(Preset $preset)
     {
+        $this->presets[] = $preset;
         $preset->configure($this);
         return $this;
     }
@@ -172,11 +173,6 @@ class Column
         return $this->filterDateRange;
     }
 
-    public function hasFilterDateRange()
-    {
-        return !empty($this->filterDateRange);
-    }
-
     public function setFilterDateRange($filterDateRange)
     {
         $this->filterDateRange = $filterDateRange;
@@ -205,14 +201,14 @@ class Column
     //     return $value;
     // }
 
-    public function getFooter()
+    public function getFooter(): ?Footer
     {
         return $this->footer;
     }
 
-    public function setFooter($footerType, $footerOptions = [])
+    public function setFooter(Footer $footer)
     {
-        $this->footer = [$footerType, $footerOptions];
+        $this->footer = $footer;
         return $this;
     }
 

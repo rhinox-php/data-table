@@ -49,7 +49,7 @@ class ArrayList extends Preset
         return $this->sortFunction;
     }
 
-    public function setSortFunction(?callable $sortFunction): self
+    public function setSortFunction(?callable $sortFunction)
     {
         $this->sortFunction = $sortFunction;
         return $this;

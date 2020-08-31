@@ -6,7 +6,7 @@ use Rhino\InputData\InputData;
 
 class ArrayDataTable extends DataTable
 {
-    protected $array = [];
+    private $array = [];
 
     public function __construct(array $array)
     {
@@ -36,7 +36,28 @@ class ArrayDataTable extends DataTable
 
     protected function filterData(array $data): array
     {
-        // @todo column filtering
+        // @todo advanced column filtering
+
+        $columns = $this->getColumns();
+        foreach ($this->getInputColumns() as $i => $inputColumn) {
+            $searchValue = $inputColumn->string('search.value');
+            if ($inputColumn->string('search.value')) {
+                $column = $columns[$i->int()];
+                if (!$column->isSearchable()) {
+                    continue;
+                }
+
+                $match = preg_quote($searchValue, '/');
+                $match = str_replace('\*', '.*?', $match);
+                $match = str_replace('\?', '.', $match);
+                $match = preg_replace('/\s+/', '.*?', $match);
+                foreach ($data as $rowIndex => $row) {
+                    if (!preg_match("/$match/i", $row[$i->int()])) {
+                        unset($data[$rowIndex]);
+                    }
+                }
+            }
+        }
 
         $globalSearchString = $this->getSearch();
         if ($globalSearchString) {
@@ -45,7 +66,7 @@ class ArrayDataTable extends DataTable
             $match = str_replace('\*', '.*?', $match);
             $match = str_replace('\?', '.', $match);
             $match = preg_replace('/\s+/', '.*?', $match);
-            foreach ($data as $i => $row) {
+            foreach ($data as $rowIndex => $row) {
                 $remove = true;
                 foreach ($row as $value) {
                     if (preg_match("/$match/i", $value)) {
@@ -54,7 +75,7 @@ class ArrayDataTable extends DataTable
                     }
                 }
                 if ($remove) {
-                    unset($data[$i]);
+                    unset($data[$rowIndex]);
                 }
             }
         }
@@ -80,9 +101,14 @@ class ArrayDataTable extends DataTable
         }
 
         // @todo implement multi column sort
-        $columns = array_values($this->getColumns());
+        $columns = $this->getColumns();
         usort($data, function ($a, $b) use ($orderBy, $columns) {
             foreach ($orderBy as ['columnIndex' => $columnIndex, 'direction' => $direction]) {
+                $column = $columns[$columnIndex];
+                if (!$column->isSortable()) {
+                    continue;
+                }
+
                 $aValue = $a[$columnIndex] ?? '';
                 $bValue = $b[$columnIndex] ?? '';
                 if (is_numeric($aValue) && is_numeric($bValue)) {
@@ -126,7 +152,7 @@ class ArrayDataTable extends DataTable
      */
     public function getColumns(): array
     {
-        return $this->columns;
+        return parent::getColumns();
     }
 
     protected function spliceData(array $data): array

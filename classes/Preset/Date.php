@@ -47,7 +47,7 @@ class Date extends Preset
         return $this->timeZone;
     }
 
-    public function setTimeZone(string $timeZone): self
+    public function setTimeZone(string $timeZone)
     {
         $this->timeZone = $timeZone;
         return $this;
@@ -58,7 +58,7 @@ class Date extends Preset
         return $this->format;
     }
 
-    public function setFormat(string $format): self
+    public function setFormat(string $format)
     {
         $this->format = $format;
         return $this;

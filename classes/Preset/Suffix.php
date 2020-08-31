@@ -31,7 +31,7 @@ class Suffix extends Preset
         return $this->suffix;
     }
 
-    public function setSuffix(string $suffix): self
+    public function setSuffix(string $suffix)
     {
         $this->suffix = $suffix;
         return $this;
