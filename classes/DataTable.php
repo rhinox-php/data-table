@@ -100,7 +100,7 @@ abstract class DataTable
         return new Dropdown($buttons);
     }
 
-    public function process($request)
+    public function process(Request $request)
     {
         // @todo input data as input
         $input = new InputData(array_merge($request->query->all(), $request->request->all()));
