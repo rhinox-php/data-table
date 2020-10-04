@@ -8,31 +8,33 @@ const rename = require('gulp-rename');
 const sass = require('gulp-sass');
 const uglifyEs = require('gulp-uglify-es').default;
 
+let outputPath = __dirname + '/dist';
+
 function buildScss() {
-    var files = ['scss/data-tables.scss'];
+    var files = [__dirname + '/scss/data-tables.scss'];
     return src(files)
-        .pipe(expect(files))
+        // .pipe(expect(files))
         .pipe(sass({
             outputStyle: 'compressed',
         }).on('error', sass.logError))
         .pipe(postcss([autoprefixer()]))
         .pipe(rename('data-tables.min.css'))
-        .pipe(dest('dist'));
+        .pipe(dest(outputPath));
 }
 
 function buildJs(cb) {
     var files = [
-        'js/data-tables.js',
-        'js/redirect.js',
+        __dirname + '/js/data-tables.js',
+        __dirname + '/js/redirect.js',
     ];
     return src(files)
-        .pipe(expect(files))
+        // .pipe(expect(files))
         .pipe(babel({
             presets: ['@babel/preset-env'],
         }))
         .pipe(uglifyEs())
         .pipe(concat('data-tables.min.js'))
-        .pipe(dest('dist'));
+        .pipe(dest(outputPath));
 }
 
 const build = parallel(buildScss, buildJs);
@@ -48,3 +50,7 @@ function watchBuild() {
 
 exports.watch = series(build, watchBuild);
 exports.default = build;
+exports.lib = (overrideOutputPath) => {
+    outputPath = overrideOutputPath;
+    return build;
+};
