@@ -126,10 +126,10 @@ const initDataTable = (dataTableConfig) => {
     const table = $(selector)
         .DataTable({
             dom: `
-                <'rhinox-data-table-header'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced btn'>>>>
+                <'rhinox-data-table-header container-fluid'<'row rhinox-data-table-top'<'col-md-9 rhinox-data-table-left'B><'col-md-3 rhinox-data-table-right'f<'rhinox-data-table-advanced btn'>>>>
                 <'rhinox-data-table-error'>
                 "<'rhinox-data-table-scroll'tr>
-                <'rhinox-data-table-footer'ilp>
+                <'rhinox-data-table-footer container-fluid'ilp>
             `,
             processing: true,
             serverSide: true,
