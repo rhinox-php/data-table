@@ -37,7 +37,7 @@ class Date extends Preset
                 return $value;
             }
         }
-        $date = $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
+        $date = $date->setTimezone(new \DateTimeZone($this->getTimeZone()));
         $value = $date->format($this->getFormat());
         return $value;
     }
