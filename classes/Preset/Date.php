@@ -6,6 +6,7 @@ use Rhino\DataTable\Column;
 
 class Date extends Preset
 {
+    // @todo allow overriding stored timezone
     private string $timeZone = 'UTC';
     private string $format = 'Y-m-d';
 
@@ -25,19 +26,18 @@ class Date extends Preset
             return null;
         }
         if ($value instanceof \DateTime) {
-            $date = $value;
-            $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
+            $date = \DateTimeImmutable::createFromMutable($value);
         } elseif ($value instanceof \DateTimeImmutable) {
             $date = $value;
-            $date = $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
         } else {
             try {
-                $date = new \DateTimeImmutable($value, new \DateTimeZone($this->getTimeZone()));
+                $date = new \DateTimeImmutable($value, new \DateTimeZone('UTC'));
             } catch (\Exception $exception) {
                 // @todo optional default value
                 return $value;
             }
         }
+        $date = $date->setTimeZone(new \DateTimeZone($this->getTimeZone()));
         $value = $date->format($this->getFormat());
         return $value;
     }
