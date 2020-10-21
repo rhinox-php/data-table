@@ -3,9 +3,6 @@
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
         <div class="dropdown-menu">
             <div class="dropdown-item rhinox-data-table-col-filter-type" data-filter="">Like</div>
-            <div class="dropdown-item rhinox-data-table-col-filter-type" data-filter=">">Greater than</div>
-            <div class="dropdown-item rhinox-data-table-col-filter-type" data-filter="<">Less than</div>
-            <div class="dropdown-item rhinox-data-table-col-filter-type" data-filter="b">Between</div>
             <div class="dropdown-item rhinox-data-table-col-filter-type" data-filter="=">Equals</div>
         </div>
     </div>

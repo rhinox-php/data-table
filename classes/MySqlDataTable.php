@@ -118,6 +118,8 @@ class MySqlDataTable extends DataTable
                     $this->applyFilterSelect($column, $inputColumn, $columnHaving, $bindings);
                 } elseif ($column->getFilterDateRange()) {
                     $this->applyFilterDateRange($column, $inputColumn, $columnHaving, $bindings);
+                } elseif ($column->getFilterNumeric()) {
+                    $this->applyFilterNumeric($column, $inputColumn, $columnHaving, $bindings);
                 } else {
                     $this->applyFilterText($column, $inputColumn, $columnHaving, $bindings);
                 }
@@ -397,10 +399,75 @@ class MySqlDataTable extends DataTable
         }
     }
 
+    protected function applyFilterNumeric(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
+    {
+        $searchValue = $inputColumn->string('search.value');
+        if (strlen($searchValue) > 1) {
+            switch ($searchValue[0]) {
+                case '>':
+                    [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' > :search)', [
+                        ':search' => substr($searchValue, 1),
+                    ]);
+                    $columnHaving[] = $textQuery;
+                    $this->mergeBindings($bindings, $textBindings);
+                    return;
+                case '<':
+                    [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' < :search)', [
+                        ':search' => substr($searchValue, 1),
+                    ]);
+                    $columnHaving[] = $textQuery;
+                    $this->mergeBindings($bindings, $textBindings);
+                    return;
+                case '=':
+                    [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' = :search)', [
+                        ':search' => substr($searchValue, 1),
+                    ]);
+                    $columnHaving[] = $textQuery;
+                    $this->mergeBindings($bindings, $textBindings);
+                    return;
+                case 'b':
+                    $searchValue = substr($searchValue, 1);
+                    if (preg_match('/(?<from>[0-9]+)[^0-9]+(?<to>[0-9]+)/', $searchValue, $matches)) {
+                        $from = $matches['from'];
+                        $to = $matches['to'];
+                        if ($from > $to) {
+                            $temp = $to;
+                            $to = $from;
+                            $from = $temp;
+                        }
+                        [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' BETWEEN :from AND :to)', [
+                            ':from' => $from,
+                            ':to' => $to,
+                        ]);
+                        $columnHaving[] = $textQuery;
+                        $this->mergeBindings($bindings, $textBindings);
+                        return;
+                    }
+            }
+        }
+        $searchValue = preg_replace('/[^0-9.%]+/', '', $searchValue);
+        [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' LIKE :search)', [
+            ':search' => '%' . $searchValue . '%',
+        ]);
+        $columnHaving[] = $textQuery;
+        $this->mergeBindings($bindings, $textBindings);
+    }
+
     protected function applyFilterText(MySqlColumn $column, InputData $inputColumn, array &$columnHaving, array &$bindings): void
     {
+        $searchValue = $inputColumn->string('search.value');
+        if (strlen($searchValue) > 1) {
+            if ($searchValue[0] === '=') {
+                [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' = :search)', [
+                    ':search' => substr($searchValue, 1),
+                ]);
+                $columnHaving[] = $textQuery;
+                $this->mergeBindings($bindings, $textBindings);
+                return;
+            }
+        }
         [$textQuery, $textBindings] = $this->replaceBindings('(' . $column->getFilterQuery() . ' LIKE :search)', [
-            ':search' => '%' . $inputColumn->string('search.value') . '%',
+            ':search' => '%' . $searchValue . '%',
         ]);
         $columnHaving[] = $textQuery;
         $this->mergeBindings($bindings, $textBindings);

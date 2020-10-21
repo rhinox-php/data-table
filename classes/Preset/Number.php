@@ -22,6 +22,7 @@ class Number extends Preset
         $column->addClass('rhinox-data-table-align-right');
         $column->addClass('rhinox-data-table-number');
         $column->addFormatter([$this, 'format']);
+        $column->setFilterNumeric(true);
     }
 
     public function format($value, $row, $type)

@@ -21,6 +21,7 @@ class Column
     private $filterEnabled = true;
     private $filterSelect = [];
     private $filterDateRange = [];
+    private $filterNumeric = [];
     private ?Footer $footer = null;
 
     public function __construct(DataTable $dataTable, $name)
@@ -176,6 +177,17 @@ class Column
     public function setFilterDateRange($filterDateRange)
     {
         $this->filterDateRange = $filterDateRange;
+        return $this;
+    }
+
+    public function getFilterNumeric()
+    {
+        return $this->filterNumeric;
+    }
+
+    public function setFilterNumeric($filterNumeric)
+    {
+        $this->filterNumeric = $filterNumeric;
         return $this;
     }
 

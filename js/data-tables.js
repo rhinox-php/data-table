@@ -98,14 +98,14 @@ const initDataTable = (dataTableConfig) => {
             }],
         };
     });
-    buttons.push({
-        text: '<i class="fa fa-reload"></i> Reset settings',
-        className: 'btn-secondary rhinox-data-table-advanced-button',
-        action: function (e, dt, node, config) {
-            localStorage.removeItem(dataTableConfig.id);
-            window.location.reload();
-        }
-    });
+    // buttons.push({
+    //     text: '<i class="fa fa-reload"></i> Reset settings',
+    //     className: 'btn-secondary rhinox-data-table-advanced-button',
+    //     action: function (e, dt, node, config) {
+    //         localStorage.removeItem(dataTableConfig.id);
+    //         window.location.reload();
+    //     }
+    // });
     buttons.push({
         text: '<i class="fa fa-sync-alt"></i> Refresh data',
         className: 'btn-secondary rhinox-data-table-advanced-button',
@@ -164,9 +164,9 @@ const initDataTable = (dataTableConfig) => {
             lengthMenu: [[10, 25, 50, 100, 250, 500], [10, 25, 50, 100, 250, 500]],
             searchCols: dataTableConfig.searchCols,
             stateSave: false,
-            stateSaveCallback: function (settings, data) {
-                localStorage.setItem(dataTableConfig.id, JSON.stringify(data));
-            },
+            // stateSaveCallback: function (settings, data) {
+            //     localStorage.setItem(dataTableConfig.id, JSON.stringify(data));
+            // },
             // stateLoadCallback: function (settings, data) {
             //     let data = null;
             //     // URL filters
@@ -254,15 +254,16 @@ const initDataTable = (dataTableConfig) => {
     // Column searching
     let searchDebounce = null;
 
-    $(selector).closest('.rhinox-data-table-wrapper').on('keyup change', '.rhinox-data-table-column-filter', function () {
+    const searchColumns = () => {
         if (searchDebounce) {
             clearTimeout(searchDebounce);
         }
         searchDebounce = setTimeout(function () {
             searchDebounce = null;
             let draw = false;
-            $(selector).closest('.rhinox-data-table-wrapper').find('.rhinox-data-table-column-filter').each(function () {
-                let value = $(this).find(':input').val();
+            $(selector).closest('.rhinox-data-table-wrapper').find('.rhinox-data-table-col-filter').each(function () {
+                let prefix = $(this).find(':input[type=hidden]').val() || '';
+                let value = prefix + $(this).find(':input:not(button)').val();
                 let column = table.column($(this).data('column'));
                 if (column.search() !== value) {
                     column.search(value);
@@ -272,7 +273,17 @@ const initDataTable = (dataTableConfig) => {
             if (draw) {
                 table.draw();
             }
-        }.bind(this), 500);
+        }, 500);
+    };
+
+    $(selector).closest('.rhinox-data-table-wrapper').on('keyup change', '.rhinox-data-table-col-filter', function () {
+        searchColumns();
+    });
+
+    $(selector).closest('.rhinox-data-table-wrapper').on('click', '.rhinox-data-table-col-filter-type', function () {
+        $(this).closest('.input-group-prepend').find('.btn').text($(this).data('filter'));
+        $(this).closest('.input-group').find('input[type=hidden]').val($(this).data('filter'));
+        searchColumns();
     });
 
     // Select rows/checkbox
