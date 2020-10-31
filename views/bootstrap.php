@@ -23,7 +23,7 @@ if (!isset($dataTable)) {
                                 <?php endforeach;?>
                             </select>
                         <?php elseif ($column->getFilterDateRange()): ?>
-                            <input class="form-control rhinox-data-table-column-filter-date-range" type="text" placeholder="Filter <?= $column->getHeader(); ?>" id="rhinox-data-table-date-range-<?= $columnId ?>" name="rhinox-data-table-date-range-<?= $columnId ?>" />
+                            <input class="form-control rhinox-data-table-date-range" type="text" placeholder="Filter <?= $column->getHeader(); ?>" id="rhinox-data-table-date-range-<?= $columnId ?>" name="rhinox-data-table-date-range-<?= $columnId ?>" />
                         <?php elseif ($column->getFilterNumeric()): ?>
                             <?php include __DIR__ . '/bootstrap/column-filter-numeric.php'; ?>
                         <?php else: ?>
