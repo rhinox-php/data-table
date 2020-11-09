@@ -163,35 +163,28 @@ const initDataTable = (dataTableConfig) => {
             columnDefs: dataTableConfig.columnDefs,
             lengthMenu: [[10, 25, 50, 100, 250, 500], [10, 25, 50, 100, 250, 500]],
             searchCols: dataTableConfig.searchCols,
-            stateSave: false,
+            stateSave: true,
             // stateSaveCallback: function (settings, data) {
             //     localStorage.setItem(dataTableConfig.id, JSON.stringify(data));
             // },
-            // stateLoadCallback: function (settings, data) {
-            //     let data = null;
-            //     // URL filters
-            //     let filter = $.query.get('filter');
-            //     for (let key in filter) {
-            //         if (filter[key]) {
-            //             $('body').addClass('rhinox-data-table-advanced-enabled');
-            //             localStorage.setItem('advancedTableOptions', true)
-            //             let data = {
-            //                 time: new Date().getTime(),
-            //                 columns: [],
-            //             };
-            //             for (let i = 0; i < columnDefs.length; i++) {
-            //                 data.columns.push({
-            //                     search: {
-            //                         caseInsensitive: true,
-            //                         regex: false,
-            //                         smart: true,
-            //                         search: filter[columnDefs[i].data] || null,
-            //                     },
-            //                 });
-            //             }
-            //             break;
-            //         }
-            //     }
+            stateLoadCallback: function (settings, stateData) {
+                const data = {
+                    time: new Date().getTime(),
+                    columns: [],
+                };
+                // URL filters
+                const queryString = new URLSearchParams(location.search);
+                for (const columnDef of dataTableConfig.columnDefs) {
+                    const filter = queryString.get(`filter[${columnDef.data}]`);
+                    data.columns.push({
+                        search: {
+                            caseInsensitive: true,
+                            regex: false,
+                            smart: true,
+                            search: filter,
+                        },
+                    });
+                }
             //     if (data === null) {
             //         // Saved state
             //         // <? php if ($this -> isRememberSettingsEnabled()): ?>
@@ -206,6 +199,11 @@ const initDataTable = (dataTableConfig) => {
             //     return data;
             // },
             // @todo provide alternate icon sets
+                for (let i = 0; i < data.columns.length; i++) {
+                    $(selector).find(`[data-column="${i}"] :input`).val(data.columns[i].search.search);
+                }
+                return data;
+            },
             buttons,
         });
 
@@ -322,7 +320,6 @@ const initDataTable = (dataTableConfig) => {
     };
 
     $(selector).find('.rhinox-data-table-date-range').each(function () {
-        console.log(this);
         if (!window.moment) {
             console.error('Date range filters require moment.js');
             return;
