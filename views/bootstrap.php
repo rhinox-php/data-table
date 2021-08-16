@@ -19,7 +19,7 @@ if (!isset($dataTable)) {
                             <select class="custom-select" id="rhinox-data-table-filter-<?=strtr($column->getName(), '_', '-');?>">
                                 <option value="">Any</option>
                                 <?php foreach ($column->getFilterSelect() as $label => $query): ?>
-                                    <option value="<?=$label;?>"><?=$label;?></option>
+                                    <option value="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8', false); ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8', false); ?></option>
                                 <?php endforeach;?>
                             </select>
                         <?php elseif ($column->getFilterDateRange()): ?>
