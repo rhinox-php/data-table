@@ -115,7 +115,7 @@ abstract class DataTable
             }
         }
 
-        if (!$request->isXmlHttpRequest() && !$input->bool('csv') && !$input->bool('json')) {
+        if (!$input->int('draw') && !$input->bool('csv') && !$input->bool('json')) {
             return false;
         }
         if ($request->get('csv') === null) {
