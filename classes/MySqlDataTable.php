@@ -27,7 +27,6 @@ class MySqlDataTable extends DataTable
         [$sql, $bindings] = $this->getQuery();
         [$statement, $queryTime] = $this->runQuery($sql, $bindings);
 
-        // @todo test debug meta data, enabled and disabled
         if ($this->getDebug()) {
             $this->setMetaValue('queryTime', $queryTime);
             $this->setMetaValue('sql', $sql);
@@ -38,7 +37,6 @@ class MySqlDataTable extends DataTable
         // Fetch the results
         $data = $statement->fetchAll(\PDO::FETCH_NUM);
         $this->setData($data);
-
 
         // Get the total results
         [$statement] = $this->runQuery('SELECT FOUND_ROWS()');
@@ -56,21 +54,18 @@ class MySqlDataTable extends DataTable
     protected function runQuery(string $sql, array $bindings = []): array
     {
         $startTime = microtime(true);
-        $statement = $this->pdo->prepare($sql);
-        if (!$statement) {
-            throw new Exception\QueryException('Error preparing SQL query', $this->pdo->errorInfo(), $sql);
+        try {
+            $statement = $this->pdo->prepare($sql);
+            if (!$statement) {
+                throw new Exception\QueryException('Error preparing SQL query', $this->pdo->errorInfo(), $sql);
+            }
+            $statement->execute($bindings);
+        } catch (\PDOException $exception) {
+            throw new Exception\QueryException('Exception preparing SQL query', $this->pdo->errorInfo(), $sql, $exception);
         }
-        $statement->execute($bindings);
         $queryTime = microtime(true) - $startTime;
 
         return [$statement, $queryTime];
-        // @todo disable debug meta data by default
-        // @todo test debug meta data, enabled and disabled
-        $this->setMetaValue('queryTime', microtime(true) - $time);
-        $this->setMetaValue('sql', $sql);
-        $this->setMetaValue('bindings', $bindings);
-        // $this->setMetaValue('sqlBound', $this->replaceBindingsInSql($sql, array_merge($this->bindings, $bindings)));
-
     }
 
     /**
@@ -100,7 +95,7 @@ class MySqlDataTable extends DataTable
             $i = 1000;
             $havingColumns = [];
             foreach ($columns as $column) {
-                if ($column instanceof MySqlSelectColumnInterface && $column->getFilterQuery()) {
+                if ($column instanceof MySqlSelectColumnInterface && $column->getFilterQuery() && $column->isSearchable()) {
                     $bindings[':searchGlobal' . $i] = '%' . $this->getSearch() . '%';
                     $havingColumns[] = $column->getFilterQuery() . ' LIKE :searchGlobal' . $i++;
                 }
@@ -114,6 +109,9 @@ class MySqlDataTable extends DataTable
         foreach ($this->getInputColumns() as $i => $inputColumn) {
             if ($inputColumn->string('search.value')) {
                 $column = $columns[$i->int()];
+                if (!$column->isSearchable()) {
+                    continue;
+                }
                 if ($column->hasFilterSelect()) {
                     $this->applyFilterSelect($column, $inputColumn, $columnHaving, $bindings);
                 } elseif ($column->getFilterDateRange()) {

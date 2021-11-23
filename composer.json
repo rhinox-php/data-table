@@ -21,12 +21,12 @@
         }
     },
     "require-dev": {
-        "phan/phan": "^3.0",
-        "phpunit/phpunit": "^9.2",
-        "fzaninotto/faker": "^1.9",
-        "vimeo/psalm": "^3.12",
-        "phpmd/phpmd": "^2.8",
-        "brianium/paratest": "^4.1",
-        "friendsofphp/php-cs-fixer": "^2.16"
+        "phan/phan": "^5.2",
+        "phpunit/phpunit": "^9.5",
+        "fzaninotto/faker": "^1.5",
+        "vimeo/psalm": "^4.10",
+        "phpmd/phpmd": "^2.10",
+        "brianium/paratest": "^6.3",
+        "friendsofphp/php-cs-fixer": "^3.1"
     }
 }

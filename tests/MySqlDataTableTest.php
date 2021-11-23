@@ -163,6 +163,39 @@ class MySqlDataTableTest extends BaseTest
         }
     }
 
+    public function testNonSearchable(): void
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->getColumn('code')->setSearchable(false);
+        $json = $this->getResponse([
+            'draw' => 1,
+            'json' => true,
+            'search' => [
+                'value' => 'mbp_15_retina_mid_15',
+            ],
+        ], $dataTable);
+        $this->assertCount(0, $json->arr('data'));
+    }
+
+    public function testNonSearchableColumnSearch(): void
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->getColumn('code')->setSearchable(false);
+        $json = $this->getResponse([
+            'draw' => 1,
+            'json' => true,
+            'columns' => [
+                4 => [
+                    'search' => [
+                        'value' => 'mbp_15_retina_mid_15',
+                    ],
+                ],
+            ],
+            'length' => 20,
+        ], $dataTable);
+        $this->assertCount(20, $json->arr('data'));
+    }
+
     public function testExtraHaving(): void
     {
         $dataTable = $this->getDataTable();
@@ -239,6 +272,37 @@ class MySqlDataTableTest extends BaseTest
             ],
         ], $dataTable);
         $this->assertSame('mbp_13', $dataTable->getColumn('code')->getDefaultColumnFilter());
+    }
+
+    public function testTextFilter(): void
+    {
+        $json = $this->getResponse([
+            'columns' => [
+                4 => [
+                    'search' => [
+                        'value' => 'mbp_13',
+                    ],
+                ],
+            ],
+        ], $this->getDataTable());
+        $this->assertGreaterThan(0, count($json->arr('data')));
+        foreach ($json->arr('data') as $row) {
+            $this->assertStringContainsString('mbp_13', $row->string('code'));
+        }
+
+        $json = $this->getResponse([
+            'columns' => [
+                4 => [
+                    'search' => [
+                        'value' => '=mbp_13_retina_mid_14',
+                    ],
+                ],
+            ],
+        ], $this->getDataTable());
+        $this->assertGreaterThan(0, count($json->arr('data')));
+        foreach ($json->arr('data') as $row) {
+            $this->assertEquals('mbp_13_retina_mid_14', $row->string('code'));
+        }
     }
 
     public function testSelectFilter(): void
@@ -322,6 +386,41 @@ class MySqlDataTableTest extends BaseTest
         $this->assertEquals(0, count($json->arr('data')));
     }
 
+    /**
+     * @dataProvider provideNumericFilter
+     */
+    public function testNumericFilter(string $filter, callable $check)
+    {
+        $dataTable = $this->getDataTable();
+        $json = $this->getResponse([
+            'columns' => [
+                7 => [
+                    'search' => [
+                        'value' => $filter,
+                    ],
+                ],
+            ],
+        ], $dataTable);
+        $this->assertGreaterThan(0, count($json->arr('data')));
+        foreach ($json->arr('data') as $row) {
+            $this->assertTrue($check($row->int('totalQuantity')));
+        }
+    }
+
+    public function provideNumericFilter()
+    {
+        return [
+            ['>508', fn ($v) => $v > 508],
+            ['<508', fn ($v) => $v < 508],
+            ['=508', fn ($v) => $v == 508],
+            ['between 507 and 509', fn ($v) => $v == 508],
+            ['between 509 and 507', fn ($v) => $v == 508],
+            ['508', fn ($v) => $v == 508],
+        ];
+    }
+    // int(631)
+    // int(483)
+    // int(508)
     public function testInvalidQuery(): void
     {
         $dataTable = new MySqlDataTable($this->getPdo([
@@ -372,6 +471,27 @@ class MySqlDataTableTest extends BaseTest
         $dataTable->setUrl('/another/url');
         $html = $dataTable->render();
         $this->assertStringContainsString('"url":"\/another\/url"', $html);
+    }
+
+    public function testDebug()
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->addWhere('/* :test */ created_at > :date', [
+            ':date' => (new \DateTime('1999-01-01'))->format('Y-m-d H:i:s'),
+        ]);
+        $dataTable->setDebug(true);
+        $json = $this->getResponse([], $dataTable);
+        $this->assertNotEmpty($json->arr('meta'));
+        $this->assertGreaterThan(0, $json->decimal('meta.queryTime'));
+        $this->assertStringContainsString('SELECT', $json->string('meta.sql'));
+    }
+
+    public function testNotDebug()
+    {
+        $dataTable = $this->getDataTable();
+        $dataTable->setDebug(false);
+        $json = $this->getResponse([], $dataTable);
+        $this->assertEmpty($json->arr('meta'));
     }
 
     private function getPdo(?array $options = null): \PDO
