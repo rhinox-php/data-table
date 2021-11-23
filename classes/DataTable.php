@@ -571,4 +571,12 @@ abstract class DataTable
         $this->debug = $debug;
         return $this;
     }
+
+    protected static function timeCall(callable $callback): array
+    {
+        $startTime = microtime(true);
+        $result = $callback();
+        $timeTaken = microtime(true) - $startTime;
+        return [$result, $timeTaken];
+    }
 }

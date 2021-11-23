@@ -6,14 +6,14 @@ use Rhino\InputData\InputData;
 
 class MySqlDataTable extends DataTable
 {
-    private $bindingCount = 1000;
-    private $pdo;
-    private $table;
-    private $joins = [];
-    private $groupBys = [];
-    private $bindings = [];
-    private $wheres = [];
-    private $havings = [];
+    protected $pdo;
+    protected $table;
+    protected $bindingCount = 1000;
+    protected $joins = [];
+    protected $groupBys = [];
+    protected $bindings = [];
+    protected $wheres = [];
+    protected $havings = [];
 
     public function __construct($pdo, $table)
     {
@@ -25,7 +25,7 @@ class MySqlDataTable extends DataTable
     public function processSource(InputData $input)
     {
         [$sql, $bindings] = $this->getQuery();
-        [$statement, $queryTime] = $this->runQuery($sql, $bindings);
+        [$statement, $queryTime] = static::timeCall(fn () => $this->runQuery($sql, $bindings));
 
         if ($this->getDebug()) {
             $this->setMetaValue('queryTime', $queryTime);
@@ -35,12 +35,14 @@ class MySqlDataTable extends DataTable
         }
 
         // Fetch the results
-        $data = $statement->fetchAll(\PDO::FETCH_NUM);
+        $data = $this->fetchResults($statement);
         $this->setData($data);
 
         // Get the total results
-        [$statement] = $this->runQuery('SELECT FOUND_ROWS()');
-        $total = (int) $statement->fetchColumn(0);
+        $statement = $this->runQuery('SELECT FOUND_ROWS()');
+        $total = $this->fetchResults($statement);
+        // Get first row/column
+        $total = (int) $total[0][0];
         // @todo get real total records by doing COUNT(*)
         $this->setRecordsTotal($total);
         $this->setRecordsFiltered($total);
@@ -48,12 +50,8 @@ class MySqlDataTable extends DataTable
         $this->processFooters();
     }
 
-    /**
-     * @return (\PDOStatement|float)[]
-     */
-    protected function runQuery(string $sql, array $bindings = []): array
+    protected function runQuery(string $sql, array $bindings = [])
     {
-        $startTime = microtime(true);
         try {
             $statement = $this->pdo->prepare($sql);
             if (!$statement) {
@@ -63,9 +61,12 @@ class MySqlDataTable extends DataTable
         } catch (\PDOException $exception) {
             throw new Exception\QueryException('Exception preparing SQL query', $this->pdo->errorInfo(), $sql, $exception);
         }
-        $queryTime = microtime(true) - $startTime;
+        return $statement;
+    }
 
-        return [$statement, $queryTime];
+    protected function fetchResults($statement)
+    {
+        return $statement->fetchAll(\PDO::FETCH_NUM);
     }
 
     /**
@@ -252,13 +253,15 @@ class MySqlDataTable extends DataTable
             SELECT $footerColumns
             FROM ($sql) AS footerResult
         SQL;
-        [$statement, $footerQueryTime] = $this->runQuery($footerSql, $bindings);
+        [$statement, $footerQueryTime] = static::timeCall(fn () => $this->runQuery($footerSql, $bindings));
         if ($this->getDebug()) {
             $this->setMetaValue('footerQueryTime', $footerQueryTime);
             $this->setMetaValue('footerSql', $footerSql);
             $this->setMetaValue('footerSqlBound', $this->replaceBindingsInSql($footerSql, $bindings));
         }
-        $footerQueryResult = $statement->fetch(\PDO::FETCH_NUM);
+        $footerQueryResult = $this->fetchResults($statement);
+        // Get first row
+        $footerQueryResult = $footerQueryResult[0];
         $footerResult = [];
         foreach ($this->getColumns() as $columnIndex => $column) {
             $footer = $column->getFooter();
