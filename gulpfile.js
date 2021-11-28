@@ -5,7 +5,7 @@ const concat = require('gulp-concat');
 const expect = require('gulp-expect-file');
 const postcss = require('gulp-postcss');
 const rename = require('gulp-rename');
-const sass = require('gulp-sass')(require('node-sass'));
+const sass = require('gulp-sass')(require('sass'));
 const uglifyEs = require('gulp-uglify-es').default;
 
 let outputPath = __dirname + '/dist';
